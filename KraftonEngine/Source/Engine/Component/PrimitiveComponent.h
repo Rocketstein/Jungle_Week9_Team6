@@ -5,6 +5,7 @@
 #include "Render/Types/RenderTypes.h"
 #include "Core/RayTypes.h"
 #include "Core/CollisionTypes.h"
+#include "Collision/OverlapInfo.h"
 #include "Core/EngineTypes.h"
 #include "Render/Types/VertexTypes.h"
 #include "Render/Proxy/DirtyFlag.h"
@@ -42,7 +43,7 @@ public:
 
 	//Collision
 	virtual void UpdateWorldAABB() const;
-	virtual bool LineTraceComponent(const FRay& Ray, FHitResult& OutHitResult);
+	virtual bool LineTraceComponent(const FRay& Ray, FRayHitResult& OutHitResult);
 	void UpdateWorldMatrix() const override;
 
 	virtual bool SupportsOutline() const { return true; }
@@ -83,6 +84,12 @@ public:
 		bInOctreeOverflow = false;
 	}
 
+	// Overlap
+	const TArray<FOverlapInfo>& GetOverlapInfos() const;
+	bool  IsOverlappingComponent(const UPrimitiveComponent* Other) const;
+	bool  IsOverlappingComponent(const UPrimitiveComponent& Other) const;
+	bool  IsOverlappingActor(const AActor* Other) const;
+
 protected:
 	void OnTransformDirty() override;
 	void EnsureWorldAABBUpdated() const;
@@ -103,4 +110,6 @@ protected:
 
 	bool bGenerateOverlapEvents = false;
 	bool bBlockComponent		= false;
+
+	TArray<FOverlapInfo> OverlapInfo;
 };

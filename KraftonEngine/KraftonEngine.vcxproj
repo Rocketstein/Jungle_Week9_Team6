@@ -270,6 +270,7 @@
     <ClCompile Include="Source\Engine\Collision\ConvexVolume.cpp" />
     <ClCompile Include="Source\Engine\Collision\MeshTriangleBVH.cpp" />
     <ClCompile Include="Source\Engine\Collision\Octree.cpp" />
+    <ClCompile Include="Source\Engine\Collision\OverlapInfo.cpp" />
     <ClCompile Include="Source\Engine\Collision\RayUtils.cpp" />
     <ClCompile Include="Source\Engine\Collision\RayUtilsSIMD.cpp" />
     <ClCompile Include="Source\Engine\Collision\SpatialPartition.cpp" />
@@ -456,6 +457,7 @@
     <ClInclude Include="Source\Engine\Collision\MeshTriangleBVH.h" />
     <ClInclude Include="Source\Engine\Collision\OBB.h" />
     <ClInclude Include="Source\Engine\Collision\Octree.h" />
+    <ClInclude Include="Source\Engine\Collision\OverlapInfo.h" />
     <ClInclude Include="Source\Engine\Collision\RayUtils.h" />
     <ClInclude Include="Source\Engine\Collision\RayUtilsSIMD.h" />
     <ClInclude Include="Source\Engine\Collision\SpatialPartition.h" />

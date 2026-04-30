@@ -810,6 +810,9 @@
     <ClCompile Include="Source\Engine\Component\Shape\CapsuleComponent.cpp">
       <Filter>Source\Engine\Component\Shape</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Engine\Collision\OverlapInfo.cpp">
+      <Filter>Source\Engine\Collision</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Editor\EditorEngine.h">
@@ -1477,6 +1480,9 @@
     </ClInclude>
     <ClInclude Include="Source\Engine\Component\Shape\CapsuleComponent.h">
       <Filter>Source\Engine\Component\Shape</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Engine\Collision\OverlapInfo.h">
+      <Filter>Source\Engine\Collision</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
