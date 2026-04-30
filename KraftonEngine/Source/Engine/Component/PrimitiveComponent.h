@@ -87,6 +87,7 @@ protected:
 	void OnTransformDirty() override;
 	void EnsureWorldAABBUpdated() const;
 
+protected:
 	FVector LocalExtents = { 0.5f, 0.5f, 0.5f };
 	mutable FVector WorldAABBMinLocation;
 	mutable FVector WorldAABBMaxLocation;
@@ -99,4 +100,7 @@ protected:
 	
 	FOctree* OctreeNode = nullptr;
 	bool bInOctreeOverflow = false;
+
+	bool bGenerateOverlapEvents = false;
+	bool bBlockComponent		= false;
 };
