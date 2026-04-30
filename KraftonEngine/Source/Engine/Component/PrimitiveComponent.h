@@ -86,8 +86,8 @@ public:
 
 	// Overlap
 	const TArray<FOverlapInfo>& GetOverlapInfos() const;
-	bool  IsOverlappingComponent(const UPrimitiveComponent* Other) const;
-	bool  IsOverlappingComponent(const UPrimitiveComponent& Other) const;
+	virtual bool  IsOverlappingComponent(const UPrimitiveComponent* Other) const { return false; };
+	virtual bool  IsOverlappingComponent(const UPrimitiveComponent& Other) const { return false; };
 	bool  IsOverlappingActor(const AActor* Other) const;
 
 protected:

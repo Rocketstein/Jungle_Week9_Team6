@@ -285,13 +285,6 @@ const TArray<FOverlapInfo>& UPrimitiveComponent::GetOverlapInfos() const {
 	return OverlapInfo;
 }
 
-bool UPrimitiveComponent::IsOverlappingComponent(const UPrimitiveComponent* Other) const {
-	return false;
-}
-
-bool UPrimitiveComponent::IsOverlappingComponent(const UPrimitiveComponent& Other) const {
-	return false;
-}
 
 bool UPrimitiveComponent::IsOverlappingActor(const AActor* Other) const {
 	if (!Other) return false;

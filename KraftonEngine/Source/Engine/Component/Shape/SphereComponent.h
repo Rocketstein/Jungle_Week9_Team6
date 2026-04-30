@@ -5,10 +5,13 @@ class USphereComponent : public UShapeComponent {
 public:
 	DECLARE_CLASS(USphereComponent, UShapeComponent)
 
+	USphereComponent() = default;
 	USphereComponent(float InRadius) : SphereRadius(InRadius) {} 
 	float GetSphereRadius() const { return SphereRadius; }
 	void  SetSphereRadius(float InRadius) { SphereRadius = InRadius; }
 
+	void DrawDebugShape(UWorld* InWorld) override;
+
 private:
-	float SphereRadius;
+	float SphereRadius = 0.f;
 };

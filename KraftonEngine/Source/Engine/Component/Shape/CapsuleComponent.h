@@ -4,7 +4,7 @@
 class UCapsuleComponent : public UShapeComponent {
 public:
 	DECLARE_CLASS(UCapsuleComponent, UShapeComponent)
-
+	UCapsuleComponent() = default;
 	UCapsuleComponent(float InHalfHeight, float InRadius) : CapsuleHalfHeight(InHalfHeight), CapsuleRadius(InRadius) {}
 	float GetCapsuleHalfHeight() const { return CapsuleHalfHeight; }
 	float GetCapsuleRadius() const { return CapsuleRadius; }
