@@ -301,6 +301,7 @@ void UWorld::ProcessOverlapEvents() {
 	}
 }
 
+// Separate Components on Hit if they are both set to Block
 void UWorld::ResolvePenetration(UPrimitiveComponent* A, UPrimitiveComponent* B, const FHitResult& Hit) {
 	// Simple rule: move whichever component has a movement component, or split 50/50
 	if (!A || !A->GetOwner() || !A->GetOwner()->GetRootComponent()) return;
@@ -321,7 +322,7 @@ void UWorld::ResolvePenetration(UPrimitiveComponent* A, UPrimitiveComponent* B, 
 		A->GetOwner()->SetActorLocation(A->GetOwner()->GetActorLocation() + correction * 0.5f);
 		B->GetOwner()->SetActorLocation(B->GetOwner()->GetActorLocation() - correction * 0.5f);
 	}
-	// both static → do nothing
+	// both static -> do nothing
 }
 
 void UWorld::EndPlay()
