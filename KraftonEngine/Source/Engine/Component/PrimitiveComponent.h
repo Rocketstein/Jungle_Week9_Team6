@@ -85,6 +85,7 @@ public:
 	}
 
 	// Overlap
+	bool IsTransformDirty() const { return bTransformDirty; }
 	bool IsCollisionEnabled() const { return bCollisionEnabled; }
 	void SetCollisionEnabled(bool bInCollisionFlag) { bCollisionEnabled = bInCollisionFlag; }
 	bool CanGenerateOverlapEvents() const { return bGenerateOverlapEvents; }
