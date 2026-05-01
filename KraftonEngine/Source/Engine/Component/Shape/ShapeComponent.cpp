@@ -1,4 +1,5 @@
 ﻿#include "ShapeComponent.h"
+#include "Serialization/Archive.h"
 #include "GameFramework/World.h"
 #include "Collision/CollisionDispatcher.h"
 
@@ -12,6 +13,12 @@ void UShapeComponent::PostEditProperty(const char* PropertyName) {
 void UShapeComponent::GetEditableProperties(TArray<FPropertyDescriptor>& OutProps) {
 	USceneComponent::GetEditableProperties(OutProps);
 	OutProps.push_back({ "Draw Only If Selected", EPropertyType::Bool, &bDrawOnlyIfSelected });
+}
+
+void UShapeComponent::Serialize(FArchive& Ar) {
+	UPrimitiveComponent::Serialize(Ar);
+	Ar << bDrawOnlyIfSelected;
+	Ar << ShapeColor;
 }
 
 void UShapeComponent::ContributeVisuals(FScene& Scene) const {
