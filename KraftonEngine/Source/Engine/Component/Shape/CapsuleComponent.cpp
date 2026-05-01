@@ -51,3 +51,7 @@ void UCapsuleComponent::DrawDebugShape(FScene& Scene) const {
 	Scene.AddDebugLine(TopCenter + Right * CapsuleRadius, BotCenter + Right * CapsuleRadius, ShapeColor);
 	Scene.AddDebugLine(TopCenter - Right * CapsuleRadius, BotCenter - Right * CapsuleRadius, ShapeColor);
 }
+
+void UCapsuleComponent::UpdateWorldAABB() const {
+	
+}

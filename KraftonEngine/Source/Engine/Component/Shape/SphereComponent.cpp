@@ -18,3 +18,7 @@ void USphereComponent::DrawDebugShape(FScene& Scene) const {
 	DrawDebugRing(Center, SphereRadius, FVector(1, 0, 0), FVector(0, 0, 1), Segments, false, Scene);
 	DrawDebugRing(Center, SphereRadius, FVector(0, 1, 0), FVector(0, 0, 1), Segments, false, Scene);
 }
+
+void USphereComponent::UpdateWorldAABB() const {
+
+}
