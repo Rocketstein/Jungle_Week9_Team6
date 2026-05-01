@@ -289,6 +289,14 @@ const TArray<FOverlapInfo>& UPrimitiveComponent::GetOverlapInfos() const {
 	return OverlapInfo;
 }
 
+void UPrimitiveComponent::EndComponentOverlap(const UPrimitiveComponent* Other) {
+	for (uint32 i = 0; i < OverlapInfo.size(); i++) {
+		if (OverlapInfo[i].HitResult.Component && OverlapInfo[i].HitResult.Component == Other) {
+			OverlapInfo.erase(OverlapInfo.begin() + i);
+			break;
+		}
+	}
+}
 
 bool UPrimitiveComponent::IsOverlappingActor(const AActor* Other) {
 	if (!Other) return false;

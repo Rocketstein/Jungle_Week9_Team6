@@ -91,6 +91,7 @@ public:
 	void SetGenerateOverlapEvents(bool bShouldGenerateOverlapEvents) { bGenerateOverlapEvents = bShouldGenerateOverlapEvents; }
 
 	const TArray<FOverlapInfo>& GetOverlapInfos() const;
+	void  EndComponentOverlap(const UPrimitiveComponent* Other);
 	virtual bool IsOverlappingComponent(UPrimitiveComponent* Other, FOverlapInfo& InInfo) { return false; };
 	virtual bool IsOverlappingComponent(UPrimitiveComponent& Other, FOverlapInfo& InInfo) { return false; };
 	bool  IsOverlappingActor(const AActor* Other);
