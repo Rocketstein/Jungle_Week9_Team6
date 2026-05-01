@@ -8,6 +8,7 @@
 #include "Collision/OverlapInfo.h"
 #include "Core/CollisionEventTypes.h"
 #include "Core/EngineTypes.h"
+#include "Core/ComponentMobility.h"
 #include "Render/Types/VertexTypes.h"
 #include "Render/Proxy/DirtyFlag.h"
 
@@ -101,6 +102,10 @@ public:
 	FComponentEndOverlapSignature   OnComponentEndOverlap;
 	FComponentHitSignature          OnComponentHit;
 
+	// Mobility
+	EComponentMobility GetMobility() const { return Mobility; }
+	void SetMobility(EComponentMobility InMobility) { Mobility = InMobility; } 
+
 protected:
 	void OnTransformDirty() override;
 	void EnsureWorldAABBUpdated() const;
@@ -122,6 +127,7 @@ protected:
 	bool bCollisionEnabled		= true;
 	bool bBlockComponent		= false;
 	EOverlapBehaviour bGenerateOverlapEvents = EOverlapBehaviour::Overlap;
+	EComponentMobility Mobility = EComponentMobility::Movable;
 
 	TArray<FOverlapInfo> OverlapInfo;
 };

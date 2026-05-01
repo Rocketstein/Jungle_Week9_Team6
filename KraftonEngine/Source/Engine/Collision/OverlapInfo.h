@@ -15,6 +15,7 @@ struct FHitResult {
 	FVector Location;
 	FVector ImpactLocation;
 	FVector ImpactNormal;
+	float   PenetrationDepth;
 
 	UPrimitiveComponent* Component = nullptr;
 	AActor* GetActor();

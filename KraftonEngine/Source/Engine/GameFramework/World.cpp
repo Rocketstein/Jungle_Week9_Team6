@@ -285,6 +285,7 @@ void UWorld::ProcessOverlapEvents() {
 						Shape->BeginComponentOverlap(Info, true);
 						Shape->ShapeColor = FColor(0, 255, 0);
 					}
+					ResolvePenetration(Shape, Other, Info.HitResult);
 				} else if (Other->GetOverlapBehaviour() == EOverlapBehaviour::Overlap) {
 					// Overlap
 					FOverlapInfo Info;
@@ -298,6 +299,29 @@ void UWorld::ProcessOverlapEvents() {
 			}
 		}
 	}
+}
+
+void UWorld::ResolvePenetration(UPrimitiveComponent* A, UPrimitiveComponent* B, const FHitResult& Hit) {
+	// Simple rule: move whichever component has a movement component, or split 50/50
+	if (!A || !A->GetOwner() || !A->GetOwner()->GetRootComponent()) return;
+	if (!B || !B->GetOwner() || !B->GetOwner()->GetRootComponent()) return;
+	UPrimitiveComponent* PrimA = dynamic_cast<UPrimitiveComponent*>(A->GetOwner()->GetRootComponent());
+	UPrimitiveComponent* PrimB = dynamic_cast<UPrimitiveComponent*>(B->GetOwner()->GetRootComponent());
+	if (!PrimA || !PrimB) return;
+
+	bool aMovable = PrimA->GetMobility() == EComponentMobility::Movable;
+	bool bMovable = PrimB->GetMobility() == EComponentMobility::Movable;
+
+	FVector correction = Hit.ImpactNormal * Hit.PenetrationDepth;
+	if (aMovable && !bMovable)
+		A->GetOwner()->SetActorLocation(A->GetOwner()->GetActorLocation() + correction);
+	else if (bMovable && !aMovable)
+		B->GetOwner()->SetActorLocation(B->GetOwner()->GetActorLocation() - correction);
+	else if (aMovable && bMovable) {
+		A->GetOwner()->SetActorLocation(A->GetOwner()->GetActorLocation() + correction * 0.5f);
+		B->GetOwner()->SetActorLocation(B->GetOwner()->GetActorLocation() - correction * 0.5f);
+	}
+	// both static → do nothing
 }
 
 void UWorld::EndPlay()

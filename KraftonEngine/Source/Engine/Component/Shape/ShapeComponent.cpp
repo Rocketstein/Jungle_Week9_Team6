@@ -14,7 +14,9 @@ void UShapeComponent::GetEditableProperties(TArray<FPropertyDescriptor>& OutProp
 	USceneComponent::GetEditableProperties(OutProps);
 	OutProps.push_back({ "Is Collidable",			EPropertyType::Bool,	&bCollisionEnabled });
 	static const char* OverlapBehaviourNames[] = { "Ignore", "Hit", "Overlap" };
-	OutProps.push_back({ "Overlap Behaviour", EPropertyType::Enum, &bGenerateOverlapEvents, 0.f, 0.f, 0.1f, OverlapBehaviourNames, 3 });
+	OutProps.push_back({ "Overlap Behaviour",		EPropertyType::Enum, &bGenerateOverlapEvents, 0.f, 0.f, 0.1f, OverlapBehaviourNames, 3 });
+	static const char* MobilityNames[] = { "Static", "Stationary", "Movable" };
+	OutProps.push_back({ "Mobility",				EPropertyType::Enum, &Mobility, 0.f, 0.f, 0.1f, MobilityNames, 3 });
 	OutProps.push_back({ "Draw Only If Selected",	EPropertyType::Bool,	&bDrawOnlyIfSelected });
 	OutProps.push_back({ "Shape Color",				EPropertyType::Color4,	&ShapeColor });
 }

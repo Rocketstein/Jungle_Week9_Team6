@@ -72,8 +72,10 @@ public:
 	void RemoveActorToOctree(AActor* actor);
 	void UpdateActorInOctree(AActor* actor);
 
+private:
 	// Overlaps
 	void ProcessOverlapEvents();
+	void ResolvePenetration(UPrimitiveComponent* A, UPrimitiveComponent* B, const FHitResult& Hit);
 
 private:
 	//TArray<AActor*> Actors;

@@ -113,6 +113,8 @@ void UPrimitiveComponent::GetEditableProperties(TArray<FPropertyDescriptor>& Out
 	OutProps.push_back({ "Is Collidable", EPropertyType::Bool, &bCollisionEnabled });
 	static const char* OverlapBehaviourNames[] = { "Ignore", "Hit", "Overlap" };
 	OutProps.push_back({ "Generates Overlap Event", EPropertyType::Enum, &bGenerateOverlapEvents, 0.f, 0.f, 0.1f, OverlapBehaviourNames, 3 });
+	static const char* MobilityNames[] = { "Static", "Stationary", "Movable" };
+	OutProps.push_back({ "Mobility",				EPropertyType::Enum, &Mobility, 0.f, 0.f, 0.1f, MobilityNames, 3 });
 }
 
 void UPrimitiveComponent::PostEditProperty(const char* PropertyName)
@@ -305,10 +307,10 @@ void UPrimitiveComponent::BeginComponentOverlap(const FOverlapInfo& OtherOverlap
 
 	if (OtherOverlap.HitResult.bBlocking) {
 		FComponentHitEvent Event;
-		Event.HitComponent  = this;
-		Event.OtherActor    = OtherActor;
+		Event.HitComponent   = this;
+		Event.OtherActor     = OtherActor;
 		Event.OtherComponent = OtherComp;
-		Event.Hit           = OtherOverlap.HitResult;
+		Event.Hit            = OtherOverlap.HitResult;
 		OnComponentHit.Broadcast(Event);
 		if (Owner) Owner->NotifyActorHit(this, OtherActor, OtherComp, OtherOverlap.HitResult);
 	} else {
@@ -338,7 +340,7 @@ void UPrimitiveComponent::EndComponentOverlap(const UPrimitiveComponent* Other) 
 				Event.SweepResult         = Removed.HitResult;
 				OnComponentEndOverlap.Broadcast(Event);
 				if (Owner) Owner->NotifyActorEndOverlap(OtherActor);
-			}
+			} 
 			break;
 		}
 	}
