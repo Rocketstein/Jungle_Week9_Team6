@@ -243,38 +243,42 @@ void UWorld::Tick(float DeltaTime, ELevelTick TickType)
 	Scene.GetDebugDrawQueue().Tick(DeltaTime);
 
 	TickManager.Tick(this, DeltaTime, TickType);
+	UpdateOverlaps();
 }
 
 void UWorld::UpdateOverlaps() {
-	auto& Actors = PersistentLevel->GetActors();
-	auto Octree = GetOctree();
-	for (auto* Actor : Actors) {
+	const FOctree* Octree = GetOctree();
+	if (!Octree) return;
+
+	for (auto* Actor : PersistentLevel->GetActors()) {
 		if (!Actor) continue;
-		if (Actor->IsOverlappingDirty()) {
-			auto& Components = Actor->GetComponents();
-			for (auto* Component : Components) {
-				if (!Component) continue;
-				if (UPrimitiveComponent* Prim = dynamic_cast<UPrimitiveComponent*>(Component)) {
-					// Broad Phase
-					TArray<UPrimitiveComponent*> Broad;
-					Octree->QueryAABB(Prim->GetWorldBoundingBox(), Broad);
 
-					// Narrow Phase
-					for (auto* Candidate : Broad) {
-						if (!Candidate) return;
+		for (auto* Component : Actor->GetComponents()) {
+			UShapeComponent* Shape = dynamic_cast<UShapeComponent*>(Component);
+			if (!Shape || !Shape->IsCollisionEnabled() || !Shape->CanGenerateOverlapEvents()) continue;
 
-						// Check shape-shape collision
-						UShapeComponent* Shape0 = dynamic_cast<UShapeComponent*>(Prim);
-						UShapeComponent* Shape1 = dynamic_cast<UShapeComponent*>(Candidate);
-						if (Shape0 && Shape1) {
-							FOverlapInfo OverlapInfo {};
-							if (FCollisionDispatcher::Get().CheckCollision(Shape0, Shape1, OverlapInfo)) {
-								Prim->BeginComponentOverlap(OverlapInfo, true);
-							}
-						}
-					}
+			// End overlaps that are no longer valid
+			TArray<FOverlapInfo> Prev = Shape->GetOverlapInfos();
+			for (const FOverlapInfo& PrevInfo : Prev) {
+				UShapeComponent* Other = dynamic_cast<UShapeComponent*>(PrevInfo.HitResult.Component);
+				if (!Other || !FCollisionDispatcher::Get().CheckCollision(Shape, Other))
+					Shape->EndComponentOverlap(PrevInfo.HitResult.Component);
+			}
 
-				}
+			// Broad phase
+			TArray<UPrimitiveComponent*> Broad;
+			Octree->QueryAABB(Shape->GetWorldBoundingBox(), Broad);
+
+			// Narrow phase
+			for (auto* Candidate : Broad) {
+				if (!Candidate || Candidate == Shape) continue;
+				UShapeComponent* Other = dynamic_cast<UShapeComponent*>(Candidate);
+				if (!Other || !Other->IsCollisionEnabled() || !Other->CanGenerateOverlapEvents()) continue;
+
+				FOverlapInfo Info;
+				Info.HitResult.Component = Other;
+				if (FCollisionDispatcher::Get().CheckCollision(Shape, Other, Info))
+					Shape->BeginComponentOverlap(Info, true);
 			}
 		}
 	}

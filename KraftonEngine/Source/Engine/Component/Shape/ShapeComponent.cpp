@@ -26,11 +26,3 @@ void UShapeComponent::DrawDebugRing(FVector Center, float Radius, FVector AxisA,
 		Prev = Next;
 	}
 }
-
-bool UShapeComponent::IsOverlappingComponent(UPrimitiveComponent* Other, FOverlapInfo& InInfo) {
-	if (UShapeComponent* Shape = dynamic_cast<UShapeComponent*>(Other)) { 
-		return FCollisionDispatcher::Get().CheckCollision(this, Shape, InInfo);
-	}
-
-	return false;
-}

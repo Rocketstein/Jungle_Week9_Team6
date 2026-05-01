@@ -9,8 +9,6 @@ public:
 	void ContributeSelectedVisuals(FScene& Scene) const override;
 	void PostEditProperty(const char* PropertyName) override;
 
-	bool  IsOverlappingComponent(UPrimitiveComponent* Other, FOverlapInfo& InInfo) override;
-
 public:
 	FColor	ShapeColor;
 	bool	bDrawOnlyIfSelected = false;

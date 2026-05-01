@@ -94,7 +94,7 @@ public:
 	const TArray<FOverlapInfo>& GetOverlapInfos() const;
 	void  BeginComponentOverlap(const FOverlapInfo& OtherOverlap, bool bDoNotifies);
 	void  EndComponentOverlap(const UPrimitiveComponent* Other);
-	bool  IsOverlappingComponent(UPrimitiveComponent* Other, FOverlapInfo& InInfo);
+	bool  IsOverlappingComponent(const UPrimitiveComponent* Other);
 	bool  IsOverlappingActor(const AActor* Other);
 
 protected:

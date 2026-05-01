@@ -292,6 +292,8 @@ const TArray<FOverlapInfo>& UPrimitiveComponent::GetOverlapInfos() const {
 
 void UPrimitiveComponent::BeginComponentOverlap(const FOverlapInfo& OtherOverlap, bool bDoNotifies) {
 	if (!OtherOverlap.HitResult.Component) return;
+	for (const FOverlapInfo& Existing : OverlapInfo)
+		if (Existing.HitResult.Component == OtherOverlap.HitResult.Component) return;
 	OverlapInfo.push_back(OtherOverlap);
 }
 
@@ -304,17 +306,20 @@ void UPrimitiveComponent::EndComponentOverlap(const UPrimitiveComponent* Other) 
 	}
 }
 
+bool UPrimitiveComponent::IsOverlappingComponent(const UPrimitiveComponent* Other) {
+	for (auto& Info : OverlapInfo) {
+		if (Info.HitResult.Component) {
+			if (Info.HitResult.Component == Other) return true;
+		}
+	}
+	return false;
+}
+
 bool UPrimitiveComponent::IsOverlappingActor(const AActor* Other) {
-	//if (!Other) return false;
-	//for (auto* OtherComp : Other->GetPrimitiveComponents()) {
-	//	if (!OtherComp) continue;
-
-	//	FOverlapInfo Info;
-	//	if (IsOverlappingComponent(OtherComp, Info)) {
-	//		OverlapInfo.push_back(Info);
-	//		return true;
-	//	}
-	//}
-
-	//return false;
+	for (auto& Info : OverlapInfo) {
+		if (Info.HitResult.GetActor()) {
+			if (Info.HitResult.GetActor() == Other) return true;
+		}
+	}
+	return false;
 }
