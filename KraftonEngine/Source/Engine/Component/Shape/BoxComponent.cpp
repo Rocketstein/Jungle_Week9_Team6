@@ -3,7 +3,7 @@
 
 IMPLEMENT_CLASS(UBoxComponent, UShapeComponent)
 
-void UBoxComponent::DrawDebugShape(UWorld* InWorld) {
+void UBoxComponent::DrawDebugShape(UWorld* InWorld) const {
 	FVector Center		= GetWorldLocation();
 	FVector WorldMin	= Center - BoxExtent;
 	FVector WorldMax	= Center + BoxExtent;

@@ -9,7 +9,7 @@ public:
 	FVector GetBoxExtent() const { return BoxExtent; }
 	void	SetBoxExtent(FVector InExtent) { BoxExtent = InExtent; }
 
-	void DrawDebugShape(UWorld* InWorld) override;
+	void DrawDebugShape(UWorld* InWorld) const override;
 
 private:
 	FVector BoxExtent;

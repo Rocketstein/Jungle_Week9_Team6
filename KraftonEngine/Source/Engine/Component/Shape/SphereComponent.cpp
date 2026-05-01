@@ -3,21 +3,13 @@
 
 IMPLEMENT_CLASS(USphereComponent, UShapeComponent)
 
-void USphereComponent::DrawDebugShape(UWorld* InWorld) {
+void USphereComponent::DrawDebugShape(UWorld* InWorld) const {
 	if (SphereRadius <= 0.f) return;
-	constexpr int32 Segments = 24;
-	const float Step = 2.0f * FMath::Pi / static_cast<float>(Segments);
+	constexpr uint32 Segments = 24;
+	
 	FVector Center = GetWorldLocation();
-	FVector AxisA  = FVector::ForwardVector;
-	FVector AxisB  = FVector::RightVector;
-	FVector Prev = Center + AxisA * SphereRadius;
 
-	for (int32 Index = 1; Index <= Segments; ++Index)
-	{
-		const float Angle = Step * static_cast<float>(Index);
-		const FVector Next = Center + (AxisA * cosf(Angle) + AxisB * sinf(Angle)) * SphereRadius;
-		InWorld->GetScene().AddDebugLine(Prev, Next, ShapeColor);
-		Prev = Next;
-	}
-
+	DrawDebugRing(Center, SphereRadius, FVector(1, 0, 0), FVector(0, 1, 0), Segments, false, InWorld);
+	DrawDebugRing(Center, SphereRadius, FVector(1, 0, 0), FVector(0, 0, 1), Segments, false, InWorld);
+	DrawDebugRing(Center, SphereRadius, FVector(0, 1, 0), FVector(0, 0, 1), Segments, false, InWorld);
 }

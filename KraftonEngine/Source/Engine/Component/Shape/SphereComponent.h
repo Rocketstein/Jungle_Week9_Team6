@@ -10,8 +10,8 @@ public:
 	float GetSphereRadius() const { return SphereRadius; }
 	void  SetSphereRadius(float InRadius) { SphereRadius = InRadius; }
 
-	void DrawDebugShape(UWorld* InWorld) override;
+	void DrawDebugShape(UWorld* InWorld) const override;
 
 private:
-	float SphereRadius = 0.f;
+	float SphereRadius = 5.f;
 };
