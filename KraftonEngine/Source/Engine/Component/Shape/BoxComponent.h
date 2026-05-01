@@ -12,9 +12,6 @@ public:
 	void	SetRelativeScale(const FVector& NewScale) override;
 	void	GetEditableProperties(TArray<FPropertyDescriptor>& OutProps) override;
 
-	bool	IsOverlappingComponent(UPrimitiveComponent* Other, FOverlapInfo& InInfo) override;
-	bool	IsOverlappingComponent(UPrimitiveComponent& Other, FOverlapInfo& InInfo) override;
-
 private:
 	FVector BoxExtent = FVector(1.f, 1.f, 1.f);
 };

@@ -1,11 +1,11 @@
-﻿#pragma once
+#pragma once
 #include "Core/Singleton.h"
 #include "Collision/OverlapInfo.h"
 #include "Component/Shape/ShapeComponent.h"
 
 class FCollisionDispatcher : public TSingleton<FCollisionDispatcher> {
 	friend class TSingleton<FCollisionDispatcher>;
-	using ShapeCollisionFunc = bool(*)(const UShapeComponent*, const UShapeComponent*);
+	using ShapeCollisionFunc = bool(*)(const UShapeComponent*, const UShapeComponent*, FOverlapInfo&);
 
 public:
 	void Init();
@@ -15,17 +15,21 @@ public:
 		CollisionMatrix[std::pair<FString, FString>(Shape1, Shape0)] = Func;
 	}
 
-	bool CheckCollision(const UShapeComponent* ShapeA, const UShapeComponent* ShapeB) const {
+	bool CheckCollision(const UShapeComponent* ShapeA, const UShapeComponent* ShapeB, FOverlapInfo& OutInfo) const {
 		FString TypeA = ShapeA->GetClass()->GetName();
 		FString TypeB = ShapeB->GetClass()->GetName();
 		auto it = CollisionMatrix.find(std::pair<FString, FString>(TypeA, TypeB));
 		if (it != CollisionMatrix.end()) {
-			return it->second(ShapeA, ShapeB, InInfo);
+			return it->second(ShapeA, ShapeB, OutInfo);
 		}
-		return false;	// No registered collision function for this pair
+		return false;
+	}
+
+	bool CheckCollision(const UShapeComponent* ShapeA, const UShapeComponent* ShapeB) const {
+		FOverlapInfo Info;
+		return CheckCollision(ShapeA, ShapeB, Info);
 	}
 
 private:
 	TMap<std::pair<FString, FString>, ShapeCollisionFunc> CollisionMatrix;
 };
-

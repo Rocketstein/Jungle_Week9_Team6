@@ -43,13 +43,3 @@ void UBoxComponent::SetRelativeScale(const FVector& NewScale) {
 	USceneComponent::SetRelativeScale(NewScale);
 	BoxExtent = NewScale;
 }
-
-bool UBoxComponent::IsOverlappingComponent(UPrimitiveComponent* Other, FOverlapInfo& InInfo) {
-	if (!bCollisionEnabled || !bGenerateOverlapEvents) return false;
-	if (!Other->IsCollisionEnabled() || !Other->CanGenerateOverlapEvents()) return false;
-
-	if (auto* Box = dynamic_cast<UBoxComponent*>(Other)) {
-		// Box-Box 
-	}
-
-}
