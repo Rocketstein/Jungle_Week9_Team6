@@ -73,7 +73,7 @@ public:
 	void UpdateActorInOctree(AActor* actor);
 
 	// Overlaps
-	void UpdateOverlaps();
+	void ProcessOverlapEvents();
 
 private:
 	//TArray<AActor*> Actors;

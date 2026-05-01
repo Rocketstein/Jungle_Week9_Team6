@@ -243,10 +243,10 @@ void UWorld::Tick(float DeltaTime, ELevelTick TickType)
 	Scene.GetDebugDrawQueue().Tick(DeltaTime);
 
 	TickManager.Tick(this, DeltaTime, TickType);
-	UpdateOverlaps();
+	ProcessOverlapEvents();
 }
 
-void UWorld::UpdateOverlaps() {
+void UWorld::ProcessOverlapEvents() {
 	const FOctree* Octree = GetOctree();
 	if (!Octree) return;
 
