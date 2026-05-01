@@ -1,5 +1,6 @@
 ﻿#include "ShapeComponent.h"
 #include "GameFramework/World.h"
+#include "Collision/CollisionDispatcher.h"
 
 DEFINE_CLASS(UShapeComponent, UPrimitiveComponent)
 HIDE_FROM_COMPONENT_LIST(UShapeComponent)
@@ -24,4 +25,12 @@ void UShapeComponent::DrawDebugRing(FVector Center, float Radius, FVector AxisA,
 		Scene.AddDebugLine(Prev, Next, ShapeColor);
 		Prev = Next;
 	}
+}
+
+bool UShapeComponent::IsOverlappingComponent(UPrimitiveComponent* Other, FOverlapInfo& InInfo) {
+	if (UShapeComponent* Shape = dynamic_cast<UShapeComponent*>(Other)) { 
+		return FCollisionDispatcher::Get().CheckCollision(this, Shape, InInfo);
+	}
+
+	return false;
 }

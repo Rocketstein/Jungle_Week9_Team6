@@ -1,6 +1,7 @@
 ﻿#include "GameFramework/World.h"
 #include "Object/ObjectFactory.h"
-#include "Component/PrimitiveComponent.h"
+#include "Collision/CollisionDispatcher.h"
+#include "Component/Shape/ShapeComponent.h"
 #include "Component/StaticMeshComponent.h"
 #include "Engine/Component/CameraComponent.h"
 #include "Render/Types/LODContext.h"
@@ -242,6 +243,41 @@ void UWorld::Tick(float DeltaTime, ELevelTick TickType)
 	Scene.GetDebugDrawQueue().Tick(DeltaTime);
 
 	TickManager.Tick(this, DeltaTime, TickType);
+}
+
+void UWorld::UpdateOverlaps() {
+	auto& Actors = PersistentLevel->GetActors();
+	auto Octree = GetOctree();
+	for (auto* Actor : Actors) {
+		if (!Actor) continue;
+		if (Actor->IsOverlappingDirty()) {
+			auto& Components = Actor->GetComponents();
+			for (auto* Component : Components) {
+				if (!Component) continue;
+				if (UPrimitiveComponent* Prim = dynamic_cast<UPrimitiveComponent*>(Component)) {
+					// Broad Phase
+					TArray<UPrimitiveComponent*> Broad;
+					Octree->QueryAABB(Prim->GetWorldBoundingBox(), Broad);
+
+					// Narrow Phase
+					for (auto* Candidate : Broad) {
+						if (!Candidate) return;
+
+						// Check shape-shape collision
+						UShapeComponent* Shape0 = dynamic_cast<UShapeComponent*>(Prim);
+						UShapeComponent* Shape1 = dynamic_cast<UShapeComponent*>(Candidate);
+						if (Shape0 && Shape1) {
+							FOverlapInfo OverlapInfo {};
+							if (FCollisionDispatcher::Get().CheckCollision(Shape0, Shape1, OverlapInfo)) {
+								Prim->BeginComponentOverlap(OverlapInfo, true);
+							}
+						}
+					}
+
+				}
+			}
+		}
+	}
 }
 
 void UWorld::EndPlay()

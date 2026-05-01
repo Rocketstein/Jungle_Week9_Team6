@@ -92,6 +92,8 @@ public:
 	FActorTickFunction PrimaryActorTick;
 
 	// Overlap
+	void MarkOverlappingDirty() { bIsOverlappingDirty; }
+	bool IsOverlappingDirty() const { return bIsOverlappingDirty; }
 	bool IsOverlappingActor(const AActor* Other) const;
 
 protected:
@@ -111,4 +113,7 @@ protected:
 	mutable bool bPrimitiveCacheDirty = true;
 	bool bQueuedForPartitionUpdate = false;
 	bool bActorHasBegunPlay = false;
+
+protected:
+	bool bIsOverlappingDirty = false;
 };
