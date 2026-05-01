@@ -12,7 +12,8 @@ void UShapeComponent::PostEditProperty(const char* PropertyName) {
 
 void UShapeComponent::GetEditableProperties(TArray<FPropertyDescriptor>& OutProps) {
 	USceneComponent::GetEditableProperties(OutProps);
-	OutProps.push_back({ "Draw Only If Selected", EPropertyType::Bool, &bDrawOnlyIfSelected });
+	OutProps.push_back({ "Draw Only If Selected", EPropertyType::Bool,		&bDrawOnlyIfSelected });
+	OutProps.push_back({ "Shape Color",			  EPropertyType::Color4,	&ShapeColor });
 }
 
 void UShapeComponent::Serialize(FArchive& Ar) {
