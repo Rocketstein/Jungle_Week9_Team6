@@ -4,7 +4,7 @@
 IMPLEMENT_CLASS(UBoxComponent, UShapeComponent)
 
 void UBoxComponent::GetEditableProperties(TArray<FPropertyDescriptor>& OutProps) {
-	USceneComponent::GetEditableProperties(OutProps);
+	UShapeComponent::GetEditableProperties(OutProps);
 	OutProps.push_back({ "Box Extent", EPropertyType::Vec3, &BoxExtent, 0.0f, 0.0f, 0.1f });
 }
 

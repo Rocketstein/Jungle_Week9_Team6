@@ -4,7 +4,7 @@
 IMPLEMENT_CLASS(UCapsuleComponent, UShapeComponent)
 
 void UCapsuleComponent::GetEditableProperties(TArray<FPropertyDescriptor>& OutProps) {
-	USceneComponent::GetEditableProperties(OutProps);
+	UShapeComponent::GetEditableProperties(OutProps);
 	OutProps.push_back({ "Capsule Radius",		EPropertyType::Float, &CapsuleRadius,	  0.0f, 2048.f, 0.1f });
 	OutProps.push_back({ "Capsule Half-Height", EPropertyType::Float, &CapsuleHalfHeight, 0.0f, 2048.f, 0.1f });
 }

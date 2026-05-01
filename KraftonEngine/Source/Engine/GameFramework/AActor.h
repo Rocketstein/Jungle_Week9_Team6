@@ -91,6 +91,9 @@ public:
 	
 	FActorTickFunction PrimaryActorTick;
 
+	bool IsActorSelected() const { return bIsSelected; }
+	void SetActorSelected(bool InFlag) { bIsSelected = InFlag; }
+
 	// Overlap
 	void MarkOverlappingDirty() { bIsOverlappingDirty; }
 	bool IsOverlappingDirty() const { return bIsOverlappingDirty; }
@@ -116,4 +119,5 @@ protected:
 
 protected:
 	bool bIsOverlappingDirty = false;
+	bool bIsSelected = false;
 };

@@ -261,8 +261,10 @@ void UWorld::UpdateOverlaps() {
 			TArray<FOverlapInfo> Prev = Shape->GetOverlapInfos();
 			for (const FOverlapInfo& PrevInfo : Prev) {
 				UShapeComponent* Other = dynamic_cast<UShapeComponent*>(PrevInfo.HitResult.Component);
-				if (!Other || !FCollisionDispatcher::Get().CheckCollision(Shape, Other))
+				if (!Other || !FCollisionDispatcher::Get().CheckCollision(Shape, Other)) {
 					Shape->EndComponentOverlap(PrevInfo.HitResult.Component);
+					Shape->ShapeColor = FColor(0, 0, 1);
+				}
 			}
 
 			// Broad phase
@@ -277,8 +279,10 @@ void UWorld::UpdateOverlaps() {
 
 				FOverlapInfo Info;
 				Info.HitResult.Component = Other;
-				if (FCollisionDispatcher::Get().CheckCollision(Shape, Other, Info))
+				if (FCollisionDispatcher::Get().CheckCollision(Shape, Other, Info)) {
 					Shape->BeginComponentOverlap(Info, true);
+					Shape->ShapeColor = FColor(1, 0, 0);
+				}
 			}
 		}
 	}

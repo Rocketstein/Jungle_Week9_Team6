@@ -4,7 +4,7 @@
 IMPLEMENT_CLASS(USphereComponent, UShapeComponent)
 
 void USphereComponent::GetEditableProperties(TArray<FPropertyDescriptor>& OutProps) {
-	USceneComponent::GetEditableProperties(OutProps);
+	UShapeComponent::GetEditableProperties(OutProps);
 	OutProps.push_back({ "Sphere Radius", EPropertyType::Float, &SphereRadius, 0.0f, 2048.f, 0.1f });
 }
 
