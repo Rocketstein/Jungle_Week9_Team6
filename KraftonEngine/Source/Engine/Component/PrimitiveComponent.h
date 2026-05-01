@@ -6,6 +6,7 @@
 #include "Core/RayTypes.h"
 #include "Core/CollisionTypes.h"
 #include "Collision/OverlapInfo.h"
+#include "Core/CollisionEventTypes.h"
 #include "Core/EngineTypes.h"
 #include "Render/Types/VertexTypes.h"
 #include "Render/Proxy/DirtyFlag.h"
@@ -95,6 +96,10 @@ public:
 	void  EndComponentOverlap(const UPrimitiveComponent* Other);
 	bool  IsOverlappingComponent(const UPrimitiveComponent* Other);
 	bool  IsOverlappingActor(const AActor* Other);
+
+	FComponentBeginOverlapSignature OnComponentBeginOverlap;
+	FComponentEndOverlapSignature   OnComponentEndOverlap;
+	FComponentHitSignature          OnComponentHit;
 
 protected:
 	void OnTransformDirty() override;

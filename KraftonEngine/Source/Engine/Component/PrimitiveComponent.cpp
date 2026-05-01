@@ -298,12 +298,47 @@ void UPrimitiveComponent::BeginComponentOverlap(const FOverlapInfo& OtherOverlap
 		if (Existing.HitResult.Component == OtherOverlap.HitResult.Component) return;
 	OverlapInfo.push_back(OtherOverlap);
 
+	if (!bDoNotifies) return;
+
+	UPrimitiveComponent* OtherComp = OtherOverlap.HitResult.Component;
+	AActor* OtherActor = OtherComp ? OtherComp->GetOwner() : nullptr;
+
+	if (OtherOverlap.HitResult.bBlocking) {
+		FComponentHitEvent Event;
+		Event.HitComponent  = this;
+		Event.OtherActor    = OtherActor;
+		Event.OtherComponent = OtherComp;
+		Event.Hit           = OtherOverlap.HitResult;
+		OnComponentHit.Broadcast(Event);
+		if (Owner) Owner->NotifyActorHit(this, OtherActor, OtherComp, OtherOverlap.HitResult);
+	} else {
+		FComponentOverlapEvent Event;
+		Event.OverlappedComponent = this;
+		Event.OtherActor          = OtherActor;
+		Event.OtherComponent      = OtherComp;
+		Event.SweepResult         = OtherOverlap.HitResult;
+		OnComponentBeginOverlap.Broadcast(Event);
+		if (Owner) Owner->NotifyActorBeginOverlap(OtherActor);
+	}
 }
 
 void UPrimitiveComponent::EndComponentOverlap(const UPrimitiveComponent* Other) {
 	for (uint32 i = 0; i < OverlapInfo.size(); i++) {
 		if (OverlapInfo[i].HitResult.Component && OverlapInfo[i].HitResult.Component == Other) {
+			FOverlapInfo Removed = OverlapInfo[i];
 			OverlapInfo.erase(OverlapInfo.begin() + i);
+
+			if (!Removed.HitResult.bBlocking) {
+				UPrimitiveComponent* OtherComp = Removed.HitResult.Component;
+				AActor* OtherActor = OtherComp ? OtherComp->GetOwner() : nullptr;
+				FComponentOverlapEvent Event;
+				Event.OverlappedComponent = this;
+				Event.OtherActor          = OtherActor;
+				Event.OtherComponent      = OtherComp;
+				Event.SweepResult         = Removed.HitResult;
+				OnComponentEndOverlap.Broadcast(Event);
+				if (Owner) Owner->NotifyActorEndOverlap(OtherActor);
+			}
 			break;
 		}
 	}

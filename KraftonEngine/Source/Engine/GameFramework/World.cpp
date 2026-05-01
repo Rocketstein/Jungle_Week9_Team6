@@ -283,11 +283,8 @@ void UWorld::ProcessOverlapEvents() {
 					Info.HitResult.Component = Other;
 					if (FCollisionDispatcher::Get().CheckCollision(Shape, Other, Info)) {
 						Shape->BeginComponentOverlap(Info, true);
-						Shape->ShapeColor = FColor(255, 0, 0);
+						Shape->ShapeColor = FColor(0, 255, 0);
 					}
-
-					// Propagate Hit Event
-
 				} else if (Other->GetOverlapBehaviour() == EOverlapBehaviour::Overlap) {
 					// Overlap
 					FOverlapInfo Info;
@@ -297,9 +294,6 @@ void UWorld::ProcessOverlapEvents() {
 						Shape->BeginComponentOverlap(Info, true);
 						Shape->ShapeColor = FColor(255, 0, 0);
 					}
-
-					// Propagate Overlap Event
-
 				}
 			}
 		}
