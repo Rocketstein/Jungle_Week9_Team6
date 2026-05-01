@@ -274,6 +274,12 @@ void UPrimitiveComponent::OnTransformDirty()
 	// (basis 동일 + translation만 바뀐 경우 UpdateWorldMatrix가 이전 AABB를 평행이동만 적용)
 	bWorldAABBDirty = true;
 	MarkRenderTransformDirty();
+
+	// Check Collision
+	// Broad phase (OBB)
+
+	// Narrow phase
+
 }
 
 void UPrimitiveComponent::EnsureWorldAABBUpdated() const
