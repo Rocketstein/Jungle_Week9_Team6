@@ -255,7 +255,7 @@ void UWorld::ProcessOverlapEvents() {
 
 		for (auto* Component : Actor->GetComponents()) {
 			UShapeComponent* Shape = dynamic_cast<UShapeComponent*>(Component);
-			if (!Shape || !Shape->IsCollisionEnabled() || !Shape->CanGenerateOverlapEvents()) continue;
+			if (!Shape || !Shape->IsCollisionEnabled() || Shape->GetOverlapBehaviour() == EOverlapBehaviour::Ignore) continue;
 
 			// End overlaps that are no longer valid
 			TArray<FOverlapInfo> Prev = Shape->GetOverlapInfos();
@@ -275,13 +275,31 @@ void UWorld::ProcessOverlapEvents() {
 			for (auto* Candidate : Broad) {
 				if (!Candidate || Candidate == Shape) continue;
 				UShapeComponent* Other = dynamic_cast<UShapeComponent*>(Candidate);
-				if (!Other || !Other->IsCollisionEnabled() || !Other->CanGenerateOverlapEvents()) continue;
+				if (!Other || !Other->IsCollisionEnabled()) continue;
+				if (Shape->GetOverlapBehaviour() == EOverlapBehaviour::Hit && Other->GetOverlapBehaviour() == EOverlapBehaviour::Hit) {
+					// Hit 
+					FOverlapInfo Info;
+					Info.HitResult.bBlocking = true;
+					Info.HitResult.Component = Other;
+					if (FCollisionDispatcher::Get().CheckCollision(Shape, Other, Info)) {
+						Shape->BeginComponentOverlap(Info, true);
+						Shape->ShapeColor = FColor(255, 0, 0);
+					}
 
-				FOverlapInfo Info;
-				Info.HitResult.Component = Other;
-				if (FCollisionDispatcher::Get().CheckCollision(Shape, Other, Info)) {
-					Shape->BeginComponentOverlap(Info, true);
-					Shape->ShapeColor = FColor(255, 0, 0);
+					// Propagate Hit Event
+
+				} else if (Other->GetOverlapBehaviour() == EOverlapBehaviour::Overlap) {
+					// Overlap
+					FOverlapInfo Info;
+					Info.HitResult.bBlocking = false;
+					Info.HitResult.Component = Other;
+					if (FCollisionDispatcher::Get().CheckCollision(Shape, Other, Info)) {
+						Shape->BeginComponentOverlap(Info, true);
+						Shape->ShapeColor = FColor(255, 0, 0);
+					}
+
+					// Propagate Overlap Event
+
 				}
 			}
 		}

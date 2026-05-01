@@ -2,6 +2,7 @@
 #include "Object/ObjectFactory.h"
 #include "Serialization/Archive.h"
 #include "Core/RayTypes.h"
+//#include "Core/CollisionEventTypes.h"
 #include "Collision/RayUtils.h"
 #include "Render/Resource/MeshBufferManager.h"
 #include "Core/CollisionTypes.h"
@@ -110,7 +111,8 @@ void UPrimitiveComponent::GetEditableProperties(TArray<FPropertyDescriptor>& Out
 	OutProps.push_back({ "Cast Shadow", EPropertyType::Bool, &bCastShadow });
 	OutProps.push_back({ "Two Sided Shadow", EPropertyType::Bool, &bCastShadowAsTwoSided });
 	OutProps.push_back({ "Is Collidable", EPropertyType::Bool, &bCollisionEnabled });
-	OutProps.push_back({ "Generates Overlap Event", EPropertyType::Bool, &bGenerateOverlapEvents });
+	static const char* OverlapBehaviourNames[] = { "Ignore", "Hit", "Overlap" };
+	OutProps.push_back({ "Generates Overlap Event", EPropertyType::Enum, &bGenerateOverlapEvents, 0.f, 0.f, 0.1f, OverlapBehaviourNames, 3 });
 }
 
 void UPrimitiveComponent::PostEditProperty(const char* PropertyName)
@@ -295,6 +297,7 @@ void UPrimitiveComponent::BeginComponentOverlap(const FOverlapInfo& OtherOverlap
 	for (const FOverlapInfo& Existing : OverlapInfo)
 		if (Existing.HitResult.Component == OtherOverlap.HitResult.Component) return;
 	OverlapInfo.push_back(OtherOverlap);
+
 }
 
 void UPrimitiveComponent::EndComponentOverlap(const UPrimitiveComponent* Other) {

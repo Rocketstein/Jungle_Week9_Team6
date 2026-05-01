@@ -88,8 +88,7 @@ public:
 	bool IsTransformDirty() const { return bTransformDirty; }
 	bool IsCollisionEnabled() const { return bCollisionEnabled; }
 	void SetCollisionEnabled(bool bInCollisionFlag) { bCollisionEnabled = bInCollisionFlag; }
-	bool CanGenerateOverlapEvents() const { return bGenerateOverlapEvents; }
-	void SetGenerateOverlapEvents(bool bShouldGenerateOverlapEvents) { bGenerateOverlapEvents = bShouldGenerateOverlapEvents; }
+	EOverlapBehaviour GetOverlapBehaviour() const { return bGenerateOverlapEvents; }
 
 	const TArray<FOverlapInfo>& GetOverlapInfos() const;
 	void  BeginComponentOverlap(const FOverlapInfo& OtherOverlap, bool bDoNotifies);
@@ -116,8 +115,8 @@ protected:
 	bool bInOctreeOverflow = false;
 
 	bool bCollisionEnabled		= true;
-	bool bGenerateOverlapEvents = true;
 	bool bBlockComponent		= false;
+	EOverlapBehaviour bGenerateOverlapEvents = EOverlapBehaviour::Overlap;
 
 	TArray<FOverlapInfo> OverlapInfo;
 };
