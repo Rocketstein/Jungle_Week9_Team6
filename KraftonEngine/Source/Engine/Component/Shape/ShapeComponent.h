@@ -5,7 +5,7 @@ class UShapeComponent : public UPrimitiveComponent {
 public:
 	DECLARE_CLASS(UShapeComponent, UPrimitiveComponent)
 	virtual ~UShapeComponent() = default;
-	FPrimitiveSceneProxy* CreateSceneProxy() override { return nullptr; }	// Do not draw debug AABB lines
+/*	FPrimitiveSceneProxy* CreateSceneProxy() override { return nullptr; }	*/// Do not draw debug AABB lines
 	void ContributeVisuals(FScene& Scene) const override;
 	void GetEditableProperties(TArray<FPropertyDescriptor>& OutProps) override;
 	void PostEditProperty(const char* PropertyName) override;

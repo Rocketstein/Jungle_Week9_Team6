@@ -53,5 +53,19 @@ void UCapsuleComponent::DrawDebugShape(FScene& Scene) const {
 }
 
 void UCapsuleComponent::UpdateWorldAABB() const {
-	
+	FVector WorldCenter = GetWorldLocation();
+	FVector Up = GetUpVector().Normalized();
+
+	float BiasedHeight = CapsuleHalfHeight > CapsuleRadius ? (CapsuleHalfHeight - CapsuleRadius) : 0.f;
+
+	FVector Extent(
+		fabsf(Up.X) * BiasedHeight + CapsuleRadius,
+		fabsf(Up.Y) * BiasedHeight + CapsuleRadius,
+		fabsf(Up.Z) * BiasedHeight + CapsuleRadius
+	);
+
+	WorldAABBMinLocation = WorldCenter - Extent;
+	WorldAABBMaxLocation = WorldCenter + Extent;
+	bWorldAABBDirty = false;
+	bHasValidWorldAABB = true;
 }

@@ -263,7 +263,7 @@ void UWorld::UpdateOverlaps() {
 				UShapeComponent* Other = dynamic_cast<UShapeComponent*>(PrevInfo.HitResult.Component);
 				if (!Other || !FCollisionDispatcher::Get().CheckCollision(Shape, Other)) {
 					Shape->EndComponentOverlap(PrevInfo.HitResult.Component);
-					Shape->ShapeColor = FColor(0, 0, 1);
+					Shape->ShapeColor = FColor(0, 0, 255);
 				}
 			}
 
@@ -281,7 +281,7 @@ void UWorld::UpdateOverlaps() {
 				Info.HitResult.Component = Other;
 				if (FCollisionDispatcher::Get().CheckCollision(Shape, Other, Info)) {
 					Shape->BeginComponentOverlap(Info, true);
-					Shape->ShapeColor = FColor(1, 0, 0);
+					Shape->ShapeColor = FColor(255, 0, 0);
 				}
 			}
 		}

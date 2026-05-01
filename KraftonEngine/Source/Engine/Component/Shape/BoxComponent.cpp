@@ -3,11 +3,6 @@
 
 IMPLEMENT_CLASS(UBoxComponent, UShapeComponent)
 
-UBoxComponent::UBoxComponent() {
-	// Initialize AABB
-	
-}
-
 void UBoxComponent::GetEditableProperties(TArray<FPropertyDescriptor>& OutProps) {
 	UShapeComponent::GetEditableProperties(OutProps);
 	OutProps.push_back({ "Box Extent", EPropertyType::Vec3, &BoxExtent, 0.0f, 0.0f, 0.1f });

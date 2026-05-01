@@ -20,5 +20,9 @@ void USphereComponent::DrawDebugShape(FScene& Scene) const {
 }
 
 void USphereComponent::UpdateWorldAABB() const {
-
+	FVector WorldCenter = GetWorldLocation();
+	WorldAABBMinLocation = WorldCenter - FVector(SphereRadius, SphereRadius, SphereRadius);
+	WorldAABBMaxLocation = WorldCenter + FVector(SphereRadius, SphereRadius, SphereRadius);
+	bWorldAABBDirty = false;
+	bHasValidWorldAABB = true;
 }
