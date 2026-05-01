@@ -3,6 +3,11 @@
 
 IMPLEMENT_CLASS(UBoxComponent, UShapeComponent)
 
+void UBoxComponent::GetEditableProperties(TArray<FPropertyDescriptor>& OutProps) {
+	USceneComponent::GetEditableProperties(OutProps);
+	OutProps.push_back({ "Box Extent", EPropertyType::Vec3, &BoxExtent, 0.0f, 0.0f, 0.1f });
+}
+
 void UBoxComponent::DrawDebugShape(FScene& Scene) const {
 	FVector Center = GetWorldLocation();
 	FVector X      = GetForwardVector().Normalized() * BoxExtent.X;

@@ -3,6 +3,12 @@
 
 IMPLEMENT_CLASS(UCapsuleComponent, UShapeComponent)
 
+void UCapsuleComponent::GetEditableProperties(TArray<FPropertyDescriptor>& OutProps) {
+	USceneComponent::GetEditableProperties(OutProps);
+	OutProps.push_back({ "Capsule Radius",		EPropertyType::Float, &CapsuleRadius,	  0.0f, 500.0f, 0.1f });
+	OutProps.push_back({ "Capsule Half-Height", EPropertyType::Float, &CapsuleHalfHeight, 0.0f, 500.0f, 0.1f });
+}
+
 void UCapsuleComponent::DrawDebugShape(FScene& Scene) const {
 	if (CapsuleRadius <= 0.f || CapsuleHalfHeight < 0.f) return;
 

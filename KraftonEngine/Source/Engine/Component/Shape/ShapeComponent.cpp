@@ -4,6 +4,10 @@
 DEFINE_CLASS(UShapeComponent, UPrimitiveComponent)
 HIDE_FROM_COMPONENT_LIST(UShapeComponent)
 
+void UShapeComponent::PostEditProperty(const char* PropertyName) {
+	USceneComponent::PostEditProperty(PropertyName);
+}
+
 void UShapeComponent::ContributeSelectedVisuals(FScene& Scene) const {
 	DrawDebugShape(Scene);
 }

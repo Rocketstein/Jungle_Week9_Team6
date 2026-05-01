@@ -10,6 +10,7 @@ public:
 	void	SetBoxExtent(FVector InExtent) { BoxExtent = InExtent; }
 	void	DrawDebugShape(FScene& Scene) const override;
 	void	SetRelativeScale(const FVector& NewScale) override;
+	void	GetEditableProperties(TArray<FPropertyDescriptor>& OutProps) override;
 
 private:
 	FVector BoxExtent = FVector(1.f, 1.f, 1.f);

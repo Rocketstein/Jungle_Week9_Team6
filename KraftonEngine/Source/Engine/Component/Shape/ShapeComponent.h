@@ -5,7 +5,9 @@ class UShapeComponent : public UPrimitiveComponent {
 public:
 	DECLARE_CLASS(UShapeComponent, UPrimitiveComponent)
 	virtual ~UShapeComponent() = default;
+	FPrimitiveSceneProxy* CreateSceneProxy() override { return nullptr; }	// Do not draw debug AABB lines
 	void ContributeSelectedVisuals(FScene& Scene) const override;
+	void PostEditProperty(const char* PropertyName) override;
 
 public:
 	FColor	ShapeColor;

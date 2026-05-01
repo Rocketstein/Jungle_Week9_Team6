@@ -6,6 +6,9 @@ public:
 	DECLARE_CLASS(UCapsuleComponent, UShapeComponent)
 	UCapsuleComponent() = default;
 	UCapsuleComponent(float InHalfHeight, float InRadius) : CapsuleHalfHeight(InHalfHeight), CapsuleRadius(InRadius) {}
+
+	void  GetEditableProperties(TArray<FPropertyDescriptor>& OutProps) override;
+
 	float GetCapsuleHalfHeight() const { return CapsuleHalfHeight; }
 	float GetCapsuleRadius() const { return CapsuleRadius; }
 	void  SetCapsuleHalfHeight(float InHalfHeight) { CapsuleHalfHeight = InHalfHeight; }
