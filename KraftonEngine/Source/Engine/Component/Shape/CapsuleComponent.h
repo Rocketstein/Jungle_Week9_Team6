@@ -14,6 +14,6 @@ public:
 	void DrawDebugShape(FScene& Scene) const override;
 
 private:
-	float CapsuleHalfHeight = 5.f;
-	float CapsuleRadius		= 5.f;
+	float CapsuleHalfHeight = 1.f;
+	float CapsuleRadius		= 1.f;
 };

@@ -13,5 +13,5 @@ public:
 	void DrawDebugShape(FScene& Scene) const override;
 
 private:
-	float SphereRadius = 5.f;
+	float SphereRadius = 1.f;
 };
