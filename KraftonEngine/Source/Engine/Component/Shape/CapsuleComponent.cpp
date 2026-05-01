@@ -3,7 +3,7 @@
 
 IMPLEMENT_CLASS(UCapsuleComponent, UShapeComponent)
 
-void UCapsuleComponent::DrawDebugShape(UWorld* InWorld) const {
+void UCapsuleComponent::DrawDebugShape(FScene& Scene) const {
 	if (CapsuleRadius <= 0.f || CapsuleHalfHeight < 0.f) return;
 
 	FVector Center    = GetWorldLocation();
@@ -18,19 +18,18 @@ void UCapsuleComponent::DrawDebugShape(UWorld* InWorld) const {
 	constexpr uint32 HalfSegments = Segments / 2;
 
 	// Junction rings at top and bottom
-	DrawDebugRing(TopCenter, CapsuleRadius, Fwd, Right, Segments,     false, InWorld);
-	DrawDebugRing(BotCenter, CapsuleRadius, Fwd, Right, Segments,     false, InWorld);
+	DrawDebugRing(TopCenter, CapsuleRadius, Fwd, Right, Segments,     false, Scene);
+	DrawDebugRing(BotCenter, CapsuleRadius, Fwd, Right, Segments,     false, Scene);
 
 	// Top hemisphere
-	DrawDebugRing(TopCenter, CapsuleRadius, Fwd,  Up,    HalfSegments, true,  InWorld);
-	DrawDebugRing(TopCenter, CapsuleRadius, Right, Up,    HalfSegments, true,  InWorld);
+	DrawDebugRing(TopCenter, CapsuleRadius, Fwd,  Up,    HalfSegments, true, Scene);
+	DrawDebugRing(TopCenter, CapsuleRadius, Right, Up,    HalfSegments, true, Scene);
 
 	// Bottom hemisphere
-	DrawDebugRing(BotCenter, CapsuleRadius, Fwd,  NegUp, HalfSegments, true,  InWorld);
-	DrawDebugRing(BotCenter, CapsuleRadius, Right, NegUp, HalfSegments, true,  InWorld);
+	DrawDebugRing(BotCenter, CapsuleRadius, Fwd,  NegUp, HalfSegments, true, Scene);
+	DrawDebugRing(BotCenter, CapsuleRadius, Right, NegUp, HalfSegments, true, Scene);
 
 	// Body lines
-	auto& Scene = InWorld->GetScene();
 	Scene.AddDebugLine(TopCenter + Fwd   * CapsuleRadius, BotCenter + Fwd   * CapsuleRadius, ShapeColor);
 	Scene.AddDebugLine(TopCenter - Fwd   * CapsuleRadius, BotCenter - Fwd   * CapsuleRadius, ShapeColor);
 	Scene.AddDebugLine(TopCenter + Right * CapsuleRadius, BotCenter + Right * CapsuleRadius, ShapeColor);

@@ -9,8 +9,8 @@ public:
 	FVector GetBoxExtent() const { return BoxExtent; }
 	void	SetBoxExtent(FVector InExtent) { BoxExtent = InExtent; }
 
-	void DrawDebugShape(UWorld* InWorld) const override;
+	void DrawDebugShape(FScene& Scene) const override;
 
 private:
-	FVector BoxExtent;
+	FVector BoxExtent = FVector(1.f, 1.f, 1.f);
 };

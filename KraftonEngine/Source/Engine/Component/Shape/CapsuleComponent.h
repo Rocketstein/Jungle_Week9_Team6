@@ -11,7 +11,7 @@ public:
 	void  SetCapsuleHalfHeight(float InHalfHeight) { CapsuleHalfHeight = InHalfHeight; }
 	void  SetCapsuleRadius(float InRadius) { CapsuleRadius = InRadius; }
 
-	void DrawDebugShape(UWorld* InWorld) const override;
+	void DrawDebugShape(FScene& Scene) const override;
 
 private:
 	float CapsuleHalfHeight = 5.f;
