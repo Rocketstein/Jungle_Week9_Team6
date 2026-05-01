@@ -33,3 +33,8 @@ void UBoxComponent::DrawDebugShape(FScene& Scene) const {
 	Scene.AddDebugLine(P[2], P[6], ShapeColor);
 	Scene.AddDebugLine(P[3], P[7], ShapeColor);
 }
+
+void UBoxComponent::SetRelativeScale(const FVector& NewScale) {
+	USceneComponent::SetRelativeScale(NewScale);
+	BoxExtent = NewScale;
+}
