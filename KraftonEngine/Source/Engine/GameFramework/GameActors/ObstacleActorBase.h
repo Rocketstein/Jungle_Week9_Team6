@@ -29,6 +29,7 @@ protected:
 	virtual void OnOverlap(const FComponentOverlapEvent& Other);
 
 	// Should be called when a player collides into one of its shape components.
+	// TODO: Add a concrete definition once player class is ready
 	virtual void OnPlayerCollision() = 0;
 
 protected:
