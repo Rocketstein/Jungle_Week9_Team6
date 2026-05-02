@@ -10,6 +10,7 @@
 #include "Core/Log.h"
 #include "Profiling/MemoryStats.h"
 #include "Engine/Texture/Texture2D.h"
+#include "Materials/MaterialManager.h"
 
 
 namespace ResourceKey
@@ -17,6 +18,9 @@ namespace ResourceKey
 	constexpr const char* Font     = "Font";
 	constexpr const char* Particle = "Particle";
 	constexpr const char* Texture  = "Texture";
+	constexpr const char* Mesh     = "Mesh";
+	constexpr const char* Material = "Material";
+	constexpr const char* PathMap  = "Path";
 	constexpr const char* Path     = "Path";
 	constexpr const char* Columns  = "Columns";
 	constexpr const char* Rows     = "Rows";
@@ -88,6 +92,52 @@ void FResourceManager::LoadFromFile(const FString& Path, ID3D11Device* InDevice)
 		}
 	}
 
+	// Mesh — { "Name": { "Path": "..." } }  (경로 레지스트리 전용)
+	if (Root.hasKey(ResourceKey::Mesh))
+	{
+		JSON MeshSection = Root[ResourceKey::Mesh];
+		for (auto& Pair : MeshSection.ObjectRange())
+		{
+			JSON Entry = Pair.second;
+			FMeshResource Resource;
+			Resource.Name = FName(Pair.first.c_str());
+			Resource.Path = Entry[ResourceKey::Path].ToString();
+			MeshResources[Pair.first] = Resource;
+		}
+	}
+
+	// Material — { "Name": { "Path": "..." } }  (경로 레지스트리 + 기본 프리로드)
+	if (Root.hasKey(ResourceKey::Material))
+	{
+		JSON MaterialSection = Root[ResourceKey::Material];
+		for (auto& Pair : MaterialSection.ObjectRange())
+		{
+			JSON Entry = Pair.second;
+			FMaterialResource Resource;
+			Resource.Name = FName(Pair.first.c_str());
+			Resource.Path = Entry[ResourceKey::Path].ToString();
+			MaterialResources[Pair.first] = Resource;
+
+			FGenericPathResource PathResource;
+			PathResource.Name = Resource.Name;
+			PathResource.Path = Resource.Path;
+			PathResources[Pair.first] = PathResource;
+		}
+	}
+
+	if (Root.hasKey(ResourceKey::PathMap))
+	{
+		JSON PathSection = Root[ResourceKey::PathMap];
+		for (auto& Pair : PathSection.ObjectRange())
+		{
+			JSON Entry = Pair.second;
+			FGenericPathResource Resource;
+			Resource.Name = FName(Pair.first.c_str());
+			Resource.Path = Entry[ResourceKey::Path].ToString();
+			PathResources[Pair.first] = Resource;
+		}
+	}
+
 	if (LoadGPUResources(InDevice))
 	{
 		UE_LOG("Complete Load Resources!");
@@ -95,6 +145,11 @@ void FResourceManager::LoadFromFile(const FString& Path, ID3D11Device* InDevice)
 	else
 	{
 		UE_LOG("Failed to Load Resources...");
+	}
+
+	for (const auto& [Key, Resource] : MaterialResources)
+	{
+		FMaterialManager::Get().GetOrCreateMaterial(Resource.Path);
 	}
 }
 
@@ -105,7 +160,12 @@ void FResourceManager::LoadFromDirectory(const FString& Path, ID3D11Device* InDe
 
 	for (const auto& Entry : std::filesystem::recursive_directory_iterator(FPaths::ToWide(Path)))
 	{
-		if (Entry.path().extension() != ".png")
+		FString Extension = Entry.path().extension().string();
+		for (char& C : Extension)
+		{
+			C = static_cast<char>(::tolower(static_cast<unsigned char>(C)));
+		}
+		if (Extension != ".png")
 			continue;
 
 		UTexture2D::LoadFromFile(FPaths::ToUtf8(Entry.path()), InDevice);
@@ -344,6 +404,107 @@ TArray<FString> FResourceManager::GetTextureNames() const
 	TArray<FString> Names;
 	Names.reserve(TextureResources.size());
 	for (const auto& [Key, _] : TextureResources)
+	{
+		Names.push_back(Key);
+	}
+	return Names;
+}
+
+FMeshResource* FResourceManager::FindMesh(const FName& MeshName)
+{
+	auto It = MeshResources.find(MeshName.ToString());
+	return (It != MeshResources.end()) ? &It->second : nullptr;
+}
+
+const FMeshResource* FResourceManager::FindMesh(const FName& MeshName) const
+{
+	auto It = MeshResources.find(MeshName.ToString());
+	return (It != MeshResources.end()) ? &It->second : nullptr;
+}
+
+void FResourceManager::RegisterMesh(const FName& MeshName, const FString& InPath)
+{
+	FMeshResource Resource;
+	Resource.Name = MeshName;
+	Resource.Path = InPath;
+	MeshResources[MeshName.ToString()] = Resource;
+}
+
+TArray<FString> FResourceManager::GetMeshNames() const
+{
+	TArray<FString> Names;
+	Names.reserve(MeshResources.size());
+	for (const auto& [Key, _] : MeshResources)
+	{
+		Names.push_back(Key);
+	}
+	return Names;
+}
+
+FMaterialResource* FResourceManager::FindMaterial(const FName& MaterialName)
+{
+	auto It = MaterialResources.find(MaterialName.ToString());
+	return (It != MaterialResources.end()) ? &It->second : nullptr;
+}
+
+const FMaterialResource* FResourceManager::FindMaterial(const FName& MaterialName) const
+{
+	auto It = MaterialResources.find(MaterialName.ToString());
+	return (It != MaterialResources.end()) ? &It->second : nullptr;
+}
+
+void FResourceManager::RegisterMaterial(const FName& MaterialName, const FString& InPath)
+{
+	FMaterialResource Resource;
+	Resource.Name = MaterialName;
+	Resource.Path = InPath;
+	MaterialResources[MaterialName.ToString()] = Resource;
+
+	RegisterPath(MaterialName, InPath);
+}
+
+TArray<FString> FResourceManager::GetMaterialNames() const
+{
+	TArray<FString> Names;
+	Names.reserve(MaterialResources.size());
+	for (const auto& [Key, _] : MaterialResources)
+	{
+		Names.push_back(Key);
+	}
+	return Names;
+}
+
+FGenericPathResource* FResourceManager::FindPath(const FName& ResourceName)
+{
+	auto It = PathResources.find(ResourceName.ToString());
+	return (It != PathResources.end()) ? &It->second : nullptr;
+}
+
+const FGenericPathResource* FResourceManager::FindPath(const FName& ResourceName) const
+{
+	auto It = PathResources.find(ResourceName.ToString());
+	return (It != PathResources.end()) ? &It->second : nullptr;
+}
+
+void FResourceManager::RegisterPath(const FName& ResourceName, const FString& InPath)
+{
+	FGenericPathResource Resource;
+	Resource.Name = ResourceName;
+	Resource.Path = InPath;
+	PathResources[ResourceName.ToString()] = Resource;
+}
+
+FString FResourceManager::ResolvePath(const FName& ResourceName, const FString& Fallback) const
+{
+	const FGenericPathResource* Resource = FindPath(ResourceName);
+	return Resource ? Resource->Path : Fallback;
+}
+
+TArray<FString> FResourceManager::GetPathNames() const
+{
+	TArray<FString> Names;
+	Names.reserve(PathResources.size());
+	for (const auto& [Key, _] : PathResources)
 	{
 		Names.push_back(Key);
 	}

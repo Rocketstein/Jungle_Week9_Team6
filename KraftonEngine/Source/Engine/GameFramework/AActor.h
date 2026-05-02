@@ -14,6 +14,7 @@ struct FActorTickFunction;
 class UWorld;
 class ULevel;
 class UPrimitiveComponent;
+class UBillboardComponent;
 
 class AActor : public UObject
 {
@@ -43,6 +44,7 @@ public:
 		bPrimitiveCacheDirty = true;
 		Comp->CreateRenderState();
 		MarkPickingDirty();
+		SyncEditorBillboardVisibility();
 		return Comp;
 	}
 
@@ -56,6 +58,8 @@ public:
 
 	void SetRootComponent(USceneComponent* Comp);
 	USceneComponent* GetRootComponent() const { return RootComponent; }
+	void EnsureEditorBillboardForActor();
+	void SyncEditorBillboardVisibility();
 
 	const TArray<UActorComponent*>& GetComponents() const { return OwnedComponents; }
 
@@ -81,6 +85,10 @@ public:
 
 	bool IsVisible() const { return bVisible; }
 	void SetVisible(bool Visible);
+	bool IsActorMovementLocked() const { return bLockActorMovement; }
+	void SetActorMovementLocked(bool bLocked) { bLockActorMovement = bLocked; }
+	const FString& GetFolderPath() const { return FolderPath; }
+	void SetFolderPath(const FString& InFolderPath) { FolderPath = InFolderPath; }
 
 	// Tick 필요 여부 — false면 Tick 호출 자체를 건너뜀 (StaticMesh 등)
 	bool bNeedsTick = true;
@@ -108,11 +116,15 @@ protected:
 	virtual void TickActor( float DeltaSeconds, ELevelTick TickType, FActorTickFunction& ThisTickFunction );
 	
 	void MarkPickingDirty();
+	UBillboardComponent* FindEditorOnlyBillboardComponent() const;
+	bool HasNonEditorOnlyPrimitiveComponent() const;
 
 	USceneComponent* RootComponent = nullptr;
 
 	FVector PendingActorLocation = FVector(0, 0, 0);
 	bool bVisible = true;
+	bool bLockActorMovement = false;
+	FString FolderPath;
 
 	TArray<UActorComponent*> OwnedComponents;
 

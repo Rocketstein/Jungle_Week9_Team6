@@ -1,9 +1,10 @@
-﻿#include "Mesh/ObjImporter.h"
+#include "Mesh/ObjImporter.h"
 #include "Mesh/StaticMeshAsset.h"
 #include "Materials/Material.h"
 #include "Core/Log.h"
 #include "Engine/Platform/Paths.h"
 #include "Mesh/ObjManager.h"
+#include "Resource/ResourceManager.h"
 #include "SimpleJSON/json.hpp"
 #include "Materials/MaterialManager.h"
 #include <algorithm>
@@ -453,14 +454,15 @@ FString FObjImporter::ConvertMtlInfoToJson(const FObjMaterialInfo* MtlInfo)
 // MTL 정보에서 머티리얼 mat 파일로 변환하는 함수
 FString FObjImporter::ConvertMtlInfoToMat(const FObjMaterialInfo* MtlInfo)
 {
-	FString MatPath = "Asset/Materials/Auto/" + MtlInfo->MaterialSlotName + ".mat";
+	const FString AutoMaterialDirectory = FResourceManager::Get().ResolvePath(FName("Default.Directory.MaterialAuto"));
+	const FString MatPath = AutoMaterialDirectory + "/" + MtlInfo->MaterialSlotName + ".mat";
 
 	// 이미 존재하면 덮어쓰지 않음 (에디터에서 수정했을 수 있으므로)
 	if (std::filesystem::exists(FPaths::ToWide(MatPath)))
 		return MatPath;
 
 	// Auto/ 디렉토리 보장
-	std::filesystem::create_directories(FPaths::ToWide("Asset/Materials/Auto"));
+	std::filesystem::create_directories(FPaths::ToWide(AutoMaterialDirectory));
 
 	json::JSON JsonData;
 	JsonData["PathFileName"] = MatPath;
@@ -595,6 +597,16 @@ bool FObjImporter::Convert(const FObjInfo& ObjInfo, const TArray<FObjMaterialInf
 	}
 
     // Phase 2: 파편화된 섹션들의 면(Face)을 머티리얼 인덱스 기준으로 재그룹화
+	if (OutMaterials.empty() && !ObjInfo.PosIndices.empty())
+	{
+		UMaterial* DefaultMaterial = FMaterialManager::Get().GetOrCreateMaterial("None");
+
+		FStaticMaterial FallbackMaterial;
+		FallbackMaterial.MaterialInterface = DefaultMaterial;
+		FallbackMaterial.MaterialSlotName = "None";
+		OutMaterials.push_back(FallbackMaterial);
+	}
+
 	TArray<TArray<uint32>> FacesPerMaterial;
 	FacesPerMaterial.resize(OutMaterials.size());
 
@@ -834,5 +846,49 @@ bool FObjImporter::Import(const FString& ObjFilePath, const FImportOptions& Opti
 	std::chrono::duration<double> Duration = EndTime - StartTime;
 	UE_LOG("OBJ Imported successfully. File: %s. Time taken: %.4f seconds", ObjFilePath.c_str(), Duration.count());
 
+	return true;
+}
+
+bool FObjImporter::ImportMtl(const FString& MtlFilePath, TArray<FString>* OutGeneratedMatPaths)
+{
+	if (OutGeneratedMatPaths)
+	{
+		OutGeneratedMatPaths->clear();
+	}
+
+	TArray<FObjMaterialInfo> ParsedMtlInfos;
+	if (!ParseMtl(MtlFilePath, ParsedMtlInfos))
+	{
+		UE_LOG("ParseMtl failed for: %s", MtlFilePath.c_str());
+		return false;
+	}
+
+	if (ParsedMtlInfos.empty())
+	{
+		UE_LOG("No materials found in MTL file: %s", MtlFilePath.c_str());
+		return false;
+	}
+
+	for (const FObjMaterialInfo& MaterialInfo : ParsedMtlInfos)
+	{
+		if (MaterialInfo.MaterialSlotName.empty())
+		{
+			continue;
+		}
+
+		const FString MatPath = ConvertMtlInfoToMat(&MaterialInfo);
+		if (!MatPath.empty())
+		{
+			if (OutGeneratedMatPaths)
+			{
+				OutGeneratedMatPaths->push_back(MatPath);
+			}
+
+			// Force-load so the new .mat is immediately available in editor/runtime caches.
+			FMaterialManager::Get().GetOrCreateMaterial(MatPath);
+		}
+	}
+
+	UE_LOG("MTL Imported successfully. File: %s. Generated %zu material(s)", MtlFilePath.c_str(), OutGeneratedMatPaths ? OutGeneratedMatPaths->size() : ParsedMtlInfos.size());
 	return true;
 }

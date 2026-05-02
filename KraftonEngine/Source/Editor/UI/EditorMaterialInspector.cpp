@@ -17,9 +17,15 @@ FEditorMaterialInspector::FEditorMaterialInspector(std::filesystem::path InPath)
 
 void FEditorMaterialInspector::Render()
 {
+	if (!bVisible)
+	{
+		return;
+	}
+
 	bool bIsValid = ImGui::Begin("MaterialInspector");
 	bIsValid &= std::filesystem::exists(MaterialPath);
 	bIsValid &= MaterialPath.extension() == ".mat";
+	bIsValid &= (CachedMaterial != nullptr);
 
 	if (!bIsValid)
 	{
@@ -43,14 +49,38 @@ void FEditorMaterialInspector::Render()
 	MatMap[MatKeys::PathFileName] = JsonData.hasKey(MatKeys::PathFileName) ? JsonData[MatKeys::PathFileName].ToString().c_str() : "";
 	ImGui::Selectable(MatMap[MatKeys::PathFileName].c_str());
 
+	RenderPreview();
 	RenderShaderParameter();
 	RenderTextureSection();
 
 	ImGui::End();
 }
 
+void FEditorMaterialInspector::RenderPreview()
+{
+	if (!CachedMaterial)
+	{
+		return;
+	}
+
+	UTexture2D* PreviewTexture = FMaterialManager::Get().GetMaterialPreviewTexture(CachedMaterial);
+	if (!PreviewTexture || !PreviewTexture->GetSRV())
+	{
+		return;
+	}
+
+	ImGui::TextUnformatted("Preview");
+	ImGui::Image(PreviewTexture->GetSRV(), ImVec2(160.0f, 160.0f));
+	ImGui::Separator();
+}
+
 void FEditorMaterialInspector::RenderShaderParameter()
 {
+	if (!CachedMaterial)
+	{
+		return;
+	}
+
 	const auto& Layout = CachedMaterial->GetParameterInfo();
 
 	for (const auto& [ParamName, Info] : Layout)
@@ -89,8 +119,8 @@ void FEditorMaterialInspector::RenderShaderParameter()
 				bool bIsValid = CachedMaterial->GetMatrixParameter(ParamName, Param);
 				ImGui::DragFloat4("##matrix1Param", Param.Data);
 				ImGui::DragFloat4("##matrix2Param", Param.Data + 4);
-				ImGui::DragFloat4("##matrix3Param", Param.Data + 4);
-				ImGui::DragFloat4("##matrix4Param", Param.Data + 4);
+				ImGui::DragFloat4("##matrix3Param", Param.Data + 8);
+				ImGui::DragFloat4("##matrix4Param", Param.Data + 12);
 				CachedMaterial->SetMatrixParameter(ParamName, Param);
 				break;
 			}
@@ -103,7 +133,16 @@ void FEditorMaterialInspector::RenderShaderParameter()
 
 void FEditorMaterialInspector::RenderTextureSection()
 {
+	if (!CachedMaterial)
+	{
+		return;
+	}
+
 	TMap<FString, UTexture2D*>* Textures = CachedMaterial->GetTexture();
+	if (!Textures)
+	{
+		return;
+	}
 
 	for (auto& Pair : *Textures)
 	{

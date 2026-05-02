@@ -62,8 +62,18 @@ void UEngine::Init(FWindowsWindow* InWindow)
 	}
 
 	{
-		SCOPE_STARTUP_STAT("ResourceManager::LoadFromFile");
-		FResourceManager::Get().LoadFromFile(FPaths::ToUtf8(FPaths::ResourceFilePath()), Device);
+		SCOPE_STARTUP_STAT("ResourceManager::LoadDefaultResources");
+		FResourceManager::Get().LoadFromFile(FPaths::ToUtf8(FPaths::DefaultContentResourceFilePath()), Device);
+	}
+
+	{
+		SCOPE_STARTUP_STAT("ResourceManager::LoadEditorResources");
+		FResourceManager::Get().LoadFromFile(FPaths::ToUtf8(FPaths::EditorResourceFilePath()), Device);
+	}
+
+	{
+		SCOPE_STARTUP_STAT("ResourceManager::LoadProjectResources");
+		FResourceManager::Get().LoadFromFile(FPaths::ToUtf8(FPaths::ProjectResourceFilePath()), Device);
 	}
 
 	{
@@ -170,7 +180,11 @@ void UEngine::WorldTick(float DeltaTime)
 			continue;
 		}
 
-		const ELevelTick TickType = ToLevelTickType(Ctx.WorldType);
+		ELevelTick TickType = ToLevelTickType(Ctx.WorldType);
+		if (bGamePaused && (Ctx.WorldType == EWorldType::PIE || Ctx.WorldType == EWorldType::Game))
+		{
+			TickType = LEVELTICK_PauseTick;
+		}
 
 		// 월드 단위 업데이트 (FlushPrimitive / VisibleProxies / DebugDraw /s TickManager)
 		World->Tick(DeltaTime, TickType);

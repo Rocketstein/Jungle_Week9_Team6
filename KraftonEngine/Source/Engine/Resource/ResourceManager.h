@@ -51,6 +51,25 @@ public:
 	// --- Texture names ---
 	TArray<FString> GetTextureNames() const;
 
+	// --- Mesh (경로 레지스트리 전용) ---
+	FMeshResource* FindMesh(const FName& MeshName);
+	const FMeshResource* FindMesh(const FName& MeshName) const;
+	void RegisterMesh(const FName& MeshName, const FString& InPath);
+	TArray<FString> GetMeshNames() const;
+
+	// --- Material (경로 레지스트리 + 기본 프리로드) ---
+	FMaterialResource* FindMaterial(const FName& MaterialName);
+	const FMaterialResource* FindMaterial(const FName& MaterialName) const;
+	void RegisterMaterial(const FName& MaterialName, const FString& InPath);
+	TArray<FString> GetMaterialNames() const;
+
+	// --- Generic path registry ---
+	FGenericPathResource* FindPath(const FName& ResourceName);
+	const FGenericPathResource* FindPath(const FName& ResourceName) const;
+	void RegisterPath(const FName& ResourceName, const FString& InPath);
+	FString ResolvePath(const FName& ResourceName, const FString& Fallback = "") const;
+	TArray<FString> GetPathNames() const;
+
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> FindLoadedTexture(FString InPath);
 
 private:
@@ -60,5 +79,8 @@ private:
 	TMap<FString, FFontResource>     FontResources;
 	TMap<FString, FParticleResource> ParticleResources;
 	TMap<FString, FTextureResource>  TextureResources;
+	TMap<FString, FMeshResource>     MeshResources;
+	TMap<FString, FMaterialResource> MaterialResources;
+	TMap<FString, FGenericPathResource> PathResources;
 	TMap<FString, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> LoadedResource;
 };
