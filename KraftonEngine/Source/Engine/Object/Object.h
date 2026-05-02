@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Profiling/MemoryStats.h"
 #include "Object/FName.h"
@@ -97,8 +97,12 @@ public:
 	static UClass StaticClassInstance;
 	static UClass* StaticClass() { return &StaticClassInstance; }
 
+	void FlagPendingKill() { bPendingKill = true; }
+	bool IspendingKill() const { return bPendingKill; }
+
 protected:
 	FName ObjectName;
+	bool  bPendingKill = false;
 
 private:
 	uint32 UUID;
@@ -140,6 +144,11 @@ public:
 			return;
 		}
 		delete Obj;
+	}
+
+	void FlagPendingKill(UObject* Obj) 
+	{
+		Obj->FlagPendingKill();
 	}
 
 private:

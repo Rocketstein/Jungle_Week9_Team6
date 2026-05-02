@@ -247,4 +247,7 @@ FWorldContext* UEngine::GetWorldContextFromWorld(const UWorld* World)
 void UEngine::SetActiveWorld(const FName& Handle)
 {
 	ActiveWorldHandle = Handle;
+	if (GetWorld()) {
+		GetWorld()->MarkActorsOverlapDirty();
+	}
 }

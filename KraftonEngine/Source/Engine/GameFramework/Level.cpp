@@ -32,6 +32,7 @@ void ULevel::AddActor(AActor* Actor)
 		return;
 	}
 	
+	Actor->MarkOverlappingDirty();
 	Actor->SetOuter(this);
 	Actors.push_back(Actor);
 }
