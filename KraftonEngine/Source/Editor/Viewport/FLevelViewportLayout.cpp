@@ -3188,7 +3188,7 @@ AActor* FLevelViewportLayout::SpawnActorFromViewportMenu(EViewportPlaceActorType
 		ASimpleObstacleActor* Actor = World->SpawnActor<ASimpleObstacleActor>();
 		if (Actor)
 		{
-			Actor->InitDefaultComponents();
+			Actor->InitDefaultComponents(GetRegisteredMeshPath("Default.Mesh.BasicShape.Cube"));
 			SpawnedActor = Actor;
 			SpawnLocation.Z += 1.0f;
 		}
