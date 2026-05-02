@@ -40,6 +40,8 @@ void AObstacleActorBase::InitDefaultComponents(const FString& UStaticMeshFileNam
 	StaticMeshComponent->SetCanDeleteFromDetails(false);
 	SetRootComponent(StaticMeshComponent);
 	UBoxComponent* CollisionBox = AddComponent<UBoxComponent>();
+	CollisionBox->AttachToComponent(StaticMeshComponent);
+	//CollisionBox->SetWorldLocation(StaticMeshComponent->GetWorldLocation());
 
 	if (!UStaticMeshFileName.empty() && UStaticMeshFileName != "None")
 	{
