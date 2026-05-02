@@ -7,7 +7,7 @@
 #include "Core/ProjectSettings.h"
 #include "Editor/Selection/SelectionManager.h"
 #include "Engine/Runtime/WindowsWindow.h"
-#include "Engine/Input/InputSystem.h"
+#include "Engine/Input/InputManager.h"
 #include "GameFramework/DecalActor.h"
 #include "GameFramework/PawnActor.h"
 #include "GameFramework/CharacterActor.h"
@@ -1768,13 +1768,18 @@ void FLevelViewportLayout::RenderViewportUI(float DeltaTime)
 			ImVec2 MousePos = ImGui::GetIO().MousePos;
 			FPoint MP = { MousePos.x, MousePos.y };
 
-			// 留덉슦?ㅺ? ?대뼡 ?щ’ ?꾩뿉 ?덈뒗吏
+
 			for (int32 i = 0; i < ActiveSlotCount; ++i)
 			{
-				if (IsSlotVisibleEnough(i) && ViewportWindows[i]->IsHover(MP))
+				bool bSlotHovered = IsSlotVisibleEnough(i) && ViewportWindows[i]->IsHover(MP);
+				if (i < static_cast<int32>(LevelViewportClients.size()))
+				{
+					LevelViewportClients[i]->SetHovered(bSlotHovered);
+				}
+
+				if (bSlotHovered)
 				{
 					bMouseOverViewport = true;
-					break;
 				}
 			}
 
@@ -2840,8 +2845,8 @@ void FLevelViewportLayout::HandleViewportContextMenuInput(const FPoint& MousePos
 		const bool bClickCandidate =
 			bReleasedOverSameSlot &&
 			ContextMenuState.RightClickTravelSq[i] <= RightClickPopupThresholdSq &&
-			!InputSystem::Get().GetRightDragging() &&
-			!InputSystem::Get().GetRightDragEnd();
+			!FInputManager::Get().IsMouseButtonDown(FInputManager::MOUSE_RIGHT) &&
+			!FInputManager::Get().IsMouseButtonReleased(FInputManager::MOUSE_RIGHT);
 		const ImGuiIO& IO = ImGui::GetIO();
 		const bool bNoModifiers = !IO.KeyCtrl && !IO.KeyShift && !IO.KeyAlt && !IO.KeySuper;
 

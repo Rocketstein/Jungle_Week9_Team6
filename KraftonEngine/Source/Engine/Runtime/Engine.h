@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Object/Object.h"
 #include "GameFramework/World.h"
@@ -8,6 +8,7 @@
 
 #include <memory>
 
+class UGameInstance;
 class FWindowsWindow;
 class FTimer;
 class UCameraComponent;
@@ -51,6 +52,8 @@ public:
 	void SetTimer(FTimer* InTimer) { Timer = InTimer; }
 	FTimer* GetTimer() const { return Timer; }
 
+	UGameInstance* GetGameInstance() const { return GameInstance; }
+
 	FRenderer& GetRenderer() { return Renderer; }
 
 	// Game Viewport Client — PIE/Standalone 용
@@ -80,6 +83,7 @@ protected:
 
 private:
 	std::unique_ptr<IRenderPipeline> RenderPipeline;
+	UGameInstance* GameInstance = nullptr;
 };
 
 extern UEngine* GEngine;

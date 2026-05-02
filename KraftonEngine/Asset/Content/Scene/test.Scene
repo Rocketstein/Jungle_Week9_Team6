@@ -3,7 +3,7 @@
       "ClassName" : "AGameModeBase",
       "NonSceneComponents" : [],
       "ObjectName" : "AGameModeBase_1",
-      "UUID" : 169,
+      "UUID" : 166,
       "bVisible" : true
     }, {
       "ClassName" : "AStaticMeshActor",
@@ -11,7 +11,30 @@
       "ObjectName" : "AStaticMeshActor_0",
       "PrimitiveKey" : "170",
       "RootComponent" : {
-        "Children" : [],
+        "Children" : [{
+            "Children" : [],
+            "ClassName" : "UBillboardComponent",
+            "ObjectName" : "UBillboardComponent_1",
+            "Properties" : {
+              "Cast Shadow" : true,
+              "Generates Overlap Event" : 2,
+              "Height" : 1.000000,
+              "Is Collidable" : true,
+              "Location" : [0.000000, 0.000000, 0.000000],
+              "Mobility" : 2,
+              "Rotation" : [-0.000000, 0.000000, 0.000000],
+              "Scale" : [1.000000, 1.000000, 1.000000],
+              "Texture" : {
+                "Path" : "Asset/Editor/StaticMeshActor_64.png"
+              },
+              "Two Sided Shadow" : false,
+              "Visible" : true,
+              "Width" : 1.000000,
+              "bEditorOnly" : true,
+              "bTickEnable" : true
+            },
+            "bHiddenInComponentTree" : true
+          }],
         "ClassName" : "UStaticMeshComponent",
         "ObjectName" : "UStaticMeshComponent_4",
         "Properties" : {
@@ -37,7 +60,30 @@
       "ObjectName" : "AStaticMeshActor_1",
       "PrimitiveKey" : "173",
       "RootComponent" : {
-        "Children" : [],
+        "Children" : [{
+            "Children" : [],
+            "ClassName" : "UBillboardComponent",
+            "ObjectName" : "UBillboardComponent_2",
+            "Properties" : {
+              "Cast Shadow" : true,
+              "Generates Overlap Event" : 2,
+              "Height" : 1.000000,
+              "Is Collidable" : true,
+              "Location" : [0.000000, 0.000000, 0.000000],
+              "Mobility" : 2,
+              "Rotation" : [-0.000000, 0.000000, 0.000000],
+              "Scale" : [1.000000, 1.000000, 1.000000],
+              "Texture" : {
+                "Path" : "Asset/Editor/StaticMeshActor_64.png"
+              },
+              "Two Sided Shadow" : false,
+              "Visible" : true,
+              "Width" : 1.000000,
+              "bEditorOnly" : true,
+              "bTickEnable" : true
+            },
+            "bHiddenInComponentTree" : true
+          }],
         "ClassName" : "UStaticMeshComponent",
         "ObjectName" : "UStaticMeshComponent_5",
         "Properties" : {
@@ -77,7 +123,30 @@
       "ObjectName" : "AStaticMeshActor_2",
       "PrimitiveKey" : "176",
       "RootComponent" : {
-        "Children" : [],
+        "Children" : [{
+            "Children" : [],
+            "ClassName" : "UBillboardComponent",
+            "ObjectName" : "UBillboardComponent_3",
+            "Properties" : {
+              "Cast Shadow" : true,
+              "Generates Overlap Event" : 2,
+              "Height" : 1.000000,
+              "Is Collidable" : true,
+              "Location" : [0.000000, 0.000000, 0.000000],
+              "Mobility" : 2,
+              "Rotation" : [-0.000000, 0.000000, 0.000000],
+              "Scale" : [1.000000, 1.000000, 1.000000],
+              "Texture" : {
+                "Path" : "Asset/Editor/StaticMeshActor_64.png"
+              },
+              "Two Sided Shadow" : false,
+              "Visible" : true,
+              "Width" : 1.000000,
+              "bEditorOnly" : true,
+              "bTickEnable" : true
+            },
+            "bHiddenInComponentTree" : true
+          }],
         "ClassName" : "UStaticMeshComponent",
         "ObjectName" : "UStaticMeshComponent_6",
         "Properties" : {
@@ -115,7 +184,30 @@
       "ObjectName" : "AStaticMeshActor_3",
       "PrimitiveKey" : "179",
       "RootComponent" : {
-        "Children" : [],
+        "Children" : [{
+            "Children" : [],
+            "ClassName" : "UBillboardComponent",
+            "ObjectName" : "UBillboardComponent_4",
+            "Properties" : {
+              "Cast Shadow" : true,
+              "Generates Overlap Event" : 2,
+              "Height" : 1.000000,
+              "Is Collidable" : true,
+              "Location" : [0.000000, 0.000000, 0.000000],
+              "Mobility" : 2,
+              "Rotation" : [-0.000000, 0.000000, 0.000000],
+              "Scale" : [1.000000, 1.000000, 1.000000],
+              "Texture" : {
+                "Path" : "Asset/Editor/StaticMeshActor_64.png"
+              },
+              "Two Sided Shadow" : false,
+              "Visible" : true,
+              "Width" : 1.000000,
+              "bEditorOnly" : true,
+              "bTickEnable" : true
+            },
+            "bHiddenInComponentTree" : true
+          }],
         "ClassName" : "UStaticMeshComponent",
         "ObjectName" : "UStaticMeshComponent_7",
         "Properties" : {
@@ -134,6 +226,36 @@
         }
       },
       "UUID" : 179,
+      "bVisible" : true
+    }, {
+      "ClassName" : "AGameModeBase",
+      "NonSceneComponents" : [],
+      "ObjectName" : "AGameModeBase_1",
+      "RootComponent" : {
+        "Children" : [],
+        "ClassName" : "UBillboardComponent",
+        "ObjectName" : "UBillboardComponent_0",
+        "Properties" : {
+          "Cast Shadow" : true,
+          "Generates Overlap Event" : 2,
+          "Height" : 1.000000,
+          "Is Collidable" : true,
+          "Location" : [0.000000, 0.000000, 0.000000],
+          "Mobility" : 2,
+          "Rotation" : [-0.000000, 0.000000, 0.000000],
+          "Scale" : [1.000000, 1.000000, 1.000000],
+          "Texture" : {
+            "Path" : "Asset/Editor/Actor_64.png"
+          },
+          "Two Sided Shadow" : false,
+          "Visible" : true,
+          "Width" : 1.000000,
+          "bEditorOnly" : true,
+          "bTickEnable" : true
+        },
+        "bHiddenInComponentTree" : true
+      },
+      "UUID" : 169,
       "bVisible" : true
     }, {
       "ClassName" : "ADirectionalLightActor",
@@ -432,13 +554,13 @@
   "ClassName" : "UWorld",
   "ContextHandle" : "Default",
   "ContextName" : "Default",
-  "Name" : "Default",
+  "Name" : "test",
   "PerspectiveCamera" : {
     "FOV" : 1.047198,
     "FarClip" : 1000.000000,
     "Location" : [-5.306901, -4.416908, 5.644362],
     "NearClip" : 0.100000,
-    "Rotation" : [0.000000, 37.966755, 60.754086]
+    "Rotation" : [0.000002, 37.966747, 60.754086]
   },
   "Primitives" : {
     "170" : {

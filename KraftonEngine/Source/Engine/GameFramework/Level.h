@@ -6,7 +6,7 @@
 class AActor;
 class UWorld;
 class FSpatialPartition;
-
+class FArchive;
 class ULevel :
     public UObject
 {
@@ -27,13 +27,19 @@ public:
 	const TArray<AActor*>& GetActors() const { return Actors; }
 	UWorld* GetWorld() const { return OwingWorld; }
 	void SetWorld(UWorld* World) { OwingWorld = World;}
-
+	void Serialize(FArchive& Ar);
 	void BeginPlay();
 	void EndPlay();
 	void Tick(float DeltaTime);
+
+	// GameMode 클래스 — 비어있으면 ProjectSettings의 DefaultGameModeClass 사용
+	const FString& GetGameModeClassName() const { return GameModeClassName; }
+	void SetGameModeClassName(const FString& InName) { GameModeClassName = InName; }
+
 private:
 	FName LevelName;
 	TArray<AActor*> Actors;
 	UWorld* OwingWorld = nullptr;
+	FString GameModeClassName;
 };
 

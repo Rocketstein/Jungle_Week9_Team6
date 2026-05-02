@@ -15,7 +15,7 @@
 #include "Object/ObjectFactory.h"
 #include "Mesh/ObjManager.h"
 #include "Core/ProjectSettings.h"
-#include "Input/InputSystem.h"
+#include "Engine/Input/InputManager.h"
 #include "GameFramework/AActor.h"
 #include "Materials/MaterialManager.h"
 #include "Engine/Platform/Paths.h"
@@ -87,6 +87,11 @@ void UEditorEngine::Init(FWindowsWindow* InWindow)
 {
 	// 엔진 공통 초기화 (Renderer, D3D, 싱글턴 등)
 	UEngine::Init(InWindow);
+
+	if (InWindow)
+	{
+		FInputManager::Get().SetOwnerWindow(InWindow->GetHWND());
+	}
 
 	{
 		SCOPE_STARTUP_STAT("ObjManager::ScanMeshAssets");
@@ -161,6 +166,8 @@ void UEditorEngine::OnWindowResized(uint32 Width, uint32 Height)
 
 void UEditorEngine::Tick(float DeltaTime)
 {
+	FInputManager::Get().Tick();
+
 	// --- PIE 요청 처리 (프레임 경계에서 처리되도록 Tick 선두에서 소비) ---
 	if (bRequestEndPlayMapQueued)
 	{
@@ -175,9 +182,7 @@ void UEditorEngine::Tick(float DeltaTime)
 	ApplyTransformSettingsToGizmo();
 	FDirectoryWatcher::Get().ProcessChanges();
 	FNotificationManager::Get().Tick(DeltaTime);
-	InputSystem::Get().Tick();
 	MainPanel.Update();
-	InputSystem::Get().RefreshSnapshot();
 
 	for (FEditorViewportClient* VC : ViewportLayout.GetAllViewportClients())
 	{
@@ -291,8 +296,7 @@ void UEditorEngine::StartQueuedPlaySessionRequest()
 void UEditorEngine::StartPlayInEditorSession(const FRequestPlaySessionParams& Params)
 {
 	SetGamePaused(false);
-	InputSystem::Get().ResetAllKeyStates();
-	InputSystem::Get().ResetTransientState();
+	FInputManager::Get().ResetAllKeyStates();
 
 	// 1) 현재 에디터 월드를 복제해 PIE 월드 생성 (UE의 CreatePIEWorldByDuplication 대응).
 	UWorld* EditorWorld = GetWorld();
@@ -464,7 +468,7 @@ void UEditorEngine::EndPlayMap()
 
 	PlayInEditorSessionInfo.reset();
 	PIEControlMode = EPIEControlMode::Possessed;
-	InputSystem::Get().ResetCaptureStateForPIEEnd();
+	// InputSystem::Get().ResetCaptureStateForPIEEnd();
 }
 
 bool UEditorEngine::TogglePIEControlMode()
@@ -490,9 +494,7 @@ bool UEditorEngine::EnterPIEPossessedMode()
 
 	PIEControlMode = EPIEControlMode::Possessed;
 	SyncGameViewportPIEControlState(true);
-	InputSystem::Get().SetUseRawMouse(true);
-	InputSystem::Get().ResetKeyboardKeyStates();
-	InputSystem::Get().ResetTransientState();
+	FInputManager::Get().ResetAllKeyStates();
 	return true;
 }
 
@@ -505,9 +507,7 @@ bool UEditorEngine::EnterPIEEjectedMode()
 
 	PIEControlMode = EPIEControlMode::Ejected;
 	SyncGameViewportPIEControlState(false);
-	InputSystem::Get().SetUseRawMouse(false);
-	InputSystem::Get().ResetKeyboardKeyStates();
-	InputSystem::Get().ResetTransientState();
+	FInputManager::Get().ResetAllKeyStates();
 	return true;
 }
 
@@ -883,9 +883,9 @@ void UEditorEngine::RestoreViewportCamera(const FPerspectiveCameraData& CamData)
 	}
 }
 
-bool UEditorEngine::SaveSceneAs(const FString& InSceneName)
+bool UEditorEngine::SaveSceneAs(const FString& InScenePath)
 {
-	if (InSceneName.empty())
+	if (InScenePath.empty())
 	{
 		return false;
 	}
@@ -897,8 +897,18 @@ bool UEditorEngine::SaveSceneAs(const FString& InSceneName)
 		return false;
 	}
 
-	FSceneSaveManager::SaveSceneAsJSON(InSceneName, *Context, FindSceneViewportCamera());
-	CurrentLevelFilePath = BuildScenePathFromStem(InSceneName);
+	if (InScenePath.ends_with(".umap") || InScenePath.ends_with(".UMAP"))
+	{
+		FSceneSaveManager::SaveWorldToBinary(InScenePath, Context->World);
+	}
+	else
+	{
+		// Extract stem to pass to SaveSceneAsJSON
+		FString Stem = GetFileStem(InScenePath);
+		FSceneSaveManager::SaveSceneAsJSON(Stem, *Context, FindSceneViewportCamera());
+	}
+	
+	CurrentLevelFilePath = InScenePath;
 	return true;
 }
 
@@ -906,7 +916,7 @@ bool UEditorEngine::SaveScene()
 {
 	if (HasCurrentLevelFilePath())
 	{
-		return SaveSceneAs(GetFileStem(CurrentLevelFilePath));
+		return SaveSceneAs(CurrentLevelFilePath);
 	}
 
 	return SaveSceneAsWithDialog();
@@ -917,11 +927,10 @@ bool UEditorEngine::SaveSceneAsWithDialog()
 	const std::wstring InitialDir = FSceneSaveManager::GetSceneDirectory();
 	const std::wstring DefaultFile = HasCurrentLevelFilePath()
 		? std::filesystem::path(FPaths::ToWide(CurrentLevelFilePath)).filename().wstring()
-		: std::wstring(L"Untitled.Scene");
+		: std::wstring(L"Untitled"); // Removed the forced extension so the dialog uses the selected filter's default
 	const FString SelectedPath = FEditorFileUtils::SaveFileDialog({
-		.Filter = L"Scene Files (*.Scene)\0*.Scene\0All Files (*.*)\0*.*\0",
+		.Filter = L"Binary Scene (*.umap)\0*.umap\0JSON Scene (*.Scene)\0*.Scene\0All Files (*.*)\0*.*\0",
 		.Title = L"Save Scene As",
-		.DefaultExtension = L"Scene",
 		.InitialDirectory = InitialDir.c_str(),
 		.DefaultFileName = DefaultFile.c_str(),
 		.OwnerWindowHandle = Window ? Window->GetHWND() : nullptr,
@@ -935,7 +944,7 @@ bool UEditorEngine::SaveSceneAsWithDialog()
 		return false;
 	}
 
-	return SaveSceneAs(GetFileStem(SelectedPath));
+	return SaveSceneAs(SelectedPath);
 }
 
 bool UEditorEngine::LoadSceneFromPath(const FString& InScenePath)
@@ -950,7 +959,18 @@ bool UEditorEngine::LoadSceneFromPath(const FString& InScenePath)
 
 	FWorldContext LoadContext;
 	FPerspectiveCameraData CameraData;
-	FSceneSaveManager::LoadSceneFromJSON(InScenePath, LoadContext, CameraData);
+	if (InScenePath.ends_with(".Scene")||InScenePath.ends_with(".scene"))
+	{
+		FSceneSaveManager::LoadSceneFromJSON(InScenePath, LoadContext, CameraData);
+	}
+	else if (InScenePath.ends_with(".umap") || InScenePath.ends_with(".UMAP"))
+	{
+		LoadContext.World = UObjectManager::Get().CreateObject<UWorld>();
+		FSceneSaveManager::LoadWorldFromBinary(InScenePath, LoadContext.World);
+		LoadContext.WorldType = EWorldType::Editor;
+		LoadContext.ContextName = "Loaded Binary Scene";
+		LoadContext.ContextHandle = FName("Loaded Binary Scene");
+	}
 	if (!LoadContext.World)
 	{
 		return false;
@@ -971,7 +991,7 @@ bool UEditorEngine::LoadSceneWithDialog()
 {
 	const std::wstring InitialDir = FSceneSaveManager::GetSceneDirectory();
 	const FString SelectedPath = FEditorFileUtils::OpenFileDialog({
-		.Filter = L"Scene Files (*.Scene)\0*.Scene\0All Files (*.*)\0*.*\0",
+		.Filter = L"Scene Files (*.Scene;*.umap)\0*.Scene;*.umap\0All Files (*.*)\0*.*\0",
 		.Title = L"Load Scene",
 		.InitialDirectory = InitialDir.c_str(),
 		.OwnerWindowHandle = Window ? Window->GetHWND() : nullptr,

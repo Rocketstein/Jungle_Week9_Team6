@@ -24,7 +24,7 @@
 #include "Core/PropertyTypes.h"
 #include "Object/FName.h"
 #include "Profiling/PlatformTime.h"
-
+#include "Engine/Serialization/WindowsArchive.h"
 // ---- JSON vector helpers ---------------------------------------------------
 
 static void WriteVec3(json::JSON& Obj, const char* Key, const FVector& V)
@@ -163,6 +163,7 @@ namespace SceneKeys
 	static constexpr const char* Properties = "Properties";
 	static constexpr const char* Children = "Children";
 	static constexpr const char* HiddenInComponentTree = "bHiddenInComponentTree";
+	static constexpr const char* GameModeClass = "GameModeClass";
 }
 
 static void SerializeComponentEditorMetadata(json::JSON& Node, const UActorComponent* Comp)
@@ -273,6 +274,15 @@ json::JSON FSceneSaveManager::SerializeWorld(UWorld* World, const FWorldContext&
 	w[SceneKeys::WorldType] = WorldTypeToString(Ctx.WorldType);
 	w[SceneKeys::ContextName] = Ctx.ContextName;
 	w[SceneKeys::ContextHandle] = Ctx.ContextHandle.ToString();
+
+	if (ULevel* PersistentLevel = World->GetPersistentLevel())
+	{
+		const FString& GMClass = PersistentLevel->GetGameModeClassName();
+		if (!GMClass.empty())
+		{
+			w[SceneKeys::GameModeClass] = GMClass;
+		}
+	}
 
 	// ---- Primitives: gather static mesh components into a top-level block
 	JSON Primitives = json::Object();
@@ -759,6 +769,45 @@ void FSceneSaveManager::LoadSceneFromJSONString(const string& SceneJson, FWorldC
 	OutWorldContext.ContextHandle = FName(ContextHandle);
 }
 
+void FSceneSaveManager::SaveWorldToBinary(const FString& FilePath, UWorld* World)
+{
+	if (!World)
+		return;
+	FWindowsBinWriter Ar(FilePath);
+	if (Ar.IsValid())
+	{
+		World->Serialize(Ar);
+	}
+	else
+	{
+		std::cerr << "Failed to open file for writing: " << FilePath << std::endl;
+	}
+}
+
+void FSceneSaveManager::LoadWorldFromBinary(const FString& FilePath, UWorld* World)
+{
+	if (!World)
+		return;
+	FWindowsBinReader Ar(FilePath);
+	if (Ar.IsValid())
+	{
+		//World data Initialize
+		World->EndPlay();
+		World->InitWorld();
+		//load world data
+		World->Serialize(Ar);
+
+		if (World->GetWorldType()== EWorldType::Game|| World->GetWorldType() == EWorldType::PIE)
+		{
+			World->BeginPlay();
+		}
+	}
+	else
+	{
+		std::cerr << "Failed to open file for reading: " << FilePath << std::endl;
+	}
+}
+
 USceneComponent* FSceneSaveManager::DeserializeSceneComponentTree(json::JSON& Node, AActor* Owner)
 {
 	string ClassName = Node[SceneKeys::ClassName].ToString();
@@ -1001,9 +1050,11 @@ TArray<FString> FSceneSaveManager::GetSceneFileList()
 
 	for (auto& Entry : std::filesystem::directory_iterator(SceneDir))
 	{
-		if (Entry.is_regular_file() && Entry.path().extension() == SceneExtension)
+		if (Entry.is_regular_file())
 		{
-			Result.push_back(FPaths::ToUtf8(Entry.path().stem().wstring()));
+			auto Ext = Entry.path().extension().wstring();
+			if (Ext == SceneExtension||Ext == L".umap"||Ext == L".UMAP")
+				Result.push_back(FPaths::ToUtf8(Entry.path().stem().wstring()));
 		}
 	}
 	return Result;

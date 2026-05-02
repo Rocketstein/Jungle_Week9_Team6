@@ -15,7 +15,7 @@
 #include "ImGui/imgui_impl_win32.h"
 
 #include "Render/Pipeline/Renderer.h"
-#include "Engine/Input/InputSystem.h"
+#include "Engine/Input/InputManager.h"
 
 #include "Editor/UI/ImGuiSetting.h"
 #include "Editor/UI/NotificationToast.h"
@@ -23,6 +23,8 @@
 #include "Core/ProjectSettings.h"
 #include "Platform/Paths.h"
 #include "Resource/ResourceManager.h"
+#include "Engine/Serialization/SceneSaveManager.h"
+#include "Editor/UI/EditorFileUtils.h"
 
 #include <filesystem>
 
@@ -467,6 +469,64 @@ void FEditorMainPanel::RenderMainMenuBar()
 			ImGui::EndMenu();
 		}
 
+		if (ImGui::BeginMenu("Levels"))
+		{
+			UWorld* World = EditorEngine->GetWorld();
+			if (World)
+			{
+				ULevel* Persistent = World->GetPersistentLevel();
+				FString PersistentName = Persistent ? "Persistent Level" : "No Persistent Level";
+				bool bIsPersistentCurrent = (World->GetCurrentLevel() == Persistent);
+				if (ImGui::MenuItem(PersistentName.c_str(), nullptr, bIsPersistentCurrent))
+				{
+					World->SetCurrentLevel(Persistent);
+				}
+
+				ImGui::Separator();
+				ImGui::TextDisabled("Streaming Levels");
+
+				for (const auto& Info : World->GetStreamingLevels())
+				{
+					bool bIsCurrent = (World->GetCurrentLevel() == Info.LoadedLevel);
+					FString DisplayName = Info.LevelName.ToString() + (Info.bIsLoaded ? "" : " (Unloaded)");
+
+					if (ImGui::MenuItem(DisplayName.c_str(), nullptr, bIsCurrent))
+					{
+						if (Info.LoadedLevel) World->SetCurrentLevel(Info.LoadedLevel);
+					}
+
+					if (ImGui::BeginPopupContextItem())
+					{
+						if (!Info.bIsLoaded)
+						{
+							if (ImGui::MenuItem("Load Level")) World->LoadStreamingLevel(Info.LevelPath);
+						}
+						else
+						{
+							if (ImGui::MenuItem("Unload Level")) World->UnloadStreamingLevel(Info.LevelName);
+						}
+						ImGui::EndPopup();
+					}
+				}
+
+				ImGui::Separator();
+				if (ImGui::MenuItem("Add Existing Level..."))
+				{
+					const std::wstring InitialDir = FSceneSaveManager::GetSceneDirectory();
+					const FString SelectedPath = FEditorFileUtils::OpenFileDialog({
+						.Filter = L"Level Files (*.umap)\0*.umap\0",
+						.Title = L"Add Existing Level",
+						.InitialDirectory = InitialDir.c_str(),
+						});
+					if (!SelectedPath.empty())
+					{
+						World->AddStreamingLevel(SelectedPath);
+					}
+				}
+			}
+			ImGui::EndMenu();
+		}
+
 		MenuEndX = ImGui::GetCursorPosX();
 
 		ImGui::SetCursorPos(ImVec2(SceneTabX, ContentStartY));
@@ -648,17 +708,7 @@ void FEditorMainPanel::Update()
 	// 뷰포트 슬롯 위에서는 bUsingMouse를 해제해야 TickInteraction이 동작
 	bool bWantMouse = IO.WantCaptureMouse;
 	bool bWantKeyboard = IO.WantCaptureKeyboard || bShowShortcutOverlay;
-	if (EditorEngine && EditorEngine->IsMouseOverViewport())
-	{
-		bWantMouse = false;
-		if (!IO.WantTextInput && !bShowShortcutOverlay)
-		{
-			bWantKeyboard = false;
-		}
-	}
-	InputSystem::Get().GetGuiInputState().bUsingMouse = bWantMouse;
-	InputSystem::Get().GetGuiInputState().bUsingKeyboard = bWantKeyboard;
-	InputSystem::Get().GetGuiInputState().bUsingTextInput = IO.WantTextInput;
+
 
 	// IME는 ImGui가 텍스트 입력을 원할 때만 활성화.
 	if (Window)
@@ -692,36 +742,36 @@ void FEditorMainPanel::HandleGlobalShortcuts()
 		return;
 	}
 
-	InputSystem& Input = InputSystem::Get();
+	FInputManager& Input = FInputManager::Get();
 	FEditorSettings& Settings = FEditorSettings::Get();
 
-	if (Input.GetKeyDown(VK_OEM_3))
+	if (Input.IsKeyPressed(VK_OEM_3))
 	{
 		Settings.UI.bConsole = !Settings.UI.bConsole;
 		return;
 	}
 
-	if (!Input.GetKey(VK_CONTROL))
+	if (!Input.IsKeyDown(VK_CONTROL))
 	{
 		return;
 	}
 
-	const bool bShift = Input.GetKey(VK_SHIFT);
-	if (Input.GetKeyDown(VK_SPACE))
+	const bool bShift = Input.IsKeyDown(VK_SHIFT);
+	if (Input.IsKeyPressed(VK_SPACE))
 	{
 		Settings.UI.bContentBrowser = !Settings.UI.bContentBrowser;
 		return;
 	}
 
-	if (Input.GetKeyDown('N'))
+	if (Input.IsKeyPressed('N'))
 	{
 		EditorEngine->NewScene();
 	}
-	else if (Input.GetKeyDown('O'))
+	else if (Input.IsKeyPressed('O'))
 	{
 		EditorEngine->LoadSceneWithDialog();
 	}
-	else if (Input.GetKeyDown('S'))
+	else if (Input.IsKeyPressed('S'))
 	{
 		if (bShift)
 		{
@@ -732,11 +782,11 @@ void FEditorMainPanel::HandleGlobalShortcuts()
 			EditorEngine->SaveScene();
 		}
 	}
-	else if (Input.GetKeyDown('Z'))
+	else if (Input.IsKeyPressed('Z'))
 	{
 		EditorEngine->UndoTrackedTransformChange();
 	}
-	else if (Input.GetKeyDown('Y'))
+	else if (Input.IsKeyPressed('Y'))
 	{
 		EditorEngine->RedoTrackedTransformChange();
 	}
@@ -792,3 +842,4 @@ void FEditorMainPanel::RestoreEditorWindowsAfterPIE()
 {
 	ShowEditorWindows();
 }
+

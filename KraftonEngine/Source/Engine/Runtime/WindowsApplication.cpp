@@ -4,7 +4,7 @@
 #include <windowsx.h>
 #include <vector>
 
-#include "Engine/Input/InputSystem.h"
+#include "Engine/Input/InputManager.h"
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, unsigned int Msg, WPARAM wParam, LPARAM lParam);
 
@@ -46,6 +46,8 @@ LRESULT CALLBACK FWindowsApplication::StaticWndProc(HWND hWnd, unsigned int Msg,
 
 LRESULT FWindowsApplication::WndProc(HWND hWnd, unsigned int Msg, WPARAM wParam, LPARAM lParam)
 {
+	FInputManager::Get().ProcessMessage(hWnd, Msg, wParam, lParam);
+
 	if (ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam))
 	{
 		return true;
@@ -109,32 +111,6 @@ LRESULT FWindowsApplication::WndProc(HWND hWnd, unsigned int Msg, WPARAM wParam,
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
-	case WM_MOUSEWHEEL:
-		InputSystem::Get().AddScrollDelta(GET_WHEEL_DELTA_WPARAM(wParam));
-		return 0;
-	case WM_INPUT:
-	{
-		UINT DataSize = 0;
-		if (GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, nullptr, &DataSize, sizeof(RAWINPUTHEADER)) != 0 || DataSize == 0)
-		{
-			return 0;
-		}
-
-		std::vector<BYTE> Buffer(DataSize);
-		if (GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, Buffer.data(), &DataSize, sizeof(RAWINPUTHEADER)) != DataSize)
-		{
-			return 0;
-		}
-
-		const RAWINPUT* Raw = reinterpret_cast<const RAWINPUT*>(Buffer.data());
-		if (Raw->header.dwType == RIM_TYPEMOUSE)
-		{
-			InputSystem::Get().AddRawMouseDelta(
-				static_cast<int>(Raw->data.mouse.lLastX),
-				static_cast<int>(Raw->data.mouse.lLastY));
-		}
-		return 0;
-	}
 	case WM_SIZE:
 		if (wParam != SIZE_MINIMIZED)
 		{
