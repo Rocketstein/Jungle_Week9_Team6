@@ -8,6 +8,15 @@ class UBoxComponent;
 class USphereComponent;
 class UCapsuleComponent;
 
+enum class EObstacleType : uint8
+{
+	None = 0,
+	Barrier = 1 << 0,   // must switch lanes
+	LowBar  = 1 << 1,   // must jump
+	HighBar = 1 << 2,   // must slide
+	Misc	= 1 << 3,
+};
+
 class AObstacleActorBase : public AStaticMeshActor {
 public:
 	DECLARE_CLASS(AObstacleActorBase, AStaticMeshActor)
