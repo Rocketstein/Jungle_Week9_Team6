@@ -9,7 +9,16 @@ public:
 	void EndPlay()	 override;
 	void InitFromTemplate(const FMapChunkTemplate& InTemplate);
 
+	FVector    GetExitLocation() const;
+	FRotator   GetExitRotation() const;
+	float      GetChunkLength()  const { return Template.Length; }
+	EChunkType GetChunkType()    const { return Template.ChunkType; }
+
 private:
+	void SpawnObstacle();
 
-
+private:
+	FMapChunkTemplate     Template;
+	UStaticMeshComponent* FloorMesh = nullptr;
+	TArray<AActor*>       SpawnedObstacles;
 };
