@@ -325,6 +325,13 @@ void UWorld::ResolvePenetration(UPrimitiveComponent* A, UPrimitiveComponent* B, 
 	// both static -> do nothing
 }
 
+void UWorld::MarkActorsOverlapDirty() const {
+	auto& Actors = GetActors();
+	for (AActor* Actor : Actors) {
+		if (Actor) Actor->MarkOverlappingDirty();
+	}
+}
+
 void UWorld::EndPlay()
 {
 	bHasBegunPlay = false;

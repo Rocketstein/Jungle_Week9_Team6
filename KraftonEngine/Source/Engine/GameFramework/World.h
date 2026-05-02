@@ -72,6 +72,8 @@ public:
 	void RemoveActorToOctree(AActor* actor);
 	void UpdateActorInOctree(AActor* actor);
 
+	void MarkActorsOverlapDirty() const;
+
 private:
 	// Overlaps
 	void ProcessOverlapEvents();
