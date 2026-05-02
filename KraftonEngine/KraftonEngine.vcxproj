@@ -319,6 +319,8 @@
     <ClCompile Include="Source\Engine\GameFramework\AActor.cpp" />
     <ClCompile Include="Source\Engine\GameFramework\CharacterActor.cpp" />
     <ClCompile Include="Source\Engine\GameFramework\DecalActor.cpp" />
+    <ClCompile Include="Source\Engine\GameFramework\GameActors\ObstacleActorBase.cpp" />
+    <ClCompile Include="Source\Engine\GameFramework\GameActors\SimpleObstacleActor.cpp" />
     <ClCompile Include="Source\Engine\GameFramework\HeightFogActor.cpp" />
     <ClCompile Include="Source\Engine\GameFramework\Level.cpp" />
     <ClCompile Include="Source\Engine\GameFramework\PawnActor.cpp" />
@@ -524,6 +526,8 @@
     <ClInclude Include="Source\Engine\GameFramework\AActor.h" />
     <ClInclude Include="Source\Engine\GameFramework\CharacterActor.h" />
     <ClInclude Include="Source\Engine\GameFramework\DecalActor.h" />
+    <ClInclude Include="Source\Engine\GameFramework\GameActors\ObstacleActorBase.h" />
+    <ClInclude Include="Source\Engine\GameFramework\GameActors\SimpleObstacleActor.h" />
     <ClInclude Include="Source\Engine\GameFramework\HeightFogActor.h" />
     <ClInclude Include="Source\Engine\GameFramework\Level.h" />
     <ClInclude Include="Source\Engine\GameFramework\PawnActor.h" />
