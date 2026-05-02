@@ -96,8 +96,8 @@ public:
 	void SetActorSelected(bool InFlag) { bIsSelected = InFlag; }
 
 	// Overlap
-	void MarkOverlappingDirty() { bIsOverlappingDirty; }
-	bool IsOverlappingDirty() const { return bIsOverlappingDirty; }
+	//void MarkOverlappingDirty() { bIsOverlappingDirty; }
+	//bool IsOverlappingDirty() const { return bIsOverlappingDirty; }
 	bool IsOverlappingActor(const AActor* Other) const;
 
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) {}

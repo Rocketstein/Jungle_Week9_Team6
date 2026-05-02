@@ -278,7 +278,7 @@ void UPrimitiveComponent::OnTransformDirty()
 	// (basis 동일 + translation만 바뀐 경우 UpdateWorldMatrix가 이전 AABB를 평행이동만 적용)
 	bWorldAABBDirty = true;
 	MarkRenderTransformDirty();
-	Owner->MarkOverlappingDirty();
+	MarkUpdateOverlaps();
 }
 
 void UPrimitiveComponent::EnsureWorldAABBUpdated() const
@@ -362,4 +362,10 @@ bool UPrimitiveComponent::IsOverlappingActor(const AActor* Other) {
 		}
 	}
 	return false;
+}
+
+void UPrimitiveComponent::MarkUpdateOverlaps() {
+	if (!Owner) return;
+	if (!Owner->GetWorld()) return;
+	Owner->GetWorld()->AddPendingOverlapComponent(this);
 }

@@ -72,6 +72,9 @@ public:
 	void RemoveActorToOctree(AActor* actor);
 	void UpdateActorInOctree(AActor* actor);
 
+	// Adds a primitive component to the pending overlap update array
+	void AddPendingOverlapComponent(UPrimitiveComponent* InComp);
+
 private:
 	// Overlaps
 	void ProcessOverlapEvents();
@@ -96,6 +99,8 @@ private:
 	FTickManager TickManager;
 
 	FSpatialPartition Partition;
+
+	TArray<UPrimitiveComponent*> PendingOverlapComponents;
 };
 
 template<typename T>

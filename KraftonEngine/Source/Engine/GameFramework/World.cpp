@@ -246,59 +246,63 @@ void UWorld::Tick(float DeltaTime, ELevelTick TickType)
 	ProcessOverlapEvents();
 }
 
+void UWorld::AddPendingOverlapComponent(UPrimitiveComponent* InComp) {
+	if (InComp) PendingOverlapComponents.push_back(InComp);
+}
+
 void UWorld::ProcessOverlapEvents() {
 	const FOctree* Octree = GetOctree();
 	if (!Octree) return;
 
-	for (auto* Actor : PersistentLevel->GetActors()) {
-		if (!Actor) continue;
+	for (auto* Component : PendingOverlapComponents) {
+		UShapeComponent* Shape = dynamic_cast<UShapeComponent*>(Component);
+		if (!Shape || !Shape->IsCollisionEnabled() || Shape->GetOverlapBehaviour() == EOverlapBehaviour::Ignore) continue;
 
-		for (auto* Component : Actor->GetComponents()) {
-			UShapeComponent* Shape = dynamic_cast<UShapeComponent*>(Component);
-			if (!Shape || !Shape->IsCollisionEnabled() || Shape->GetOverlapBehaviour() == EOverlapBehaviour::Ignore) continue;
-
-			// End overlaps that are no longer valid
-			TArray<FOverlapInfo> Prev = Shape->GetOverlapInfos();
-			for (const FOverlapInfo& PrevInfo : Prev) {
-				UShapeComponent* Other = dynamic_cast<UShapeComponent*>(PrevInfo.HitResult.Component);
-				if (!Other || !FCollisionDispatcher::Get().CheckCollision(Shape, Other)) {
-					Shape->EndComponentOverlap(PrevInfo.HitResult.Component);
-					Shape->ShapeColor = FColor(0, 0, 255);
-				}
+		// End overlaps that are no longer valid
+		TArray<FOverlapInfo> Prev = Shape->GetOverlapInfos();
+		for (const FOverlapInfo& PrevInfo : Prev) {
+			UShapeComponent* Other = dynamic_cast<UShapeComponent*>(PrevInfo.HitResult.Component);
+			if (!Other || !FCollisionDispatcher::Get().CheckCollision(Shape, Other)) {
+				Shape->EndComponentOverlap(PrevInfo.HitResult.Component);
+				Shape->ShapeColor = FColor(0, 0, 255);
 			}
+		}
 
-			// Broad phase
-			TArray<UPrimitiveComponent*> Broad;
-			Octree->QueryAABB(Shape->GetWorldBoundingBox(), Broad);
+		// Broad phase
+		TArray<UPrimitiveComponent*> Broad;
+		Octree->QueryAABB(Shape->GetWorldBoundingBox(), Broad);
 
-			// Narrow phase
-			for (auto* Candidate : Broad) {
-				if (!Candidate || Candidate == Shape) continue;
-				UShapeComponent* Other = dynamic_cast<UShapeComponent*>(Candidate);
-				if (!Other || !Other->IsCollisionEnabled()) continue;
-				if (Shape->GetOverlapBehaviour() == EOverlapBehaviour::Hit && Other->GetOverlapBehaviour() == EOverlapBehaviour::Hit) {
-					// Hit 
-					FOverlapInfo Info;
-					Info.HitResult.bBlocking = true;
-					Info.HitResult.Component = Other;
-					if (FCollisionDispatcher::Get().CheckCollision(Shape, Other, Info)) {
-						Shape->BeginComponentOverlap(Info, true);
-						Shape->ShapeColor = FColor(0, 255, 0);
-					}
-					ResolvePenetration(Shape, Other, Info.HitResult);
-				} else if (Other->GetOverlapBehaviour() == EOverlapBehaviour::Overlap) {
-					// Overlap
-					FOverlapInfo Info;
-					Info.HitResult.bBlocking = false;
-					Info.HitResult.Component = Other;
-					if (FCollisionDispatcher::Get().CheckCollision(Shape, Other, Info)) {
-						Shape->BeginComponentOverlap(Info, true);
-						Shape->ShapeColor = FColor(255, 0, 0);
-					}
+		// Narrow phase
+		for (auto* Candidate : Broad) {
+			if (!Candidate || Candidate == Shape) continue;
+			UShapeComponent* Other = dynamic_cast<UShapeComponent*>(Candidate);
+			if (!Other || !Other->IsCollisionEnabled()) continue;
+			if (Shape->GetOverlapBehaviour() == EOverlapBehaviour::Hit && Other->GetOverlapBehaviour() == EOverlapBehaviour::Hit) {
+				// Hit 
+				FOverlapInfo Info;
+				Info.HitResult.bBlocking = true;
+				Info.HitResult.Component = Other;
+				if (FCollisionDispatcher::Get().CheckCollision(Shape, Other, Info)) {
+					Shape->BeginComponentOverlap(Info, true);
+					Shape->ShapeColor = FColor(0, 255, 0);
+				}
+				ResolvePenetration(Shape, Other, Info.HitResult);
+			}
+			else if (Other->GetOverlapBehaviour() == EOverlapBehaviour::Overlap) {
+				// Overlap
+				FOverlapInfo Info;
+				Info.HitResult.bBlocking = false;
+				Info.HitResult.Component = Other;
+				if (FCollisionDispatcher::Get().CheckCollision(Shape, Other, Info)) {
+					Shape->BeginComponentOverlap(Info, true);
+					Shape->ShapeColor = FColor(255, 0, 0);
 				}
 			}
 		}
+
 	}
+
+	PendingOverlapComponents.clear();
 }
 
 // Separate Components on Hit if they are both set to Block

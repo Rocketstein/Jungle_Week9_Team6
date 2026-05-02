@@ -87,7 +87,8 @@ public:
 	}
 
 	// Overlap
-	bool IsTransformDirty() const { return bTransformDirty; }
+	void MarkUpdateOverlaps();
+	//bool UpdateOverlapsOnNextTransform() const { return bUpdateOverlapsOnNextTransform; }
 	bool IsCollisionEnabled() const { return bCollisionEnabled; }
 	void SetCollisionEnabled(bool bInCollisionFlag) { bCollisionEnabled = bInCollisionFlag; }
 	EOverlapBehaviour GetOverlapBehaviour() const { return bGenerateOverlapEvents; }
@@ -124,6 +125,7 @@ protected:
 	FOctree* OctreeNode = nullptr;
 	bool bInOctreeOverflow = false;
 
+	//bool bUpdateOverlapsOnNextTransform = false;
 	bool bCollisionEnabled		= true;
 	bool bBlockComponent		= false;
 	EOverlapBehaviour bGenerateOverlapEvents = EOverlapBehaviour::Overlap;
