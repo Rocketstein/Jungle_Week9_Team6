@@ -247,14 +247,17 @@ void UWorld::Tick(float DeltaTime, ELevelTick TickType)
 }
 
 void UWorld::AddPendingOverlapComponent(UPrimitiveComponent* InComp) {
-	if (InComp) PendingOverlapComponents.push_back(InComp);
+	if (InComp) PendingOverlapComponents.insert(InComp);
 }
 
 void UWorld::ProcessOverlapEvents() {
 	const FOctree* Octree = GetOctree();
 	if (!Octree) return;
 
-	for (auto* Component : PendingOverlapComponents) {
+	TArray<UPrimitiveComponent*> Batch(PendingOverlapComponents.begin(), PendingOverlapComponents.end());
+	PendingOverlapComponents.clear();
+
+	for (auto* Component : Batch) {
 		UShapeComponent* Shape = dynamic_cast<UShapeComponent*>(Component);
 		if (!Shape || !Shape->IsCollisionEnabled() || Shape->GetOverlapBehaviour() == EOverlapBehaviour::Ignore) continue;
 
@@ -265,6 +268,10 @@ void UWorld::ProcessOverlapEvents() {
 			if (!Other || !FCollisionDispatcher::Get().CheckCollision(Shape, Other)) {
 				Shape->EndComponentOverlap(PrevInfo.HitResult.Component);
 				Shape->ShapeColor = FColor(0, 0, 255);
+			}
+
+			if (Other) {
+				Other->MarkUpdateOverlaps();
 			}
 		}
 
@@ -278,7 +285,7 @@ void UWorld::ProcessOverlapEvents() {
 			UShapeComponent* Other = dynamic_cast<UShapeComponent*>(Candidate);
 			if (!Other || !Other->IsCollisionEnabled()) continue;
 			if (Shape->GetOverlapBehaviour() == EOverlapBehaviour::Hit && Other->GetOverlapBehaviour() == EOverlapBehaviour::Hit) {
-				// Hit 
+				// Hit
 				FOverlapInfo Info;
 				Info.HitResult.bBlocking = true;
 				Info.HitResult.Component = Other;
@@ -287,6 +294,7 @@ void UWorld::ProcessOverlapEvents() {
 					Shape->ShapeColor = FColor(0, 255, 0);
 				}
 				ResolvePenetration(Shape, Other, Info.HitResult);
+				Other->MarkUpdateOverlaps();
 			}
 			else if (Other->GetOverlapBehaviour() == EOverlapBehaviour::Overlap) {
 				// Overlap
@@ -297,12 +305,10 @@ void UWorld::ProcessOverlapEvents() {
 					Shape->BeginComponentOverlap(Info, true);
 					Shape->ShapeColor = FColor(255, 0, 0);
 				}
+				Other->MarkUpdateOverlaps();
 			}
 		}
-
 	}
-
-	PendingOverlapComponents.clear();
 }
 
 // Separate Components on Hit if they are both set to Block

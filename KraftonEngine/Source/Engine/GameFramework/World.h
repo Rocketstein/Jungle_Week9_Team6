@@ -11,6 +11,7 @@
 #include "Render/Types/LODContext.h"
 #include <Collision/Octree.h>
 #include <Collision/SpatialPartition.h>
+#include <unordered_set>
 
 class UCameraComponent;
 class UPrimitiveComponent;
@@ -100,7 +101,7 @@ private:
 
 	FSpatialPartition Partition;
 
-	TArray<UPrimitiveComponent*> PendingOverlapComponents;
+	std::unordered_set<UPrimitiveComponent*> PendingOverlapComponents;
 };
 
 template<typename T>
