@@ -16,7 +16,7 @@
 #include "GameFramework/Light/DirectionalLightActor.h"
 #include "GameFramework/Light/PointLightActor.h"
 #include "GameFramework/Light/SpotLightActor.h"
-#include "GameFramework/GameActors/SimpleObstacleActor.h"
+#include "Game/GameActors/Obstacle/SimpleObstacleActor.h"
 #include "GameFramework/World.h"
 #include "Render/Pipeline/Renderer.h"
 #include "Viewport/Viewport.h"
