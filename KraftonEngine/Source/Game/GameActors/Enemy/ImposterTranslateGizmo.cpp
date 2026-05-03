@@ -70,10 +70,10 @@ FVector AImposterTranslateGizmo::GetTranslateOffset() const {
 	switch (RandomAxis())
 	{
 	case 0:
-		return FVector(RandomOffset(), 0.0f, 0.0f);
+		return FVector(RandomOffset() * RandomSign(), 0.0f, 0.0f);
 	case 1:
-		return FVector(0.0f, RandomOffset(), 0.0f);
+		return FVector(0.0f, RandomOffset() * RandomSign(), 0.0f);
 	default:
-		return FVector(0.0f, 0.0f, RandomOffset());
+		return FVector(0.0f, 0.0f, RandomOffset() * RandomSign());
 	}
 }

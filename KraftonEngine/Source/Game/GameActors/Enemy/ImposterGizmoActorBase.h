@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "EnemyActorBase.h"
 #include "Scripting/LuaActorProxy.h"
+#include "Component/GizmoComponent.h"
 
 // "Captures" Actor (Obstacle or the runner player). 
 // Obstacles could be captured and move, rotate, and scale arbitraily (in a way that does not coerce game over)
@@ -21,6 +22,7 @@ protected:
 	virtual ~AImposterGizmoActorBase() = default;
 
 protected:
+	UGizmoComponent* PreviewGizmo = nullptr; 
 	AActor* Target			= nullptr;
 	float	ActivationDelay = 1.5f;
 	float   ElapsedDelay	= 0.f;
