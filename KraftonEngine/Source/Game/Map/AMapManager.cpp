@@ -1,5 +1,6 @@
 ﻿#include "AMapManager.h"
 #include "GameFramework/World.h"
+#include <random>
 
 IMPLEMENT_CLASS(AMapManager, AActor)
 
@@ -22,8 +23,12 @@ void AMapManager::Tick(float DeltaTime) {
 	//if (!Player) return; 
 	if (Templates.empty()) return;
 
-	while ((int32)ActiveChunks.size() < TargetChunkCount)
+	while ((int32)ActiveChunks.size() < TargetChunkCount) {
+		if (ActiveChunks.empty()) {
+			SpawnNextChunk(true);
+		}
 		SpawnNextChunk();
+	}
 
 	if (!ActiveChunks.empty())
 	{
@@ -45,6 +50,23 @@ void AMapManager::BuildTemplateLibrary() {
 	Templates.clear();
 
 	//-----------------------------------------------------------------
+	// Start
+	//-----------------------------------------------------------------
+	FMapChunkTemplate Start;
+	Start.ChunkType = EChunkType::Start;
+	Start.Length = 10.f;
+	Start.ExitOffset = FVector(10.f, 0.f, 0.f);
+
+	// Start Floor infos
+	FFloorBlock StartFloor = {};
+	StartFloor.LocalPosition = FVector(5.f, 0, 0);
+	StartFloor.LocalRotation = FRotator(0, 0, 0);
+	StartFloor.Scale		 = FVector(5.f, ChunkWidth, 1);
+	Start.FloorBlockInfos.push_back(StartFloor);
+	Templates.push_back(Start);
+	// No obstacles should spawn in the start region; leave the array blank
+
+	//-----------------------------------------------------------------
 	// Straight
 	//-----------------------------------------------------------------
 	FMapChunkTemplate Straight;
@@ -62,9 +84,12 @@ void AMapManager::BuildTemplateLibrary() {
 	// Obstacle slots: 4 columns x 3 lanes; random type selected at fill time
 	// Lanes at Y=-2,0,+2 (each 2 units wide in a 6-unit-wide chunk)
 	// Columns at X=4,8,12,16; Z=1 places obstacles just above the floor surface
-	constexpr uint8 AllTypes = 0x0F;
-	for (float X : {4.f, 8.f, 12.f, 16.f})
-		for (float Y : {-2.f, 0.f, 2.f})
+	constexpr uint8 AllTypes = 0xFF;
+	float LeftLaneY  = -ChunkWidth / 1.5;
+	float MidLaneY   = 0.f;
+	float RightLaneY = ChunkWidth / 1.5f;
+	for (float X = 3.f; X <= Straight.Length - 3.f; X += 2.f)
+		for (float Y : { LeftLaneY, MidLaneY, RightLaneY })
 		{
 			FObstacleSlot Slot{};
 			Slot.LocalPosition = FVector(X, Y, 1.f);
@@ -156,9 +181,17 @@ void AMapManager::BuildTemplateLibrary() {
 	StraightWithHoleFloor2.Scale		 = FVector(ChunkLength / 4, ChunkWidth, 1);
 	StraightWithHole.FloorBlockInfos.push_back(StraightWithHoleFloor2);
 
-	// Obstacle slots: avoid the hole (X: 5-10); Floor1 covers X:0-5, Floor2 covers X:10-20
-	for (float X : {3.f, 12.f, 16.f})
-		for (float Y : {-2.f, 0.f, 2.f})
+	// Floor1 solid X: 0-5  →  one column at X=3 (2-unit margin from hole edge)
+	// Floor2 solid X: 10-20 →  columns at X=11,13,15,17 (1-unit margin from hole, 3 from far end)
+	for (float Y : { LeftLaneY, MidLaneY, RightLaneY })
+	{
+		FObstacleSlot Slot{};
+		Slot.LocalPosition = FVector(3.f, Y, 1.f);
+		Slot.AllowedTypes  = static_cast<EObstacleType>(AllTypes);
+		StraightWithHole.ObstacleSlots.push_back(Slot);
+	}
+	for (float X = 11.f; X <= 17.f; X += 2.f)
+		for (float Y : { LeftLaneY, MidLaneY, RightLaneY })
 		{
 			FObstacleSlot Slot{};
 			Slot.LocalPosition = FVector(X, Y, 1.f);
@@ -169,10 +202,10 @@ void AMapManager::BuildTemplateLibrary() {
 	Templates.push_back(StraightWithHole);
 }
 
-void AMapManager::SpawnNextChunk()
+void AMapManager::SpawnNextChunk(bool Init)
 {
 	int32 Idx = SelectNextTemplateIndex();
-	const FMapChunkTemplate& T = Templates[Idx];
+	const FMapChunkTemplate& T = Init ? Templates[0] : Templates[Idx];
 
 	FVector  SpawnLoc = ActiveChunks.empty() ? FVector(0, 0, 0) : ActiveChunks.back()->GetExitLocation();
 	FRotator SpawnRot = ActiveChunks.empty() ? FRotator(0, 0, 0) : ActiveChunks.back()->GetExitRotation();
@@ -198,7 +231,7 @@ void AMapManager::DespawnFrontChunk() {
 int32 AMapManager::SelectNextTemplateIndex()
 {
 	TArray<int32> Candidates;
-	for (int32 i = 0; i < (int32)Templates.size(); ++i)
+	for (int32 i = 1; i < (int32)Templates.size(); ++i)
 	{
 		EChunkType T = Templates[i].ChunkType;
 		//bool bIsTurn = (T == EChunkType::TurnLeft || T == EChunkType::TurnRight);
@@ -206,5 +239,6 @@ int32 AMapManager::SelectNextTemplateIndex()
 		//	continue;
 		Candidates.push_back(i);
 	}
+
 	return Candidates[rand() % Candidates.size()];
 }

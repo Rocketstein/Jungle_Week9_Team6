@@ -5,6 +5,7 @@
 #include "Math/Rotator.h"
 
 enum class EChunkType {
+	Start,
 	Straight,
 	//TurnLeft,
 	//TurnRight,

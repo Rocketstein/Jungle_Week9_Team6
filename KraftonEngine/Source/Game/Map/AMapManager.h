@@ -17,9 +17,9 @@ public:
 
 private:
 	void  BuildTemplateLibrary();
-	void  SpawnNextChunk();
+	void  SpawnNextChunk(bool Init = false);
 	void  DespawnFrontChunk();
-	int32 SelectNextTemplateIndex();  // random walk with straight-run constraint
+	int32 SelectNextTemplateIndex();
 
 	TArray<FMapChunkTemplate> Templates;
 	TArray<AMapChunk*>        ActiveChunks;

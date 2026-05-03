@@ -134,7 +134,9 @@ void AMapChunk::SpawnObstacle()
 		if (!Obs) continue;
 
 		Obs->InitDefaultComponents("");
-		Obs->SetActorLocation(GetActorLocation() + WorldQuat.RotateVector(Slot.LocalPosition));
+		FVector LocalOffset = Slot.LocalPosition;
+		LocalOffset.X -= Template.Length * 0.5f;  // slot X is from chunk start; actor origin is at chunk center
+		Obs->SetActorLocation(GetActorLocation() + WorldQuat.RotateVector(LocalOffset));
 		if (Obs->HasActorBegunPlay())
 			Obs->BeginPlay();
 		SpawnedObstacles.push_back(Obs);
