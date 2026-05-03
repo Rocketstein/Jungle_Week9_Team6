@@ -43,7 +43,7 @@ void AMapManager::Tick(float DeltaTime) {
 }
 
 void AMapManager::BuildTemplateLibrary() {
-	constexpr float ChunkWidth  = 6.f;	// Recommended multiple of 3
+	constexpr float ChunkWidth = 6.f;	// Recommended multiple of 3
 	constexpr float ChunkLength = 20.f; // Recommended multiple of 2
 	constexpr float TurnLength = 10.f;
 	constexpr float LaneY[3] = { -ChunkWidth / 1.5, 0, ChunkWidth / 1.5f };
@@ -56,6 +56,7 @@ void AMapManager::BuildTemplateLibrary() {
 	FMapChunkTemplate Start;
 	Start.ChunkType = EChunkType::Start;
 	Start.Length = 10.f;
+	Start.Width  = ChunkWidth;
 	Start.ExitOffset = FVector(10.f, 0.f, 0.f);
 
 	// Start Floor infos
@@ -73,6 +74,7 @@ void AMapManager::BuildTemplateLibrary() {
 	FMapChunkTemplate Straight;
 	Straight.ChunkType = EChunkType::Straight;
 	Straight.Length = ChunkLength;
+	Straight.Width  = ChunkWidth;
 	Straight.ExitOffset = FVector(ChunkLength, 0.0f, 0.0f);
 
 	// Straight floor infos
@@ -164,6 +166,7 @@ void AMapManager::BuildTemplateLibrary() {
 	FMapChunkTemplate StraightWithHole;
 	StraightWithHole.ChunkType = EChunkType::StraightWithHole;
 	StraightWithHole.Length = ChunkLength / 2;
+	StraightWithHole.Width  = ChunkWidth;
 	StraightWithHole.ExitOffset = FVector(StraightWithHole.Length, 0.f, 0.f);
 
 	// Straight With Hole Floor

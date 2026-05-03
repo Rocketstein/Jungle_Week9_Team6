@@ -24,12 +24,6 @@ enum EObstacleDecision {
 	Count,
 };
 
-struct FObstacleSlot
-{
-	FVector			LocalPosition;  // where in the chunk this obstacle can appear
-	EObstacleType	AllowedTypes;   // bitmask - which obstacle types fit here
-};
-
 struct FDecisionSlot
 {
 	float X;
@@ -51,9 +45,9 @@ struct FFloorBlock
 struct FMapChunkTemplate {
 	EChunkType				ChunkType = EChunkType::Straight;
 	float					Length = 0.0f;
+	float					Width  = 0.0f;
 	FVector					ExitOffset = FVector(0.0f, 0.0f, 0.0f);	// local-space offset from entry to next chunk's origin
 	FRotator				ExitRotation = FRotator(0.0f, 0.0f, 0.0f);	// e.g. (0, 0, -90) for a left turn around Z
-	TArray<FObstacleSlot>	ObstacleSlots;						// available slots, defined per template
-	TArray<FDecisionSlot>	ObstacleSlotDecisions;			// Available obstacles at Coordinate X.
+	TArray<FDecisionSlot>	ObstacleSlotDecisions;			// Available obstacles at Coordinate X. Defined per template
 	TArray<FFloorBlock>		FloorBlockInfos;
 };
