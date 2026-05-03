@@ -2,6 +2,7 @@
 #include "GameFramework/World.h"
 
 void AMapManager::BeginPlay() {
+	AActor::BeginPlay();
 	BuildTemplateLibrary();
 }
 
@@ -18,11 +19,11 @@ void AMapManager::Tick(float DeltaTime) {
 	if (!ActiveChunks.empty())
 	{
 		AMapChunk* Front = ActiveChunks[0];
-		FQuat ChunkQuat = FQuat::FromRotator(Front->GetActorRotation());
-		FVector ToPlayer = Player->GetActorLocation() - Front->GetActorLocation();
-		float Progress = ToPlayer.Dot(ChunkQuat.GetForwardVector());
+		FQuat ExitQuat = FQuat::FromRotator(Front->GetExitRotation());
+		FVector ToPlayer = Player->GetActorLocation() - Front->GetExitLocation();
+		float ExitProgress = ToPlayer.Dot(ExitQuat.GetForwardVector());
 
-		if (Progress > Front->GetChunkLength())
+		if (ExitProgress > 0.0f)
 			DespawnFrontChunk();
 	}
 }
@@ -30,7 +31,9 @@ void AMapManager::Tick(float DeltaTime) {
 void AMapManager::BuildTemplateLibrary() {
 	constexpr float ChunkWidth  = 6.f;	// Recommended multiple of 3
 	constexpr float ChunkLength = 20.f; // Recommended multiple of 2
-	constexpr float Wallheight  = 1.5f;
+	constexpr float TurnLength = 10.f;
+
+	Templates.clear();
 
 	// TODO: Walls
 	//-----------------------------------------------------------------
@@ -43,7 +46,7 @@ void AMapManager::BuildTemplateLibrary() {
 
 	// Straight floor infos
 	FFloorBlock StraightFloor = {};
-	StraightFloor.LocalPosition = FVector(0, 0, 0);
+	StraightFloor.LocalPosition = FVector(ChunkLength * 0.5f, 0, 0);
 	StraightFloor.LocalRotation = FRotator(0, 0, 0);
 	StraightFloor.Scale			= FVector(ChunkLength, ChunkWidth, 1);
 	Straight.FloorBlockInfos.push_back(StraightFloor);
@@ -60,27 +63,28 @@ void AMapManager::BuildTemplateLibrary() {
 	//StraightWallRight.LocalRotation = FRotator(0, 0, 0);
 	//StraightWallRight.Scale			= FVector(ChunkLength, 1, Wallheight);
 	//Straight.FloorBlockInfos.push_back(StraightWallRight);
-	//Templates.push_back(Straight);
+	Templates.push_back(Straight);
 
 	//-----------------------------------------------------------------
 	// Left Turn
 	//-----------------------------------------------------------------
 	FMapChunkTemplate LeftTurn;
 	LeftTurn.ChunkType = EChunkType::TurnLeft;
-	LeftTurn.ExitOffset = FVector(10.0f, -10.0f, 0.0f);
+	LeftTurn.Length = ChunkLength;
+	LeftTurn.ExitOffset = FVector(TurnLength, -TurnLength, 0.0f);
 	LeftTurn.ExitRotation = FRotator(0.0f, 0.0f, -90.0f);  // Yaw -90 for left
 
 	// Left Turn floor
 	FFloorBlock LeftTurnFloorStraight = {};
-	LeftTurnFloorStraight.LocalPosition = FVector(0, 0, 0);
+	LeftTurnFloorStraight.LocalPosition = FVector(TurnLength * 0.5f, 0, 0);
 	LeftTurnFloorStraight.LocalRotation = FRotator(0, 0, 0);
-	LeftTurnFloorStraight.Scale			= FVector(ChunkLength / 2, ChunkWidth, 1);
+	LeftTurnFloorStraight.Scale			= FVector(TurnLength, ChunkWidth, 1);
 	LeftTurn.FloorBlockInfos.push_back(LeftTurnFloorStraight);
 
 	FFloorBlock LeftTurnFloorTurn = {};
-	LeftTurnFloorTurn.LocalPosition = FVector(ChunkLength / 2, 0, 0);
+	LeftTurnFloorTurn.LocalPosition = FVector(TurnLength, -TurnLength * 0.5f, 0);
 	LeftTurnFloorTurn.LocalRotation = FRotator(0, 0, -90);
-	LeftTurnFloorTurn.Scale			= FVector(ChunkLength / 2, ChunkWidth, 1);
+	LeftTurnFloorTurn.Scale			= FVector(TurnLength, ChunkWidth, 1);
 	LeftTurn.FloorBlockInfos.push_back(LeftTurnFloorTurn);
 
 	// Left Turn Wall
@@ -115,20 +119,21 @@ void AMapManager::BuildTemplateLibrary() {
 	//-----------------------------------------------------------------
 	FMapChunkTemplate RightTurn;
 	RightTurn.ChunkType = EChunkType::TurnRight;
-	RightTurn.ExitOffset = FVector(10.0f, 10.0f, 0.f);
+	RightTurn.Length = ChunkLength;
+	RightTurn.ExitOffset = FVector(TurnLength, TurnLength, 0.f);
 	RightTurn.ExitRotation = FRotator(0.0f, 0.0f, 90.f);
 
 	// Right Turn Floor
 	FFloorBlock RightTurnFloorStraight = {};
-	RightTurnFloorStraight.LocalPosition = FVector(0, 0, 0);
+	RightTurnFloorStraight.LocalPosition = FVector(TurnLength * 0.5f, 0, 0);
 	RightTurnFloorStraight.LocalRotation = FRotator(0, 0, 0);
-	RightTurnFloorStraight.Scale		 = FVector(ChunkLength / 2, ChunkWidth, 1);
+	RightTurnFloorStraight.Scale		 = FVector(TurnLength, ChunkWidth, 1);
 	RightTurn.FloorBlockInfos.push_back(RightTurnFloorStraight);
 
 	FFloorBlock RightTurnFloorTurn = {};
-	RightTurnFloorTurn.LocalPosition = FVector(ChunkLength / 2 + ChunkWidth, ChunkWidth, 1);
+	RightTurnFloorTurn.LocalPosition = FVector(TurnLength, TurnLength * 0.5f, 0);
 	RightTurnFloorTurn.LocalRotation = FRotator(0, 0, 90);
-	RightTurnFloorTurn.Scale		 = FVector(ChunkLength / 2, ChunkWidth, 1);
+	RightTurnFloorTurn.Scale		 = FVector(TurnLength, ChunkWidth, 1);
 	RightTurn.FloorBlockInfos.push_back(RightTurnFloorTurn);
 
 	// Right Turn Walls
@@ -168,13 +173,13 @@ void AMapManager::BuildTemplateLibrary() {
 
 	// Straight With Hole Floor
 	FFloorBlock StraightWithHoleFloor1 = {};
-	StraightWithHoleFloor1.LocalPosition = FVector(0, 0, 0);
+	StraightWithHoleFloor1.LocalPosition = FVector(ChunkLength * 0.125f, 0, 0);
 	StraightWithHoleFloor1.LocalRotation = FRotator(0, 0, 0);
 	StraightWithHoleFloor1.Scale		 = FVector(ChunkLength / 4, ChunkWidth, 1);
 	StraightWithHole.FloorBlockInfos.push_back(StraightWithHoleFloor1);
 
 	FFloorBlock StraightWithHoleFloor2 = {};
-	StraightWithHoleFloor2.LocalPosition = FVector(ChunkLength / 2, 0, 0);
+	StraightWithHoleFloor2.LocalPosition = FVector(ChunkLength * 0.75f, 0, 0);
 	StraightWithHoleFloor2.LocalRotation = FRotator(0, 0, 0);
 	StraightWithHoleFloor2.Scale		 = FVector(ChunkLength / 2, ChunkWidth, 1);
 	StraightWithHole.FloorBlockInfos.push_back(StraightWithHoleFloor2);
@@ -215,8 +220,7 @@ void AMapManager::SpawnNextChunk()
 
 void AMapManager::DespawnFrontChunk() {
 	if (ActiveChunks.empty()) return;
-	ActiveChunks.front()->EndPlay();
-	UObjectManager::Get().DestroyObject(ActiveChunks.front());
+	GetWorld()->DestroyActor(ActiveChunks.front());
 	ActiveChunks.erase(ActiveChunks.begin());
 }
 

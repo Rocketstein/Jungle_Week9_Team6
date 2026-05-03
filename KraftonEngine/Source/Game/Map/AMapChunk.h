@@ -23,6 +23,6 @@ private:
 
 private:
 	FMapChunkTemplate     Template;
-	UStaticMeshComponent* RootMesh = nullptr;
+	TArray<UStaticMeshComponent*> FloorMeshes;
 	TArray<AObstacleActorBase*> SpawnedObstacles;
 };

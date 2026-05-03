@@ -22,7 +22,7 @@ public:
 	DECLARE_CLASS(AObstacleActorBase, AStaticMeshActor)
 	virtual void BeginPlay();
 	virtual void Tick(float DeltaTime) {};
-	virtual void EndPlay() {};
+	virtual void EndPlay() override;
 
 	virtual void InitDefaultComponents(const FString& UStaticMeshFileName) override;
 

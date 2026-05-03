@@ -1,20 +1,24 @@
 ﻿#include "AMapChunk.h"
 #include "GameFramework/World.h"
 #include "Component/StaticMeshComponent.h"
+#include "Engine/Runtime/Engine.h"
 #include "Game/GameActors/Obstacle/SimpleObstacleActor.h"
 #include "Game/GameActors/Obstacle/VerticalWireActor.h"
 #include "Game/GameActors/Obstacle/WireballActor.h"
+#include "Materials/MaterialManager.h"
+#include "Resource/ResourceManager.h"
 
 IMPLEMENT_CLASS(AMapChunk, AActor)
 
 void AMapChunk::BeginPlay() {
-	
+	AActor::BeginPlay();
 }
 
 void AMapChunk::EndPlay() {
 	for (auto* Obstacle : SpawnedObstacles) {
-		Obstacle->EndPlay();
-		Obstacle = nullptr;
+		if (Obstacle && Obstacle->GetWorld() && Obstacle->GetWorld()->HasBegunPlay()) {
+			Obstacle->GetWorld()->DestroyActor(Obstacle);
+		}
 	}
 
 	SpawnedObstacles.clear();
@@ -53,6 +57,62 @@ static AObstacleActorBase* SpawnObstacleOfType(UWorld* World, EObstacleType Type
 	}
 }
 
+static FString GetMeshPath(const char* MeshKey)
+{
+	if (const FMeshResource* MeshResource = FResourceManager::Get().FindMesh(FName(MeshKey)))
+	{
+		return MeshResource->Path;
+	}
+
+	return "";
+}
+
+static void ApplyBasicShapeMaterial(UStaticMeshComponent* MeshComponent, UStaticMesh* Mesh)
+{
+	if (!MeshComponent || !Mesh)
+	{
+		return;
+	}
+
+	const FString MaterialPath = FResourceManager::Get().ResolvePath(FName("Default.Material.BasicShape"));
+	UMaterial* Material = FMaterialManager::Get().GetOrCreateMaterial(MaterialPath);
+	if (!Material)
+	{
+		return;
+	}
+
+	int32 MaterialCount = static_cast<int32>(Mesh->GetStaticMaterials().size());
+	if (MaterialCount == 0 && Mesh->GetStaticMeshAsset() &&
+		(!Mesh->GetStaticMeshAsset()->Sections.empty() || !Mesh->GetStaticMeshAsset()->Indices.empty()))
+	{
+		MaterialCount = 1;
+	}
+
+	for (int32 MaterialIndex = 0; MaterialIndex < MaterialCount; ++MaterialIndex)
+	{
+		MeshComponent->SetMaterial(MaterialIndex, Material);
+	}
+}
+
+static void ApplyCubeMesh(UStaticMeshComponent* MeshComponent)
+{
+	if (!MeshComponent || !GEngine)
+	{
+		return;
+	}
+
+	const FString MeshPath = GetMeshPath("Default.Mesh.BasicShape.Cube");
+	if (MeshPath.empty())
+	{
+		return;
+	}
+
+	ID3D11Device* Device = GEngine->GetRenderer().GetFD3DDevice().GetDevice();
+	UStaticMesh* Mesh = FObjManager::LoadObjStaticMesh(MeshPath, Device);
+	MeshComponent->SetStaticMesh(Mesh);
+	ApplyBasicShapeMaterial(MeshComponent, Mesh);
+}
+
 void AMapChunk::SpawnObstacle()
 {
 	FQuat WorldQuat = FQuat::FromRotator(GetActorRotation());
@@ -74,22 +134,32 @@ void AMapChunk::SpawnObstacle()
 
 		Obs->InitDefaultComponents("");
 		Obs->SetActorLocation(GetActorLocation() + WorldQuat.RotateVector(Slot.LocalPosition));
+		if (Obs->HasActorBegunPlay())
+		{
+			Obs->BeginPlay();
+		}
 		SpawnedObstacles.push_back(Obs);
 	}
 }
 
 void AMapChunk::BuildFloor() {
-	TArray<FFloorBlock> FloorBlockInfos = Template.FloorBlockInfos;
-	for (uint16 i = 0; i < FloorBlockInfos.size(); i++) {
-		const auto& BlockInfo = FloorBlockInfos[i];
+	for (UStaticMeshComponent* FloorMesh : FloorMeshes)
+	{
+		RemoveComponent(FloorMesh);
+	}
+	FloorMeshes.clear();
+
+	for (const FFloorBlock& BlockInfo : Template.FloorBlockInfos) {
 		UStaticMeshComponent* Block = AddComponent<UStaticMeshComponent>();
-		if (i == 0) {
-			RootMesh = Block;
-			SetRootComponent(Block);
+		if (GetRootComponent())
+		{
+			Block->AttachToComponent(GetRootComponent());
 		}
 
+		ApplyCubeMesh(Block);
 		Block->SetRelativeLocation(BlockInfo.LocalPosition);
 		Block->SetRelativeRotation(BlockInfo.LocalRotation);
 		Block->SetRelativeScale(BlockInfo.Scale);
+		FloorMeshes.push_back(Block);
 	}
 }

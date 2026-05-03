@@ -20,9 +20,9 @@ struct FObstacleSlot
 
 struct FFloorBlock
 {
-	FVector LocalPosition;
-	FRotator LocalRotation;
-	FVector Scale;
+	FVector LocalPosition = FVector(0.0f, 0.0f, 0.0f);
+	FRotator LocalRotation = FRotator(0.0f, 0.0f, 0.0f);
+	FVector Scale = FVector(1.0f, 1.0f, 1.0f);
 };
 
  /*
@@ -32,11 +32,11 @@ struct FFloorBlock
  */
 struct FMapChunkTemplate {
 	EChunkType				ChunkType = EChunkType::Straight;
-	float					Length;
-	FVector					ExitOffset;							// local-space offset from entry to next chunk's origin
-	FRotator				ExitRotation;						// e.g. (0, 0, -90) for a left turn around Z
+	float					Length = 0.0f;
+	FVector					ExitOffset = FVector(0.0f, 0.0f, 0.0f);	// local-space offset from entry to next chunk's origin
+	FRotator				ExitRotation = FRotator(0.0f, 0.0f, 0.0f);	// e.g. (0, 0, -90) for a left turn around Z
 	TArray<FObstacleSlot>	ObstacleSlots;						// available slots, defined per template
-	float					ObstacleFillRate;					// 0.0–1.0, tunable per chunk type
+	float					ObstacleFillRate = 0.0f;			// 0.0-1.0, tunable per chunk type
 
 	TArray<FFloorBlock> FloorBlockInfos;
 };
