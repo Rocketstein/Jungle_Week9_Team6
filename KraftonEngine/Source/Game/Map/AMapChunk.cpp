@@ -55,7 +55,7 @@ static AObstacleActorBase* SpawnObstacleOfType(UWorld* World, EObstacleType Type
 
 	switch (Type)
 	{
-	case EObstacleType::Barrier: return World->SpawnActor<AVerticalWireActor>();
+	case EObstacleType::Barrier: return World->SpawnActor<ABarrierObstacleActor>();
 	case EObstacleType::LowBar:
 	case EObstacleType::HighBar: return World->SpawnActor<ASimpleObstacleActor>();
 	case EObstacleType::Misc:    return World->SpawnActor<AWireballActor>();
