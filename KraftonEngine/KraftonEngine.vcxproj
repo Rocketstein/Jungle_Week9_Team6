@@ -280,6 +280,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Game\GameActors\Enemy\EnemyActorBase.cpp" />
+    <ClCompile Include="Source\Game\GameActors\Enemy\EnemyActorManager.cpp" />
+    <ClCompile Include="Source\Game\GameActors\Enemy\ImposterGizmoActorBase.cpp" />
+    <ClCompile Include="Source\Game\GameActors\Enemy\ImposterRotationGizmo.cpp" />
+    <ClCompile Include="Source\Game\GameActors\Enemy\ImposterScaleGizmo.cpp" />
+    <ClCompile Include="Source\Game\GameActors\Enemy\ImposterTranslateGizmo.cpp" />
     <ClCompile Include="Source\Game\GameMode\ARunnerGameMode.cpp" />
     <ClCompile Include="Source\Game\Player\Runner.cpp" />
     <ClCompile Include="Source\Editor\EditorEngine.cpp" />
@@ -505,6 +511,12 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\Game\GameActors\Enemy\EnemyActorBase.h" />
+    <ClInclude Include="Source\Game\GameActors\Enemy\EnemyActorManager.h" />
+    <ClInclude Include="Source\Game\GameActors\Enemy\ImposterGizmoActorBase.h" />
+    <ClInclude Include="Source\Game\GameActors\Enemy\ImposterRotationGizmo.h" />
+    <ClInclude Include="Source\Game\GameActors\Enemy\ImposterScaleGizmo.h" />
+    <ClInclude Include="Source\Game\GameActors\Enemy\ImposterTranslateGizmo.h" />
     <ClInclude Include="Source\Game\GameMode\ARunnerGameMode.h" />
     <ClInclude Include="Source\Game\Player\Runner.h" />
     <ClInclude Include="Source\Editor\EditorEngine.h" />
