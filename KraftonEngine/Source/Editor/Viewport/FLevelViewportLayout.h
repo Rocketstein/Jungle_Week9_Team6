@@ -92,6 +92,7 @@ public:
 		SimpleObstacle,
 		Wireball,
 		VerticalWires,
+		MapManager,
 	};
 
 	AActor* SpawnPlaceActor(EViewportPlaceActorType Type, const FVector& Location);

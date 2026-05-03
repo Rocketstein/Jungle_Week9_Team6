@@ -3,6 +3,12 @@
 
 IMPLEMENT_CLASS(AMapManager, AActor)
 
+AMapManager::AMapManager()
+{
+	bTickInEditor = true;
+	BuildTemplateLibrary();
+}
+
 void AMapManager::BeginPlay() {
 	AActor::BeginPlay();
 	BuildTemplateLibrary();
@@ -13,8 +19,7 @@ void AMapManager::EndPlay() {
 }
 
 void AMapManager::Tick(float DeltaTime) {
-	// Disabled for debugging
-	// if (!Player) return; 
+	//if (!Player) return; 
 	if (Templates.empty()) return;
 
 	while ((int32)ActiveChunks.size() < TargetChunkCount)
@@ -24,11 +29,11 @@ void AMapManager::Tick(float DeltaTime) {
 	{
 		AMapChunk* Front = ActiveChunks[0];
 		FQuat ExitQuat = FQuat::FromRotator(Front->GetExitRotation());
-		FVector ToPlayer = Player->GetActorLocation() - Front->GetExitLocation();
-		float ExitProgress = ToPlayer.Dot(ExitQuat.GetForwardVector());
+		//FVector ToPlayer = Player->GetActorLocation() - Front->GetExitLocation();
+		//float ExitProgress = ToPlayer.Dot(ExitQuat.GetForwardVector());
 
-		if (ExitProgress > 0.0f)
-			DespawnFrontChunk();
+		//if (ExitProgress > 0.0f)
+		//	DespawnFrontChunk();
 	}
 }
 
@@ -76,7 +81,7 @@ void AMapManager::BuildTemplateLibrary() {
 	LeftTurn.ChunkType = EChunkType::TurnLeft;
 	LeftTurn.Length = ChunkLength;
 	LeftTurn.ExitOffset = FVector(TurnLength, -TurnLength, 0.0f);
-	LeftTurn.ExitRotation = FRotator(0.0f, 0.0f, -90.0f);  // Yaw -90 for left
+	LeftTurn.ExitRotation = FRotator(0.0f, -90.0f, 0.0f);  // Yaw -90 for left
 
 	// Left Turn floor
 	FFloorBlock LeftTurnFloorStraight = {};
@@ -87,7 +92,7 @@ void AMapManager::BuildTemplateLibrary() {
 
 	FFloorBlock LeftTurnFloorTurn = {};
 	LeftTurnFloorTurn.LocalPosition = FVector(TurnLength, -TurnLength * 0.5f, 0);
-	LeftTurnFloorTurn.LocalRotation = FRotator(0, 0, -90);
+	LeftTurnFloorTurn.LocalRotation = FRotator(0, -90, 0);
 	LeftTurnFloorTurn.Scale			= FVector(TurnLength, ChunkWidth, 1);
 	LeftTurn.FloorBlockInfos.push_back(LeftTurnFloorTurn);
 
@@ -125,7 +130,7 @@ void AMapManager::BuildTemplateLibrary() {
 	RightTurn.ChunkType = EChunkType::TurnRight;
 	RightTurn.Length = ChunkLength;
 	RightTurn.ExitOffset = FVector(TurnLength, TurnLength, 0.f);
-	RightTurn.ExitRotation = FRotator(0.0f, 0.0f, 90.f);
+	RightTurn.ExitRotation = FRotator(0.0f, 90.0f, 0.f);
 
 	// Right Turn Floor
 	FFloorBlock RightTurnFloorStraight = {};
@@ -136,7 +141,7 @@ void AMapManager::BuildTemplateLibrary() {
 
 	FFloorBlock RightTurnFloorTurn = {};
 	RightTurnFloorTurn.LocalPosition = FVector(TurnLength, TurnLength * 0.5f, 0);
-	RightTurnFloorTurn.LocalRotation = FRotator(0, 0, 90);
+	RightTurnFloorTurn.LocalRotation = FRotator(0, 90, 0);
 	RightTurnFloorTurn.Scale		 = FVector(TurnLength, ChunkWidth, 1);
 	RightTurn.FloorBlockInfos.push_back(RightTurnFloorTurn);
 

@@ -117,6 +117,7 @@ namespace
 		{ "Obstacle", "Basic Obstacle", "Editor.Icon.Cube", EPlaceType::SimpleObstacle, ECategory::Basic },
 		{ "Wireball", "Wireball Obstacle", "Editor.Icon.Cube", EPlaceType::Wireball, ECategory::Basic },
 		{ "Vertical Wires", "Vertical Wire Obstacle", "Editor.Icon.Cube", EPlaceType::VerticalWires, ECategory::Basic },
+		{ "Map Manager", "Map Manager", "Editor.Icon.Cube", EPlaceType::MapManager, ECategory::Basic },
 	};
 
 	const char* GetCategoryLabel(ECategory Category)

@@ -20,6 +20,7 @@
 #include "Game/GameActors/Obstacle/SimpleObstacleActor.h"
 #include "Game/GameActors/Obstacle/WireballActor.h"
 #include "Game/GameActors/Obstacle/VerticalWireActor.h"
+#include "Game/Map/AMapManager.h"
 #include "GameFramework/World.h"
 #include "Render/Pipeline/Renderer.h"
 #include "Viewport/Viewport.h"
@@ -2997,6 +2998,7 @@ void FLevelViewportLayout::RenderViewportPlaceActorPopup()
 		PlaceActorMenuItem("Obstacle", EViewportPlaceActorType::SimpleObstacle);
 		PlaceActorMenuItem("Obstacle", EViewportPlaceActorType::Wireball);
 		PlaceActorMenuItem("Obstacle", EViewportPlaceActorType::VerticalWires);
+		PlaceActorMenuItem("Map", EViewportPlaceActorType::MapManager);
 
 		ImGui::EndMenu();
 	}
@@ -3325,6 +3327,16 @@ AActor* FLevelViewportLayout::SpawnActorFromViewportMenu(EViewportPlaceActorType
 			SpawnedActor = Actor;
 			SpawnLocation.Z += 1.0f;
 		}
+		break;
+	}
+	case EViewportPlaceActorType::MapManager:
+	{
+		AMapManager* Actor = World->SpawnActor<AMapManager>();
+		if (Actor) 
+		{
+			SpawnedActor = Actor;
+		}
+		break;
 	}
 	default:
 		break;

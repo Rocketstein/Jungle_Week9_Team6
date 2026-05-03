@@ -7,6 +7,8 @@ class AMapManager : public AActor
 public:
 	DECLARE_CLASS(AMapManager, AActor)
 
+	AMapManager();
+
 	void BeginPlay() override;
 	void Tick(float DeltaTime) override;
 	void EndPlay() override;

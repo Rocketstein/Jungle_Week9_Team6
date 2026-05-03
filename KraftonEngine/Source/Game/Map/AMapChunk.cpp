@@ -162,4 +162,11 @@ void AMapChunk::BuildFloor() {
 		Block->SetRelativeScale(BlockInfo.Scale);
 		FloorMeshes.push_back(Block);
 	}
+
+	// AddComponent does not update the spatial partition, so re-insert the actor
+	// so the new floor mesh components become visible to frustum culling.
+	if (UWorld* World = GetWorld())
+	{
+		World->InsertActorToOctree(this);
+	}
 }
