@@ -7,7 +7,7 @@ IMPLEMENT_CLASS(ABarrierObstacleActor, AObstacleActorBase)
 void ABarrierObstacleActor::InitDefaultComponents(const FString& UStaticMeshFileName) {
 	FString MeshPath = UStaticMeshFileName;
 	if (MeshPath.empty() || MeshPath == "None") {
-		if (const FMeshResource* Res = FResourceManager::Get().FindMesh("Game.Mesh.Obstacle.VerticalWire")) {
+		if (const FMeshResource* Res = FResourceManager::Get().FindMesh("Game.Mesh.Obstacle.Barrier0")) {
 			MeshPath = Res->Path;
 		}
 	}
