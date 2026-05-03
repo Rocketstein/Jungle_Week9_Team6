@@ -10,7 +10,6 @@ IMPLEMENT_CLASS(AImposterTranslateGizmo, AImposterGizmoActorBase)
 
 namespace {
 	constexpr float LerpDuration = 0.5f;
-	constexpr float LaneWidth = 220.0f;
 
 	std::mt19937& RandomEngine()
 	{
@@ -23,11 +22,23 @@ namespace {
 		std::uniform_int_distribution<int> Distribution(0, 1);
 		return Distribution(RandomEngine()) == 0 ? -1 : 1;
 	}
+
+	int RandomAxis()
+	{
+		std::uniform_int_distribution<int> Distribution(0, 2);
+		return Distribution(RandomEngine());
+	}
+
+	float RandomOffset()
+	{
+		std::uniform_int_distribution<int> Distribution(0, 2);
+		return Distribution(RandomEngine());
+	}
 }
 
 void AImposterTranslateGizmo::Capture(AActor* InActor) {
 	if (!InActor) return;
-	if (!InActor->IsA<ARunner>() && !InActor->IsA<AObstacleActorBase>()) return;
+	if (!InActor->IsA<AObstacleActorBase>()) return;
 	Target = InActor;
 	Elapsed = 0.0f;
 	bTransforming = false;
@@ -56,5 +67,13 @@ void AImposterTranslateGizmo::Transform(float DeltaTime) {
 }
 
 FVector AImposterTranslateGizmo::GetTranslateOffset() const {
-	return FVector(0.0f, LaneWidth * static_cast<float>(RandomSign()), 0.0f);
+	switch (RandomAxis())
+	{
+	case 0:
+		return FVector(RandomOffset(), 0.0f, 0.0f);
+	case 1:
+		return FVector(0.0f, RandomOffset(), 0.0f);
+	default:
+		return FVector(0.0f, 0.0f, RandomOffset());
+	}
 }
