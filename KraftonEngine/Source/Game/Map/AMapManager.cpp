@@ -50,6 +50,20 @@ void AMapManager::BuildTemplateLibrary() {
 
 	Templates.clear();
 
+	auto AddDefaultDecisionSlots = [](FMapChunkTemplate& Template, float StartX, float EndX, float Step)
+	{
+		for (float X = StartX; X <= EndX; X += Step)
+		{
+			FDecisionSlot Slot = {};
+			Slot.X = X;
+			for (int32 DecisionIndex = 0; DecisionIndex < static_cast<int32>(EObstacleDecision::Count); ++DecisionIndex)
+			{
+				Slot.AllowedDecisions.push_back(static_cast<EObstacleDecision>(DecisionIndex));
+			}
+			Template.ObstacleSlotDecisions.push_back(Slot);
+		}
+	};
+
 	//-----------------------------------------------------------------
 	// Start
 	//-----------------------------------------------------------------
@@ -84,18 +98,10 @@ void AMapManager::BuildTemplateLibrary() {
 	StraightFloor.Scale			= FVector(ChunkLength * 0.5, ChunkWidth, 1);
 	Straight.FloorBlockInfos.push_back(StraightFloor);
 
-	constexpr uint8 AllTypes = 0xFF;
 	float LeftLaneY  = -ChunkWidth / 1.5;
 	float MidLaneY   = 0.f;
 	float RightLaneY = ChunkWidth / 1.5f;
-	for (float X = 2.f; X <= Straight.Length - 2.f; X += 2.f) {
-		FDecisionSlot Slot = {};
-		Slot.X = X;
-		for (uint8 i = 0; i < EObstacleDecision::Count; i++) {
-			Slot.AllowedDecisions.push_back(static_cast<EObstacleDecision>(i));
-		}
-		Straight.ObstacleSlotDecisions.push_back(Slot);
-	}
+	AddDefaultDecisionSlots(Straight, 2.f, Straight.Length - 2.f, 2.f);
 
 	Templates.push_back(Straight);
 
@@ -183,13 +189,7 @@ void AMapManager::BuildTemplateLibrary() {
 	StraightWithHole.FloorBlockInfos.push_back(StraightWithHoleFloor2);
 
 	// Obstacles
-	//for (float X = StraightWithHole.Length * 0.5f; X <= StraightWithHole.Length - 2.f; X += 2.f) {
-	//	FDecisionSlot Slot = {};
-	//	Slot.X = X;
-	//	for (uint8 i = 0; i < EObstacleDecision::Count; i++) {
-	//		Slot.AllowedDecisions.push_back(static_cast<EObstacleDecision>(i));
-	//	}
-	//}
+	AddDefaultDecisionSlots(StraightWithHole, StraightWithHole.Length * 0.5f, StraightWithHole.Length - 2.f, 2.f);
 
 	Templates.push_back(StraightWithHole);
 }
@@ -207,7 +207,7 @@ void AMapManager::SpawnNextChunk(bool Init)
 	Chunk->SetActorRotation(SpawnRot);
 
 	// TODO: Obstacle fill rate should ramp with time logarithmically, clamped to some reasonable value
-	Chunk->InitFromTemplate(T, 0.2);
+	Chunk->InitFromTemplate(T, 0.2f);
 	ActiveChunks.push_back(Chunk);
 
 	//bool bIsTurn = (T.ChunkType == EChunkType::TurnLeft || T.ChunkType == EChunkType::TurnRight);

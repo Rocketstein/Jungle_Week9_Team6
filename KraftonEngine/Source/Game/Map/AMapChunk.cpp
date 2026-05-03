@@ -48,6 +48,11 @@ FRotator AMapChunk::GetExitRotation() const
 
 static AObstacleActorBase* SpawnObstacleOfType(UWorld* World, EObstacleType Type)
 {
+	if (!World)
+	{
+		return nullptr;
+	}
+
 	switch (Type)
 	{
 	case EObstacleType::Barrier: return World->SpawnActor<AVerticalWireActor>();
@@ -56,6 +61,26 @@ static AObstacleActorBase* SpawnObstacleOfType(UWorld* World, EObstacleType Type
 	case EObstacleType::Misc:    return World->SpawnActor<AWireballActor>();
 	default:                     return nullptr;
 	}
+}
+
+static AObstacleActorBase* SpawnObstacleAt(UWorld* World, EObstacleType Type, const FVector& Location)
+{
+	AObstacleActorBase* Obstacle = SpawnObstacleOfType(World, Type);
+	if (!Obstacle)
+	{
+		return nullptr;
+	}
+
+	Obstacle->InitDefaultComponents("");
+	Obstacle->SetActorLocation(Location);
+	World->InsertActorToOctree(Obstacle);
+
+	if (!Obstacle->HasActorBegunPlay())
+	{
+		Obstacle->BeginPlay();
+	}
+
+	return Obstacle;
 }
 
 static FString GetMeshPath(const char* MeshKey)
@@ -116,107 +141,66 @@ static void ApplyCubeMesh(UStaticMeshComponent* MeshComponent)
 
 void AMapChunk::SpawnObstacle()
 {
-	using enum EObstacleDecision;
 	FQuat WorldQuat = FQuat::FromRotator(GetActorRotation());
+	const float LaneY[3] = { -Template.Width / 1.5f, 0.0f, Template.Width / 1.5f };
+	constexpr float ObstacleZ = 1.0f;
 
 	for (const FDecisionSlot& DecisionSlot : Template.ObstacleSlotDecisions) {
 		if ((float)rand() / RAND_MAX > ObstacleFillRate) continue;
+		if (DecisionSlot.AllowedDecisions.empty()) continue;
+
 		EObstacleDecision Decision = DecisionSlot.AllowedDecisions[rand() % DecisionSlot.AllowedDecisions.size()];
 
-		float LaneY[3] = { -Template.Width / 1.5, 0, Template.Width / 1.5f };
+		auto WorldPositionForLane = [&](int32 LaneIndex)
+		{
+			return GetActorLocation() + WorldQuat.RotateVector(FVector(DecisionSlot.X, LaneY[LaneIndex], ObstacleZ));
+		};
 
 		switch (Decision) {
 		case (SingleBarrierLeft):
 		{
-			AObstacleActorBase* Obs = GetWorld()->SpawnActor<AVerticalWireActor>();
-			FVector ObsPos = FVector(DecisionSlot.X, LaneY[0], 0);
-			Obs->InitDefaultComponents("");
-			Obs->SetActorLocation(GetActorLocation() + WorldQuat.RotateVector(ObsPos));
-			if (Obs->HasActorBegunPlay())
-				Obs->BeginPlay();
-			SpawnedObstacles.push_back(Obs);
+			if (AObstacleActorBase* Obs = SpawnObstacleAt(GetWorld(), EObstacleType::Barrier, WorldPositionForLane(0)))
+				SpawnedObstacles.push_back(Obs);
 			break;
 		}
 		case (SingleBarrierMiddle):
 		{
-			AObstacleActorBase* Obs = GetWorld()->SpawnActor<AVerticalWireActor>();
-			FVector ObsPos = FVector(DecisionSlot.X, LaneY[1], 0);
-			Obs->InitDefaultComponents("");
-			Obs->SetActorLocation(GetActorLocation() + WorldQuat.RotateVector(ObsPos));
-			if (Obs->HasActorBegunPlay())
-				Obs->BeginPlay();
-			SpawnedObstacles.push_back(Obs);
+			if (AObstacleActorBase* Obs = SpawnObstacleAt(GetWorld(), EObstacleType::Barrier, WorldPositionForLane(1)))
+				SpawnedObstacles.push_back(Obs);
 			break;
 		}
 		case (SingleBarrierRight):
 		{
-			AObstacleActorBase* Obs = GetWorld()->SpawnActor<AVerticalWireActor>();
-			FVector ObsPos = FVector(DecisionSlot.X, LaneY[2], 0);
-			Obs->InitDefaultComponents("");
-			Obs->SetActorLocation(GetActorLocation() + WorldQuat.RotateVector(ObsPos));
-			if (Obs->HasActorBegunPlay())
-				Obs->BeginPlay();
-			SpawnedObstacles.push_back(Obs);
+			if (AObstacleActorBase* Obs = SpawnObstacleAt(GetWorld(), EObstacleType::Barrier, WorldPositionForLane(2)))
+				SpawnedObstacles.push_back(Obs);
 			break;
 		}
 		case (DoubleBarrierLeft):
 		{
-			AObstacleActorBase* Obs0 = GetWorld()->SpawnActor<AVerticalWireActor>();
-			FVector ObsPos0 = FVector(DecisionSlot.X, LaneY[0], 0);
-			Obs0->InitDefaultComponents("");
-			Obs0->SetActorLocation(GetActorLocation() + WorldQuat.RotateVector(ObsPos0));
-			if (Obs0->HasActorBegunPlay())
-				Obs0->BeginPlay();
-			SpawnedObstacles.push_back(Obs0);
-
-			AObstacleActorBase* Obs1 = GetWorld()->SpawnActor<AVerticalWireActor>();
-			FVector ObsPos1 = FVector(DecisionSlot.X, LaneY[1], 1);
-			Obs1->InitDefaultComponents("");
-			Obs1->SetActorLocation(GetActorLocation() + WorldQuat.RotateVector(ObsPos1));
-			if (Obs1->HasActorBegunPlay())
-				Obs1->BeginPlay();
-			SpawnedObstacles.push_back(Obs1);
+			if (AObstacleActorBase* Obs0 = SpawnObstacleAt(GetWorld(), EObstacleType::Barrier, WorldPositionForLane(0)))
+				SpawnedObstacles.push_back(Obs0);
+			if (AObstacleActorBase* Obs1 = SpawnObstacleAt(GetWorld(), EObstacleType::Barrier, WorldPositionForLane(1)))
+				SpawnedObstacles.push_back(Obs1);
 			break;
 		}
 		case (DoubleBarrierRight):
 		{
-			AObstacleActorBase* Obs0 = GetWorld()->SpawnActor<AVerticalWireActor>();
-			FVector ObsPos0 = FVector(DecisionSlot.X, LaneY[2], 0);
-			Obs0->InitDefaultComponents("");
-			Obs0->SetActorLocation(GetActorLocation() + WorldQuat.RotateVector(ObsPos0));
-			if (Obs0->HasActorBegunPlay())
-				Obs0->BeginPlay();
-			SpawnedObstacles.push_back(Obs0);
-
-			AObstacleActorBase* Obs1 = GetWorld()->SpawnActor<AVerticalWireActor>();
-			FVector ObsPos1 = FVector(DecisionSlot.X, LaneY[1], 1);
-			Obs1->InitDefaultComponents("");
-			Obs1->SetActorLocation(GetActorLocation() + WorldQuat.RotateVector(ObsPos1));
-			if (Obs1->HasActorBegunPlay())
-				Obs1->BeginPlay();
-			SpawnedObstacles.push_back(Obs1);
+			if (AObstacleActorBase* Obs0 = SpawnObstacleAt(GetWorld(), EObstacleType::Barrier, WorldPositionForLane(2)))
+				SpawnedObstacles.push_back(Obs0);
+			if (AObstacleActorBase* Obs1 = SpawnObstacleAt(GetWorld(), EObstacleType::Barrier, WorldPositionForLane(1)))
+				SpawnedObstacles.push_back(Obs1);
 			break;
 		}
 		case (MustJump):
 		{
-			//AObstacleActorBase* Obs = GetWorld()->SpawnActor<AVerticalWireActor>();
-			//FVector ObsPos = FVector(DecisionSlot.X, LaneY[2], 0);
-			//Obs->InitDefaultComponents("");
-			//Obs->SetActorLocation(GetActorLocation() + WorldQuat.RotateVector(ObsPos));
-			//if (Obs->HasActorBegunPlay())
-			//	Obs->BeginPlay();
-			//SpawnedObstacles.push_back(Obs);
+			if (AObstacleActorBase* Obs = SpawnObstacleAt(GetWorld(), EObstacleType::LowBar, WorldPositionForLane(1)))
+				SpawnedObstacles.push_back(Obs);
 			break;
 		}
 		case (MustSlide):
 		{
-			//AObstacleActorBase* Obs = GetWorld()->SpawnActor<AVerticalWireActor>();
-			//FVector ObsPos = FVector(DecisionSlot.X, LaneY[2], 0);
-			//Obs->InitDefaultComponents("");
-			//Obs->SetActorLocation(GetActorLocation() + WorldQuat.RotateVector(ObsPos));
-			//if (Obs->HasActorBegunPlay())
-			//	Obs->BeginPlay();
-			//SpawnedObstacles.push_back(Obs);
+			if (AObstacleActorBase* Obs = SpawnObstacleAt(GetWorld(), EObstacleType::HighBar, WorldPositionForLane(1)))
+				SpawnedObstacles.push_back(Obs);
 			break;
 		}
 		default: {
