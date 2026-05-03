@@ -46,6 +46,7 @@ void AMapManager::BuildTemplateLibrary() {
 	constexpr float ChunkWidth  = 6.f;	// Recommended multiple of 3
 	constexpr float ChunkLength = 20.f; // Recommended multiple of 2
 	constexpr float TurnLength = 10.f;
+	constexpr float LaneY[3] = { -ChunkWidth / 1.5, 0, ChunkWidth / 1.5f };
 
 	Templates.clear();
 
@@ -81,18 +82,15 @@ void AMapManager::BuildTemplateLibrary() {
 	StraightFloor.Scale			= FVector(ChunkLength * 0.5, ChunkWidth, 1);
 	Straight.FloorBlockInfos.push_back(StraightFloor);
 
-	// Obstacle slots: 4 columns x 3 lanes; random type selected at fill time
-	// Lanes at Y=-2,0,+2 (each 2 units wide in a 6-unit-wide chunk)
-	// Columns at X=4,8,12,16; Z=1 places obstacles just above the floor surface
 	constexpr uint8 AllTypes = 0xFF;
 	float LeftLaneY  = -ChunkWidth / 1.5;
 	float MidLaneY   = 0.f;
 	float RightLaneY = ChunkWidth / 1.5f;
-	for (float X = 3.f; X <= Straight.Length - 3.f; X += 2.f)
-		for (float Y : { LeftLaneY, MidLaneY, RightLaneY })
+	for (float X = 2.f; X <= Straight.Length - 2.f; X += 2.f)
+		for (uint8 i = 0; i < 3; i++)
 		{
 			FObstacleSlot Slot{};
-			Slot.LocalPosition = FVector(X, Y, 1.f);
+			Slot.LocalPosition = FVector(X, LaneY[i], 1.f);
 			Slot.AllowedTypes  = static_cast<EObstacleType>(AllTypes);
 			Straight.ObstacleSlots.push_back(Slot);
 		}
@@ -165,39 +163,21 @@ void AMapManager::BuildTemplateLibrary() {
 	//-----------------------------------------------------------------
 	FMapChunkTemplate StraightWithHole;
 	StraightWithHole.ChunkType = EChunkType::StraightWithHole;
-	StraightWithHole.Length = ChunkLength;
-	StraightWithHole.ExitOffset = FVector(ChunkLength, 0.f, 0.f);
+	StraightWithHole.Length = ChunkLength / 2;
+	StraightWithHole.ExitOffset = FVector(StraightWithHole.Length, 0.f, 0.f);
 
 	// Straight With Hole Floor
 	FFloorBlock StraightWithHoleFloor1 = {};
-	StraightWithHoleFloor1.LocalPosition = FVector(ChunkLength / 8.f, 0, 0);
+	StraightWithHoleFloor1.LocalPosition = FVector(StraightWithHole.Length / 8.f, 0, 0);
 	StraightWithHoleFloor1.LocalRotation = FRotator(0, 0, 0);
-	StraightWithHoleFloor1.Scale		 = FVector(ChunkLength / 8, ChunkWidth, 1);
+	StraightWithHoleFloor1.Scale		 = FVector(StraightWithHole.Length / 8, ChunkWidth, 1);
 	StraightWithHole.FloorBlockInfos.push_back(StraightWithHoleFloor1);
 
 	FFloorBlock StraightWithHoleFloor2 = {};
-	StraightWithHoleFloor2.LocalPosition = FVector(ChunkLength * 0.75f, 0, 0);
+	StraightWithHoleFloor2.LocalPosition = FVector(StraightWithHole.Length * 0.75f, 0, 0);
 	StraightWithHoleFloor2.LocalRotation = FRotator(0, 0, 0);
-	StraightWithHoleFloor2.Scale		 = FVector(ChunkLength / 4, ChunkWidth, 1);
+	StraightWithHoleFloor2.Scale		 = FVector(StraightWithHole.Length / 4, ChunkWidth, 1);
 	StraightWithHole.FloorBlockInfos.push_back(StraightWithHoleFloor2);
-
-	// Floor1 solid X: 0-5  →  one column at X=3 (2-unit margin from hole edge)
-	// Floor2 solid X: 10-20 →  columns at X=11,13,15,17 (1-unit margin from hole, 3 from far end)
-	for (float Y : { LeftLaneY, MidLaneY, RightLaneY })
-	{
-		FObstacleSlot Slot{};
-		Slot.LocalPosition = FVector(3.f, Y, 1.f);
-		Slot.AllowedTypes  = static_cast<EObstacleType>(AllTypes);
-		StraightWithHole.ObstacleSlots.push_back(Slot);
-	}
-	for (float X = 11.f; X <= 17.f; X += 2.f)
-		for (float Y : { LeftLaneY, MidLaneY, RightLaneY })
-		{
-			FObstacleSlot Slot{};
-			Slot.LocalPosition = FVector(X, Y, 1.f);
-			Slot.AllowedTypes  = static_cast<EObstacleType>(AllTypes);
-			StraightWithHole.ObstacleSlots.push_back(Slot);
-		}
 
 	Templates.push_back(StraightWithHole);
 }

@@ -158,7 +158,8 @@ void AMapChunk::BuildFloor() {
 		}
 
 		ApplyCubeMesh(Block);
-		Block->SetRelativeLocation(BlockInfo.LocalPosition);
+		FVector BlockPos = BlockInfo.LocalPosition;
+		Block->SetRelativeLocation(FVector(BlockPos.X, BlockPos.Y, BlockPos.Z));
 		Block->SetRelativeRotation(BlockInfo.LocalRotation);
 		Block->SetRelativeScale(BlockInfo.Scale);
 		FloorMeshes.push_back(Block);
