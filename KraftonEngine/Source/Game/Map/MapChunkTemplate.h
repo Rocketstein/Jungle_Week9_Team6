@@ -18,6 +18,13 @@ struct FObstacleSlot
 	EObstacleType	AllowedTypes;   // bitmask - which obstacle types fit here
 };
 
+struct FFloorBlock
+{
+	FVector LocalPosition;
+	FRotator LocalRotation;
+	FVector Scale;
+};
+
  /*
  At spawn, AMapChunk::BeginPlay() iterates ObstacleSlots, 
  rolls against ObstacleFillRate for each, and calls World->SpawnActor<>() for the winners. 
@@ -30,4 +37,6 @@ struct FMapChunkTemplate {
 	FRotator				ExitRotation;						// e.g. (0, 0, -90) for a left turn around Z
 	TArray<FObstacleSlot>	ObstacleSlots;						// available slots, defined per template
 	float					ObstacleFillRate;					// 0.0–1.0, tunable per chunk type
+
+	TArray<FFloorBlock> FloorBlockInfos;
 };

@@ -15,10 +15,14 @@ public:
 	EChunkType GetChunkType()    const { return Template.ChunkType; }
 
 private:
+	// Random Obstacle generator
 	void SpawnObstacle();
+
+	// Builds floor based on the FloorBlockInfos array in the template 
+	void BuildFloor();
 
 private:
 	FMapChunkTemplate     Template;
-	UStaticMeshComponent* FloorMesh = nullptr;
-	TArray<AActor*>       SpawnedObstacles;
+	UStaticMeshComponent* RootMesh = nullptr;
+	TArray<AObstacleActorBase*> SpawnedObstacles;
 };
