@@ -476,6 +476,8 @@
     <ClCompile Include="Source\Engine\Viewport\GameViewportClient.cpp" />
     <ClCompile Include="Source\Engine\Viewport\Viewport.cpp" />
     <ClCompile Include="Source\Engine\Viewport\ViewportClient.cpp" />
+    <ClCompile Include="Source\Game\GameActors\Obstacle\MustJumpObstacleActor.cpp" />
+    <ClCompile Include="Source\Game\GameActors\Obstacle\MustSlideObstacleActor.cpp" />
     <ClCompile Include="Source\Game\GameActors\Obstacle\ObstacleActorBase.cpp" />
     <ClCompile Include="Source\Game\GameActors\Obstacle\SimpleObstacleActor.cpp" />
     <ClCompile Include="Source\Game\GameActors\Obstacle\VerticalWireActor.cpp" />
@@ -744,6 +746,8 @@
     <ClInclude Include="Source\Engine\Viewport\GameViewportClient.h" />
     <ClInclude Include="Source\Engine\Viewport\Viewport.h" />
     <ClInclude Include="Source\Engine\Viewport\ViewportClient.h" />
+    <ClInclude Include="Source\Game\GameActors\Obstacle\MustJumpObstacleActor.h" />
+    <ClInclude Include="Source\Game\GameActors\Obstacle\MustSlideObstacleActor.h" />
     <ClInclude Include="Source\Game\GameActors\Obstacle\ObstacleActorBase.h" />
     <ClInclude Include="Source\Game\GameActors\Obstacle\SimpleObstacleActor.h" />
     <ClInclude Include="Source\Game\GameActors\Obstacle\VerticalWireActor.h" />
