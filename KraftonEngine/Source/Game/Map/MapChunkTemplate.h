@@ -6,9 +6,9 @@
 
 enum class EChunkType {
 	Straight,
-	TurnLeft,
-	TurnRight,
-	TwoWay,
+	//TurnLeft,
+	//TurnRight,
+	//TwoWay,
 	StraightWithHole,
 };
 
