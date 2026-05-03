@@ -5,6 +5,9 @@ class AImposterTranslateGizmo : public AImposterGizmoActorBase {
 public:
 	DECLARE_CLASS(AImposterTranslateGizmo, AImposterGizmoActorBase)
 
-private:
+	void Capture(AActor* InTarget)	override;
+	void Transform(float DeltaTime) override;
 
+private:
+	FVector GetTranslateOffset() const;
 };

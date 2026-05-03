@@ -10,8 +10,7 @@ public:
 	DECLARE_CLASS(AImposterGizmoActorBase, AEnemyActorBase)
 	
 	virtual void Capture(AActor* InTarget)	= 0;
-	virtual void Transform()				= 0;
-
+	virtual void Transform(float DeltaTime) = 0;
 
 	void Release() { Target = nullptr; }
 
