@@ -130,6 +130,7 @@ void AMapChunk::SpawnObstacle()
 		{
 			AObstacleActorBase* Obs = GetWorld()->SpawnActor<AVerticalWireActor>();
 			FVector ObsPos = FVector(DecisionSlot.X, LaneY[0], 0);
+			Obs->InitDefaultComponents("");
 			Obs->SetActorLocation(GetActorLocation() + WorldQuat.RotateVector(ObsPos));
 			if (Obs->HasActorBegunPlay())
 				Obs->BeginPlay();
@@ -140,6 +141,7 @@ void AMapChunk::SpawnObstacle()
 		{
 			AObstacleActorBase* Obs = GetWorld()->SpawnActor<AVerticalWireActor>();
 			FVector ObsPos = FVector(DecisionSlot.X, LaneY[1], 0);
+			Obs->InitDefaultComponents("");
 			Obs->SetActorLocation(GetActorLocation() + WorldQuat.RotateVector(ObsPos));
 			if (Obs->HasActorBegunPlay())
 				Obs->BeginPlay();
@@ -150,6 +152,7 @@ void AMapChunk::SpawnObstacle()
 		{
 			AObstacleActorBase* Obs = GetWorld()->SpawnActor<AVerticalWireActor>();
 			FVector ObsPos = FVector(DecisionSlot.X, LaneY[2], 0);
+			Obs->InitDefaultComponents("");
 			Obs->SetActorLocation(GetActorLocation() + WorldQuat.RotateVector(ObsPos));
 			if (Obs->HasActorBegunPlay())
 				Obs->BeginPlay();
@@ -160,6 +163,7 @@ void AMapChunk::SpawnObstacle()
 		{
 			AObstacleActorBase* Obs0 = GetWorld()->SpawnActor<AVerticalWireActor>();
 			FVector ObsPos0 = FVector(DecisionSlot.X, LaneY[0], 0);
+			Obs0->InitDefaultComponents("");
 			Obs0->SetActorLocation(GetActorLocation() + WorldQuat.RotateVector(ObsPos0));
 			if (Obs0->HasActorBegunPlay())
 				Obs0->BeginPlay();
@@ -167,6 +171,7 @@ void AMapChunk::SpawnObstacle()
 
 			AObstacleActorBase* Obs1 = GetWorld()->SpawnActor<AVerticalWireActor>();
 			FVector ObsPos1 = FVector(DecisionSlot.X, LaneY[1], 1);
+			Obs1->InitDefaultComponents("");
 			Obs1->SetActorLocation(GetActorLocation() + WorldQuat.RotateVector(ObsPos1));
 			if (Obs1->HasActorBegunPlay())
 				Obs1->BeginPlay();
@@ -177,6 +182,7 @@ void AMapChunk::SpawnObstacle()
 		{
 			AObstacleActorBase* Obs0 = GetWorld()->SpawnActor<AVerticalWireActor>();
 			FVector ObsPos0 = FVector(DecisionSlot.X, LaneY[2], 0);
+			Obs0->InitDefaultComponents("");
 			Obs0->SetActorLocation(GetActorLocation() + WorldQuat.RotateVector(ObsPos0));
 			if (Obs0->HasActorBegunPlay())
 				Obs0->BeginPlay();
@@ -184,6 +190,7 @@ void AMapChunk::SpawnObstacle()
 
 			AObstacleActorBase* Obs1 = GetWorld()->SpawnActor<AVerticalWireActor>();
 			FVector ObsPos1 = FVector(DecisionSlot.X, LaneY[1], 1);
+			Obs1->InitDefaultComponents("");
 			Obs1->SetActorLocation(GetActorLocation() + WorldQuat.RotateVector(ObsPos1));
 			if (Obs1->HasActorBegunPlay())
 				Obs1->BeginPlay();
@@ -194,6 +201,7 @@ void AMapChunk::SpawnObstacle()
 		{
 			//AObstacleActorBase* Obs = GetWorld()->SpawnActor<AVerticalWireActor>();
 			//FVector ObsPos = FVector(DecisionSlot.X, LaneY[2], 0);
+			//Obs->InitDefaultComponents("");
 			//Obs->SetActorLocation(GetActorLocation() + WorldQuat.RotateVector(ObsPos));
 			//if (Obs->HasActorBegunPlay())
 			//	Obs->BeginPlay();
@@ -204,6 +212,7 @@ void AMapChunk::SpawnObstacle()
 		{
 			//AObstacleActorBase* Obs = GetWorld()->SpawnActor<AVerticalWireActor>();
 			//FVector ObsPos = FVector(DecisionSlot.X, LaneY[2], 0);
+			//Obs->InitDefaultComponents("");
 			//Obs->SetActorLocation(GetActorLocation() + WorldQuat.RotateVector(ObsPos));
 			//if (Obs->HasActorBegunPlay())
 			//	Obs->BeginPlay();
