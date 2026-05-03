@@ -25,8 +25,9 @@ void AMapChunk::EndPlay() {
 	AActor::EndPlay();
 }
 
-void AMapChunk::InitFromTemplate(const FMapChunkTemplate& InTemplate) {
-	Template  = InTemplate;
+void AMapChunk::InitFromTemplate(const FMapChunkTemplate& InTemplate, float InObstacleFillRate) {
+	Template         = InTemplate;
+	ObstacleFillRate = InObstacleFillRate;
 	SpawnObstacle();
 	BuildFloor();
 }
@@ -119,7 +120,7 @@ void AMapChunk::SpawnObstacle()
 
 	for (const FObstacleSlot& Slot : Template.ObstacleSlots)
 	{
-		if ((float)rand() / RAND_MAX > Template.ObstacleFillRate) continue;
+		if ((float)rand() / RAND_MAX > ObstacleFillRate) continue;
 
 		uint8 Mask = static_cast<uint8>(Slot.AllowedTypes);
 		if (Mask == 0) continue;
@@ -135,9 +136,7 @@ void AMapChunk::SpawnObstacle()
 		Obs->InitDefaultComponents("");
 		Obs->SetActorLocation(GetActorLocation() + WorldQuat.RotateVector(Slot.LocalPosition));
 		if (Obs->HasActorBegunPlay())
-		{
 			Obs->BeginPlay();
-		}
 		SpawnedObstacles.push_back(Obs);
 	}
 }

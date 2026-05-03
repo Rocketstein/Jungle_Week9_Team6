@@ -44,7 +44,6 @@ void AMapManager::BuildTemplateLibrary() {
 
 	Templates.clear();
 
-	// TODO: Walls
 	//-----------------------------------------------------------------
 	// Straight
 	//-----------------------------------------------------------------
@@ -60,18 +59,19 @@ void AMapManager::BuildTemplateLibrary() {
 	StraightFloor.Scale			= FVector(ChunkLength * 0.5, ChunkWidth, 1);
 	Straight.FloorBlockInfos.push_back(StraightFloor);
 
-	// Straight wall infos
-	//FFloorBlock StraightWallLeft = {};
-	//StraightWallLeft.LocalPosition = FVector(0, -1, 0);
-	//StraightWallLeft.LocalRotation = FRotator(0, 0, 0);
-	//StraightWallLeft.Scale		   = FVector(ChunkLength, 1, Wallheight);
-	//Straight.FloorBlockInfos.push_back(StraightWallLeft);
+	// Obstacle slots: 4 columns x 3 lanes; random type selected at fill time
+	// Lanes at Y=-2,0,+2 (each 2 units wide in a 6-unit-wide chunk)
+	// Columns at X=4,8,12,16; Z=1 places obstacles just above the floor surface
+	constexpr uint8 AllTypes = 0x0F;
+	for (float X : {4.f, 8.f, 12.f, 16.f})
+		for (float Y : {-2.f, 0.f, 2.f})
+		{
+			FObstacleSlot Slot{};
+			Slot.LocalPosition = FVector(X, Y, 1.f);
+			Slot.AllowedTypes  = static_cast<EObstacleType>(AllTypes);
+			Straight.ObstacleSlots.push_back(Slot);
+		}
 
-	//FFloorBlock StraightWallRight = {};
-	//StraightWallRight.LocalPosition = FVector(0, ChunkWidth + 1, 0);
-	//StraightWallRight.LocalRotation = FRotator(0, 0, 0);
-	//StraightWallRight.Scale			= FVector(ChunkLength, 1, Wallheight);
-	//Straight.FloorBlockInfos.push_back(StraightWallRight);
 	Templates.push_back(Straight);
 
 	//-----------------------------------------------------------------
@@ -102,30 +102,6 @@ void AMapManager::BuildTemplateLibrary() {
 	//LeftTurnFloorExit.Scale			= FVector(TurnLength - ChunkWidth * 0.5f, ChunkWidth, 1);
 	//LeftTurn.FloorBlockInfos.push_back(LeftTurnFloorExit);
 
-	// Left Turn Wall
-	//FFloorBlock LeftTurnLeftWallStraight = {};
-	//LeftTurnLeftWallStraight.LocalPosition = FVector(0, -1, 0);
-	//LeftTurnLeftWallStraight.LocalRotation = FRotator(0, 0, 0);
-	//LeftTurnLeftWallStraight.Scale		   = FVector(ChunkLength / 2 - ChunkWidth, 1, Wallheight);
-	//LeftTurn.FloorBlockInfos.push_back(LeftTurnLeftWallStraight);
-
-	//FFloorBlock LeftTurnRightWallStraight = {};
-	//LeftTurnRightWallStraight.LocalPosition = FVector(0, ChunkWidth + 1, Wallheight);
-	//LeftTurnRightWallStraight.LocalRotation = FRotator(0, 0, 0);
-	//LeftTurnRightWallStraight.Scale			= FVector(ChunkLength / 2 , 1, Wallheight);
-	//LeftTurn.FloorBlockInfos.push_back(LeftTurnRightWallStraight);
-
-	//FFloorBlock LeftTurnLeftWallTurn = {};
-	//LeftTurnLeftWallTurn.LocalPosition = FVector(ChunkLength / 2 - ChunkWidth, -1 , 0);
-	//LeftTurnLeftWallTurn.LocalRotation = FRotator(0, 0, -90);
-	//LeftTurnLeftWallTurn.Scale		   = FVector(ChunkLength / 2 - ChunkWidth, 1, Wallheight);
-	//LeftTurn.FloorBlockInfos.push_back(LeftTurnLeftWallTurn);
-
-	//FFloorBlock LeftTurnRightWallTurn = {};
-	//LeftTurnRightWallTurn.LocalPosition = FVector(ChunkLength / 2, ChunkWidth + 1, 0);
-	//LeftTurnRightWallTurn.LocalRotation = FRotator(0, 0, -90);
-	//LeftTurnRightWallTurn.Scale			= FVector(ChunkLength / 2, 1 , Wallheight);
-	//LeftTurn.FloorBlockInfos.push_back(LeftTurnRightWallTurn);
 
 	//Templates.push_back(LeftTurn);
 
@@ -157,31 +133,6 @@ void AMapManager::BuildTemplateLibrary() {
 	//RightTurnFloorExit.Scale		 = FVector(TurnLength - ChunkWidth * 0.5f, ChunkWidth, 1);
 	//RightTurn.FloorBlockInfos.push_back(RightTurnFloorExit);
 
-	// Right Turn Walls
-	//FFloorBlock RighTurnLeftWallStraight;
-	//RighTurnLeftWallStraight.LocalPosition = FVector(0, -1, 0);
-	//RighTurnLeftWallStraight.LocalRotation = FRotator(0, 0, 0);
-	//RighTurnLeftWallStraight.Scale		   = FVector(ChunkLength / 2, 1, Wallheight);
-	//RightTurn.FloorBlockInfos.push_back(RighTurnLeftWallStraight);
-
-	//FFloorBlock RightTurnRightWallStraight;
-	//RightTurnRightWallStraight.LocalPosition = FVector(0, ChunkWidth + 1, 0);
-	//RightTurnRightWallStraight.LocalRotation = FRotator(0, 0, 0);
-	//RightTurnRightWallStraight.Scale		 = FVector(ChunkLength / 2 - ChunkWidth, 1, Wallheight);
-	//RightTurn.FloorBlockInfos.push_back(RightTurnRightWallStraight);
-
-	//FFloorBlock RightTurnLeftWallTurn;
-	//RightTurnLeftWallTurn.LocalPosition = FVector(ChunkLength / 2 + ChunkWidth, -1, 0);
-	//RightTurnLeftWallTurn.LocalRotation = FRotator(0, 0, 90);
-	//RightTurnLeftWallTurn.Scale			= FVector(ChunkLength / 2, 1, Wallheight);
-	//RightTurn.FloorBlockInfos.push_back(RightTurnLeftWallTurn);
-
-	//FFloorBlock RightTurnRIghtWallTurn;
-	//RightTurnRIghtWallTurn.LocalPosition = FVector(ChunkLength / 2, ChunkWidth + 1, 0);
-	//RightTurnRIghtWallTurn.LocalRotation = FRotator(0, 0, 90);
-	//RightTurnRIghtWallTurn.Scale		 = FVector(ChunkLength / 2 - ChunkWidth, 1, Wallheight);
-	//RightTurn.FloorBlockInfos.push_back(RightTurnRIghtWallTurn);
-
 	//Templates.push_back(RightTurn);
 
 	//-----------------------------------------------------------------
@@ -205,18 +156,15 @@ void AMapManager::BuildTemplateLibrary() {
 	StraightWithHoleFloor2.Scale		 = FVector(ChunkLength / 4, ChunkWidth, 1);
 	StraightWithHole.FloorBlockInfos.push_back(StraightWithHoleFloor2);
 
-	// Straight With Hole Walls
-	//FFloorBlock StraightWithHoleWallLeft = {};
-	//StraightWithHoleWallLeft.LocalPosition = FVector(0, -1, 0);
-	//StraightWithHoleWallLeft.LocalRotation = FRotator(0, 0, 0);
-	//StraightWithHoleWallLeft.Scale = FVector(ChunkLength, 1, Wallheight);
-	//StraightWithHole.FloorBlockInfos.push_back(StraightWithHoleWallLeft);
-
-	//FFloorBlock StraightWithHoleWallRight = {};
-	//StraightWithHoleWallRight.LocalPosition = FVector(0, ChunkWidth + 1, 0);
-	//StraightWithHoleWallRight.LocalRotation = FRotator(0, 0, 0);
-	//StraightWithHoleWallRight.Scale = FVector(ChunkLength, 1, Wallheight);
-	//StraightWithHole.FloorBlockInfos.push_back(StraightWithHoleWallRight);
+	// Obstacle slots: avoid the hole (X: 5-10); Floor1 covers X:0-5, Floor2 covers X:10-20
+	for (float X : {3.f, 12.f, 16.f})
+		for (float Y : {-2.f, 0.f, 2.f})
+		{
+			FObstacleSlot Slot{};
+			Slot.LocalPosition = FVector(X, Y, 1.f);
+			Slot.AllowedTypes  = static_cast<EObstacleType>(AllTypes);
+			StraightWithHole.ObstacleSlots.push_back(Slot);
+		}
 
 	Templates.push_back(StraightWithHole);
 }
@@ -232,7 +180,9 @@ void AMapManager::SpawnNextChunk()
 	AMapChunk* Chunk = GetWorld()->SpawnActor<AMapChunk>();
 	Chunk->SetActorLocation(SpawnLoc);
 	Chunk->SetActorRotation(SpawnRot);
-	Chunk->InitFromTemplate(T);
+
+	// TODO: Obstacle fill rate should ramp with time logarithmically, clamped to some reasonable value
+	Chunk->InitFromTemplate(T, 0.2);
 	ActiveChunks.push_back(Chunk);
 
 	//bool bIsTurn = (T.ChunkType == EChunkType::TurnLeft || T.ChunkType == EChunkType::TurnRight);

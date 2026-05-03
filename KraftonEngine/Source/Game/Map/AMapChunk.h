@@ -7,7 +7,7 @@ public:
 	DECLARE_CLASS(AMapChunk, AActor)
 	void BeginPlay() override;
 	void EndPlay()	 override;
-	void InitFromTemplate(const FMapChunkTemplate& InTemplate);
+	void InitFromTemplate(const FMapChunkTemplate& InTemplate, float ObstacleFillRate);
 
 	FVector    GetExitLocation() const;
 	FRotator   GetExitRotation() const;
@@ -23,6 +23,7 @@ private:
 
 private:
 	FMapChunkTemplate     Template;
+	float                 ObstacleFillRate = 0.f;
 	TArray<UStaticMeshComponent*> FloorMeshes;
 	TArray<AObstacleActorBase*> SpawnedObstacles;
 };
