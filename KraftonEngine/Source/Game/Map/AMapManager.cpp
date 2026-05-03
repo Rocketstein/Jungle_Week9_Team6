@@ -90,11 +90,17 @@ void AMapManager::BuildTemplateLibrary() {
 	LeftTurnFloorStraight.Scale			= FVector(TurnLength, ChunkWidth, 1);
 	LeftTurn.FloorBlockInfos.push_back(LeftTurnFloorStraight);
 
-	FFloorBlock LeftTurnFloorTurn = {};
-	LeftTurnFloorTurn.LocalPosition = FVector(TurnLength, -TurnLength * 0.5f, 0);
-	LeftTurnFloorTurn.LocalRotation = FRotator(0, -90, 0);
-	LeftTurnFloorTurn.Scale			= FVector(TurnLength, ChunkWidth, 1);
-	LeftTurn.FloorBlockInfos.push_back(LeftTurnFloorTurn);
+	FFloorBlock LeftTurnFloorCorner = {};
+	LeftTurnFloorCorner.LocalPosition = FVector(TurnLength + ChunkWidth * 0.25f, -ChunkWidth * 0.25f, 0);
+	LeftTurnFloorCorner.LocalRotation = FRotator(0, 0, 0);
+	LeftTurnFloorCorner.Scale		 = FVector(ChunkWidth * 0.5f, ChunkWidth * 0.5f, 1);
+	LeftTurn.FloorBlockInfos.push_back(LeftTurnFloorCorner);
+
+	FFloorBlock LeftTurnFloorExit = {};
+	LeftTurnFloorExit.LocalPosition = FVector(TurnLength, -(TurnLength + ChunkWidth * 0.5f) * 0.5f, 0);
+	LeftTurnFloorExit.LocalRotation = FRotator(0, -90, 0);
+	LeftTurnFloorExit.Scale			= FVector(TurnLength - ChunkWidth * 0.5f, ChunkWidth, 1);
+	LeftTurn.FloorBlockInfos.push_back(LeftTurnFloorExit);
 
 	// Left Turn Wall
 	//FFloorBlock LeftTurnLeftWallStraight = {};
@@ -139,11 +145,17 @@ void AMapManager::BuildTemplateLibrary() {
 	RightTurnFloorStraight.Scale		 = FVector(TurnLength, ChunkWidth, 1);
 	RightTurn.FloorBlockInfos.push_back(RightTurnFloorStraight);
 
-	FFloorBlock RightTurnFloorTurn = {};
-	RightTurnFloorTurn.LocalPosition = FVector(TurnLength, TurnLength * 0.5f, 0);
-	RightTurnFloorTurn.LocalRotation = FRotator(0, 90, 0);
-	RightTurnFloorTurn.Scale		 = FVector(TurnLength, ChunkWidth, 1);
-	RightTurn.FloorBlockInfos.push_back(RightTurnFloorTurn);
+	FFloorBlock RightTurnFloorCorner = {};
+	RightTurnFloorCorner.LocalPosition = FVector(TurnLength + ChunkWidth * 0.25f, ChunkWidth * 0.25f, 0);
+	RightTurnFloorCorner.LocalRotation = FRotator(0, 0, 0);
+	RightTurnFloorCorner.Scale		 = FVector(ChunkWidth * 0.5f, ChunkWidth * 0.5f, 1);
+	RightTurn.FloorBlockInfos.push_back(RightTurnFloorCorner);
+
+	FFloorBlock RightTurnFloorExit = {};
+	RightTurnFloorExit.LocalPosition = FVector(TurnLength, (TurnLength + ChunkWidth * 0.5f) * 0.5f, 0);
+	RightTurnFloorExit.LocalRotation = FRotator(0, 90, 0);
+	RightTurnFloorExit.Scale		 = FVector(TurnLength - ChunkWidth * 0.5f, ChunkWidth, 1);
+	RightTurn.FloorBlockInfos.push_back(RightTurnFloorExit);
 
 	// Right Turn Walls
 	//FFloorBlock RighTurnLeftWallStraight;
