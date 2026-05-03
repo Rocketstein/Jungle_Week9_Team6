@@ -9,9 +9,9 @@ class AImposterGizmoActorBase : public AEnemyActorBase {
 public:
 	DECLARE_CLASS(AImposterGizmoActorBase, AEnemyActorBase)
 	
+	virtual void Tick(float DeltaTime) override;
 	virtual void Capture(AActor* InTarget)	= 0;
 	virtual void Transform(float DeltaTime) = 0;
-
 	void Release() { Target = nullptr; }
 
 	AActor* GetCapturedActor() const { if (Target) return Target; return nullptr; }
@@ -21,6 +21,8 @@ protected:
 	virtual ~AImposterGizmoActorBase() = default;
 
 protected:
-	AActor* Target = nullptr;
-
+	AActor* Target			= nullptr;
+	float	ActivationDelay = 1.5f;
+	float   ElapsedDelay	= 0.f;
+	bool	bIsTransforming = false;
 };

@@ -1,4 +1,4 @@
-#include "ImposterScaleGizmo.h"
+﻿#include "ImposterScaleGizmo.h"
 #include "Game/GameActors/Obstacle/ObstacleActorBase.h"
 
 #include <algorithm>
