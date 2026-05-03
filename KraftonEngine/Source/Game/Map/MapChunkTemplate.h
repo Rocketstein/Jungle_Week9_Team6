@@ -13,7 +13,7 @@ enum class EChunkType {
 	StraightWithHole,
 	StraightOneLaneL,
 	StraightOneLaneM,
-
+	StraightOneLaneR,
 };
 
 enum EObstacleDecision {
