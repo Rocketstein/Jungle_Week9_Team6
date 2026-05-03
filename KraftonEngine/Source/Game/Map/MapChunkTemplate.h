@@ -54,6 +54,6 @@ struct FMapChunkTemplate {
 	FVector					ExitOffset = FVector(0.0f, 0.0f, 0.0f);	// local-space offset from entry to next chunk's origin
 	FRotator				ExitRotation = FRotator(0.0f, 0.0f, 0.0f);	// e.g. (0, 0, -90) for a left turn around Z
 	TArray<FObstacleSlot>	ObstacleSlots;						// available slots, defined per template
-
-	TArray<FFloorBlock> FloorBlockInfos;
+	TArray<FDecisionSlot>	ObstacleSlotDecisions;			// Available obstacles at Coordinate X.
+	TArray<FFloorBlock>		FloorBlockInfos;
 };

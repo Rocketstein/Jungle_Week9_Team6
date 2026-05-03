@@ -86,14 +86,14 @@ void AMapManager::BuildTemplateLibrary() {
 	float LeftLaneY  = -ChunkWidth / 1.5;
 	float MidLaneY   = 0.f;
 	float RightLaneY = ChunkWidth / 1.5f;
-	for (float X = 2.f; X <= Straight.Length - 2.f; X += 2.f)
-		for (uint8 i = 0; i < 3; i++)
-		{
-			FObstacleSlot Slot{};
-			Slot.LocalPosition = FVector(X, LaneY[i], 1.f);
-			Slot.AllowedTypes  = static_cast<EObstacleType>(AllTypes);
-			Straight.ObstacleSlots.push_back(Slot);
+	for (float X = 2.f; X <= Straight.Length - 2.f; X += 2.f) {
+		FDecisionSlot Slot = {};
+		Slot.X = X;
+		for (uint8 i = 0; i < EObstacleDecision::Count; i++) {
+			Slot.AllowedDecisions.push_back(static_cast<EObstacleDecision>(i));
 		}
+		Straight.ObstacleSlotDecisions.push_back(Slot);
+	}
 
 	Templates.push_back(Straight);
 
@@ -180,14 +180,13 @@ void AMapManager::BuildTemplateLibrary() {
 	StraightWithHole.FloorBlockInfos.push_back(StraightWithHoleFloor2);
 
 	// Obstacles
-	for (float X = StraightWithHole.Length * 0.5f; X <= StraightWithHole.Length - 2.f; X += 2.f)
-		for (uint8 i = 0; i < 3; i++)
-		{
-			FObstacleSlot Slot{};
-			Slot.LocalPosition = FVector(X, LaneY[i], 1.f);
-			Slot.AllowedTypes = static_cast<EObstacleType>(AllTypes);
-			Straight.ObstacleSlots.push_back(Slot);
-		}
+	//for (float X = StraightWithHole.Length * 0.5f; X <= StraightWithHole.Length - 2.f; X += 2.f) {
+	//	FDecisionSlot Slot = {};
+	//	Slot.X = X;
+	//	for (uint8 i = 0; i < EObstacleDecision::Count; i++) {
+	//		Slot.AllowedDecisions.push_back(static_cast<EObstacleDecision>(i));
+	//	}
+	//}
 
 	Templates.push_back(StraightWithHole);
 }

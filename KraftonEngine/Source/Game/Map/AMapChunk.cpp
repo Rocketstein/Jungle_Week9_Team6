@@ -116,8 +116,10 @@ static void ApplyCubeMesh(UStaticMeshComponent* MeshComponent)
 
 void AMapChunk::SpawnObstacle()
 {
+	using enum EObstacleDecision;
 	FQuat WorldQuat = FQuat::FromRotator(GetActorRotation());
 
+	// Deprecated
 	for (const FObstacleSlot& Slot : Template.ObstacleSlots)
 	{
 		if ((float)rand() / RAND_MAX > ObstacleFillRate) continue;
@@ -138,6 +140,44 @@ void AMapChunk::SpawnObstacle()
 		if (Obs->HasActorBegunPlay())
 			Obs->BeginPlay();
 		SpawnedObstacles.push_back(Obs);
+	}
+
+	for (const FDecisionSlot& DecisionSlot : Template.ObstacleSlotDecisions) {
+		EObstacleDecision Decision = DecisionSlot.AllowedDecisions[rand() % DecisionSlot.AllowedDecisions.size()];
+
+		switch (Decision) {
+		case (SingleBarrierLeft):
+		{
+			break;
+		}
+		case (SingleBarrierMiddle):
+		{
+			break;
+		}
+		case (SingleBarrierRight):
+		{
+			break;
+		}
+		case (DoubleBarrierLeft):
+		{
+			break;
+		}
+		case (DoubleBarrierRight):
+		{
+			break;
+		}
+		case (MustJump):
+		{
+			break;
+		}
+		case (MustSlide):
+		{
+			break;
+		}
+		default: {
+			break;
+		}
+		}
 	}
 }
 
