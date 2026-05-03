@@ -1,4 +1,4 @@
-﻿#include "VerticalWireActor.h"
+﻿#include "BarrierObstacleActor.h"
 #include "Resource/ResourceManager.h"
 #include "Engine/Runtime/Engine.h"
 

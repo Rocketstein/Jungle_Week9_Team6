@@ -3,8 +3,7 @@
 #include "Component/StaticMeshComponent.h"
 #include "Engine/Runtime/Engine.h"
 #include "Game/GameActors/Obstacle/SimpleObstacleActor.h"
-#include "Game/GameActors/Obstacle/VerticalWireActor.h"
-#include "Game/GameActors/Obstacle/WireballActor.h"
+#include "Game/GameActors/Obstacle/BarrierObstacleActor.h"
 #include "Materials/MaterialManager.h"
 #include "Resource/ResourceManager.h"
 
@@ -53,12 +52,13 @@ static AObstacleActorBase* SpawnObstacleOfType(UWorld* World, EObstacleType Type
 		return nullptr;
 	}
 
+	// Using SimpleObstacleActor as placeholder
 	switch (Type)
 	{
 	case EObstacleType::Barrier: return World->SpawnActor<ABarrierObstacleActor>();
-	case EObstacleType::LowBar:
+	case EObstacleType::LowBar:	 return World->SpawnActor<ASimpleObstacleActor>();
 	case EObstacleType::HighBar: return World->SpawnActor<ASimpleObstacleActor>();
-	case EObstacleType::Misc:    return World->SpawnActor<AWireballActor>();
+	case EObstacleType::Misc:    return World->SpawnActor<ASimpleObstacleActor>();
 	default:                     return nullptr;
 	}
 }

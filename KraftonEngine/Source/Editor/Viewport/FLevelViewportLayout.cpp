@@ -21,8 +21,6 @@
 #include "GameFramework/Light/PointLightActor.h"
 #include "GameFramework/Light/SpotLightActor.h"
 #include "Game/GameActors/Obstacle/SimpleObstacleActor.h"
-#include "Game/GameActors/Obstacle/WireballActor.h"
-#include "Game/GameActors/Obstacle/VerticalWireActor.h"
 #include "Game/Map/AMapManager.h"
 #include "GameFramework/World.h"
 #include "Render/Pipeline/Renderer.h"

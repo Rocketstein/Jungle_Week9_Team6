@@ -480,7 +480,7 @@
     <ClCompile Include="Source\Game\GameActors\Obstacle\MustSlideObstacleActor.cpp" />
     <ClCompile Include="Source\Game\GameActors\Obstacle\ObstacleActorBase.cpp" />
     <ClCompile Include="Source\Game\GameActors\Obstacle\SimpleObstacleActor.cpp" />
-    <ClCompile Include="Source\Game\GameActors\Obstacle\VerticalWireActor.cpp" />
+    <ClCompile Include="Source\Game\GameActors\Obstacle\BarrierObstacleActor.cpp" />
     <ClCompile Include="Source\Game\GameActors\Obstacle\WireballActor.cpp" />
     <ClCompile Include="Source\Game\Map\AMapChunk.cpp" />
     <ClCompile Include="Source\Game\Map\AMapManager.cpp" />
@@ -750,7 +750,7 @@
     <ClInclude Include="Source\Game\GameActors\Obstacle\MustSlideObstacleActor.h" />
     <ClInclude Include="Source\Game\GameActors\Obstacle\ObstacleActorBase.h" />
     <ClInclude Include="Source\Game\GameActors\Obstacle\SimpleObstacleActor.h" />
-    <ClInclude Include="Source\Game\GameActors\Obstacle\VerticalWireActor.h" />
+    <ClInclude Include="Source\Game\GameActors\Obstacle\BarrierObstacleActor.h" />
     <ClInclude Include="Source\Game\GameActors\Obstacle\WireballActor.h" />
     <ClInclude Include="Source\Game\Map\AMapChunk.h" />
     <ClInclude Include="Source\Game\Map\AMapManager.h" />
