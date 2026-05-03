@@ -177,20 +177,20 @@ void AMapManager::BuildTemplateLibrary() {
 	//-----------------------------------------------------------------
 	FMapChunkTemplate StraightWithHole;
 	StraightWithHole.ChunkType = EChunkType::StraightWithHole;
-	StraightWithHole.Length = 20.f;
-	StraightWithHole.ExitOffset = FVector(20.f, 0.f, 0.f);
+	StraightWithHole.Length = ChunkLength;
+	StraightWithHole.ExitOffset = FVector(ChunkLength, 0.f, 0.f);
 
 	// Straight With Hole Floor
 	FFloorBlock StraightWithHoleFloor1 = {};
-	StraightWithHoleFloor1.LocalPosition = FVector(ChunkLength * 0.125f, 0, 0);
+	StraightWithHoleFloor1.LocalPosition = FVector(ChunkLength / 8.f, 0, 0);
 	StraightWithHoleFloor1.LocalRotation = FRotator(0, 0, 0);
-	StraightWithHoleFloor1.Scale		 = FVector(ChunkLength / 4, ChunkWidth, 1);
+	StraightWithHoleFloor1.Scale		 = FVector(ChunkLength / 8, ChunkWidth, 1);
 	StraightWithHole.FloorBlockInfos.push_back(StraightWithHoleFloor1);
 
 	FFloorBlock StraightWithHoleFloor2 = {};
 	StraightWithHoleFloor2.LocalPosition = FVector(ChunkLength * 0.75f, 0, 0);
 	StraightWithHoleFloor2.LocalRotation = FRotator(0, 0, 0);
-	StraightWithHoleFloor2.Scale		 = FVector(ChunkLength / 2, ChunkWidth, 1);
+	StraightWithHoleFloor2.Scale		 = FVector(ChunkLength / 4, ChunkWidth, 1);
 	StraightWithHole.FloorBlockInfos.push_back(StraightWithHoleFloor2);
 
 	// Straight With Hole Walls
