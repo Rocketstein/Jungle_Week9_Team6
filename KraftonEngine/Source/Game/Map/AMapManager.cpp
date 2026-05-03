@@ -1,6 +1,6 @@
 ﻿#include "AMapManager.h"
 #include "GameFramework/World.h"
-#include <random>
+#include "Game/Map/MapRandom.h"
 
 IMPLEMENT_CLASS(AMapManager, AActor)
 
@@ -191,6 +191,10 @@ void AMapManager::BuildTemplateLibrary() {
 	// Obstacles
 	AddDefaultDecisionSlots(StraightWithHole, StraightWithHole.Length * 0.5f, StraightWithHole.Length - 2.f, 2.f);
 
+	// Straight With One Lane (Left)
+	//FMapChunkTemplate StraightWithOneLaneL;
+	//StraightWithOneLaneL.ChunkType = 
+
 	Templates.push_back(StraightWithHole);
 }
 
@@ -232,5 +236,5 @@ int32 AMapManager::SelectNextTemplateIndex()
 		Candidates.push_back(i);
 	}
 
-	return Candidates[rand() % Candidates.size()];
+	return Candidates[MapRandom::Index(static_cast<int32>(Candidates.size()))];
 }
