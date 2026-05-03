@@ -20,7 +20,7 @@ void AMapManager::EndPlay() {
 }
 
 void AMapManager::Tick(float DeltaTime) {
-	if (!Player) return; 
+	//if (!Player) return; 
 	if (Templates.empty()) return;
 
 	while ((int32)ActiveChunks.size() < TargetChunkCount) {
@@ -34,11 +34,11 @@ void AMapManager::Tick(float DeltaTime) {
 	{
 		AMapChunk* Front = ActiveChunks[0];
 		FQuat ExitQuat = FQuat::FromRotator(Front->GetExitRotation());
-		FVector ToPlayer = Player->GetActorLocation() - Front->GetExitLocation();
-		float ExitProgress = ToPlayer.Dot(ExitQuat.GetForwardVector());
+		//FVector ToPlayer = Player->GetActorLocation() - Front->GetExitLocation();
+		//float ExitProgress = ToPlayer.Dot(ExitQuat.GetForwardVector());
 
-		if (ExitProgress > 0.0f)
-			DespawnFrontChunk();
+		//if (ExitProgress > 0.0f)
+		//	DespawnFrontChunk();
 	}
 }
 
@@ -63,6 +63,22 @@ void AMapManager::BuildTemplateLibrary() {
 			Template.ObstacleSlotDecisions.push_back(Slot);
 		}
 	};
+
+	auto AddNonBarrierDecisionSlots = [](FMapChunkTemplate& Template, float StartX, float EndX, float Step)
+		{
+			for (float X = StartX; X <= EndX; X += Step)
+			{
+				FDecisionSlot Slot = {};
+				Slot.X = X;
+				for (int32 DecisionIndex = 0; DecisionIndex < static_cast<int32>(EObstacleDecision::Count); ++DecisionIndex)
+				{
+					EObstacleDecision Decision = static_cast<EObstacleDecision>(DecisionIndex);
+					if (Decision == EObstacleDecision::MustJump || Decision == EObstacleDecision::MustSlide)
+						Slot.AllowedDecisions.push_back(static_cast<EObstacleDecision>(DecisionIndex));
+				}
+				Template.ObstacleSlotDecisions.push_back(Slot);
+			}
+		};
 
 	//-----------------------------------------------------------------
 	// Start
@@ -220,6 +236,9 @@ void AMapManager::BuildTemplateLibrary() {
 	StraightWithOneLaneL3.LocalRotation = FRotator(0, 0, 0);
 	StraightWithOneLaneL3.Scale			= FVector(StraightWithOneLaneL.Length / 8, ChunkWidth, 1);
 	StraightWithOneLaneL.FloorBlockInfos.push_back(StraightWithOneLaneL3);
+
+	// Obstacles
+	AddNonBarrierDecisionSlots(StraightWithOneLaneL, 2.f, StraightWithOneLaneL.Length - 2.f, 2.f);
 	Templates.push_back(StraightWithOneLaneL);
 
 	//-----------------------------------------------------------------
@@ -249,6 +268,9 @@ void AMapManager::BuildTemplateLibrary() {
 	StraightWithOneLaneM3.LocalRotation = FRotator(0, 0, 0);
 	StraightWithOneLaneM3.Scale = FVector(StraightWithOneLaneM.Length / 8, ChunkWidth, 1);
 	StraightWithOneLaneM.FloorBlockInfos.push_back(StraightWithOneLaneM3);
+
+	// Obstacles
+	AddNonBarrierDecisionSlots(StraightWithOneLaneM, 2.f, StraightWithOneLaneL.Length - 2.f, 2.f);
 	Templates.push_back(StraightWithOneLaneM);
 
 	//-----------------------------------------------------------------
@@ -278,6 +300,9 @@ void AMapManager::BuildTemplateLibrary() {
 	StraightWithOneLaneR3.LocalRotation = FRotator(0, 0, 0);
 	StraightWithOneLaneR3.Scale = FVector(StraightWithOneLaneR.Length / 8, ChunkWidth, 1);
 	StraightWithOneLaneR.FloorBlockInfos.push_back(StraightWithOneLaneR3);
+
+	//Obstacles
+	AddNonBarrierDecisionSlots(StraightWithOneLaneM, 2.f, StraightWithOneLaneL.Length - 2.f, 2.f);
 	Templates.push_back(StraightWithOneLaneR);
 }
 
