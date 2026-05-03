@@ -3012,9 +3012,6 @@ void FLevelViewportLayout::RenderViewportPlaceActorPopup()
 		PlaceActorMenuItem("Directional Light", EViewportPlaceActorType::DirectionalLight);
 		PlaceActorMenuItem("Point Light", EViewportPlaceActorType::PointLight);
 		PlaceActorMenuItem("Spot Light", EViewportPlaceActorType::SpotLight);
-		PlaceActorMenuItem("Obstacle", EViewportPlaceActorType::SimpleObstacle);
-		PlaceActorMenuItem("Obstacle", EViewportPlaceActorType::Wireball);
-		PlaceActorMenuItem("Obstacle", EViewportPlaceActorType::VerticalWires);
 		PlaceActorMenuItem("Map", EViewportPlaceActorType::MapManager);
 
 		ImGui::EndMenu();
@@ -3330,39 +3327,6 @@ AActor* FLevelViewportLayout::SpawnActorFromViewportMenu(EViewportPlaceActorType
 		if (Actor)
 		{
 			Actor->InitDefaultComponents();
-			SpawnedActor = Actor;
-			SpawnLocation.Z += 1.0f;
-		}
-		break;
-	}
-	case EViewportPlaceActorType::SimpleObstacle:
-	{
-		ASimpleObstacleActor* Actor = World->SpawnActor<ASimpleObstacleActor>();
-		if (Actor)
-		{
-			Actor->InitDefaultComponents(GetRegisteredMeshPath("Default.Mesh.BasicShape.Cube"));
-			SpawnedActor = Actor;
-			SpawnLocation.Z += 1.0f;
-		}
-		break;
-	}
-	case EViewportPlaceActorType::Wireball: 
-	{
-		AWireballActor* Actor = World->SpawnActor<AWireballActor>();
-		if (Actor)
-		{
-			Actor->InitDefaultComponents(GetRegisteredMeshPath(""));
-			SpawnedActor = Actor;
-			SpawnLocation.Z += 1.0f;
-		}
-		break;
-	}
-	case EViewportPlaceActorType::VerticalWires:
-	{
-		AVerticalWireActor* Actor = World->SpawnActor<AVerticalWireActor>();
-		if (Actor)
-		{
-			Actor->InitDefaultComponents(GetRegisteredMeshPath(""));
 			SpawnedActor = Actor;
 			SpawnLocation.Z += 1.0f;
 		}

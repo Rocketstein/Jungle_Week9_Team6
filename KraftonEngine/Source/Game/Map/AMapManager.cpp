@@ -179,6 +179,16 @@ void AMapManager::BuildTemplateLibrary() {
 	StraightWithHoleFloor2.Scale		 = FVector(StraightWithHole.Length / 4, ChunkWidth, 1);
 	StraightWithHole.FloorBlockInfos.push_back(StraightWithHoleFloor2);
 
+	// Obstacles
+	for (float X = StraightWithHole.Length * 0.5f; X <= StraightWithHole.Length - 2.f; X += 2.f)
+		for (uint8 i = 0; i < 3; i++)
+		{
+			FObstacleSlot Slot{};
+			Slot.LocalPosition = FVector(X, LaneY[i], 1.f);
+			Slot.AllowedTypes = static_cast<EObstacleType>(AllTypes);
+			Straight.ObstacleSlots.push_back(Slot);
+		}
+
 	Templates.push_back(StraightWithHole);
 }
 

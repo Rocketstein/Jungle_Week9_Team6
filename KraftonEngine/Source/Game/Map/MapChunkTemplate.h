@@ -13,10 +13,27 @@ enum class EChunkType {
 	StraightWithHole,
 };
 
+enum EObstacleDecision {
+	SingleBarrierLeft,
+	SingleBarrierMiddle,
+	SingleBarrierRight,
+	DoubleBarrierLeft,
+	DoubleBarrierRight,
+	MustJump,
+	MustSlide,
+	Count,
+};
+
 struct FObstacleSlot
 {
 	FVector			LocalPosition;  // where in the chunk this obstacle can appear
 	EObstacleType	AllowedTypes;   // bitmask - which obstacle types fit here
+};
+
+struct FDecisionSlot
+{
+	float X;
+	TArray<EObstacleDecision> AllowedDecisions; // pick one at spawn time
 };
 
 struct FFloorBlock
