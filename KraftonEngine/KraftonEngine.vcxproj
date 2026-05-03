@@ -25,6 +25,10 @@
       <Configuration>Demo</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Shipping|x64">
+      <Configuration>Shipping</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -74,6 +78,13 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings" />
   <ImportGroup Label="Shared" />
@@ -95,46 +106,56 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(ProjectDir)Bin\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)Build\$(Configuration)\</IntDir>
-    <IncludePath>Source\Engine;Source;ThirdParty;ThirdParty\ImGui;Source\Editor;Source\ObjViewer;.;$(IncludePath)</IncludePath>
+    <IncludePath>Source\Engine;Source;ThirdParty;ThirdParty\ImGui;ThirdParty\sol2;Source\Editor;Source\ObjViewer;.;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(ProjectDir)Bin\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)Build\$(Configuration)\</IntDir>
-    <IncludePath>Source\Engine;Source;ThirdParty;ThirdParty\ImGui;Source\Editor;Source\ObjViewer;.;$(IncludePath)</IncludePath>
+    <IncludePath>Source\Engine;Source;ThirdParty;ThirdParty\ImGui;ThirdParty\sol2;Source\Editor;Source\ObjViewer;.;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(ProjectDir)Bin\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)Build\$(Configuration)\</IntDir>
-    <IncludePath>Source\Engine;Source;ThirdParty;ThirdParty\ImGui;Source\Editor;Source\ObjViewer;.;$(IncludePath)</IncludePath>
+    <IncludePath>Source\Engine;Source;ThirdParty;ThirdParty\ImGui;ThirdParty\sol2;Source\Editor;Source\ObjViewer;.;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(ProjectDir)Bin\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)Build\$(Configuration)\</IntDir>
-    <IncludePath>Source\Engine;Source;ThirdParty;ThirdParty\ImGui;Source\Editor;Source\ObjViewer;.;$(IncludePath)</IncludePath>
+    <IncludePath>Source\Engine;Source;ThirdParty;ThirdParty\ImGui;ThirdParty\sol2;Source\Editor;Source\ObjViewer;.;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">
     <OutDir>$(ProjectDir)Bin\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)Build\$(Configuration)\</IntDir>
-    <IncludePath>Source\Engine;Source;ThirdParty;ThirdParty\ImGui;Source\Editor;Source\ObjViewer;.;$(IncludePath)</IncludePath>
+    <IncludePath>Source\Engine;Source;ThirdParty;ThirdParty\ImGui;ThirdParty\sol2;Source\Editor;Source\ObjViewer;.;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">
     <OutDir>$(ProjectDir)Bin\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)Build\$(Configuration)\</IntDir>
-    <IncludePath>Source\Engine;Source;ThirdParty;ThirdParty\ImGui;Source\Editor;Source\ObjViewer;.;$(IncludePath)</IncludePath>
+    <IncludePath>Source\Engine;Source;ThirdParty;ThirdParty\ImGui;ThirdParty\sol2;Source\Editor;Source\ObjViewer;.;$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">
+    <OutDir>$(ProjectDir)Bin\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)Build\$(Configuration)\</IntDir>
+    <IncludePath>Source\Engine;Source;ThirdParty;ThirdParty\ImGui;ThirdParty\sol2;Source\Editor;Source\ObjViewer;.;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
     <LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
@@ -180,13 +201,10 @@
       <ExceptionHandling>Async</ExceptionHandling>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)ThirdParty\sol2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -201,13 +219,10 @@
       <ExceptionHandling>Async</ExceptionHandling>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)ThirdParty\sol2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">
@@ -222,13 +237,10 @@
       <ExceptionHandling>Async</ExceptionHandling>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)ThirdParty\sol2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">
@@ -243,31 +255,47 @@
       <ExceptionHandling>Async</ExceptionHandling>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)ThirdParty\sol2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;SHIPPING=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\Editor\EditorEngine.cpp" />
+    <ClCompile Include="Source\Editor\History\SceneHistoryBuilder.cpp" />
     <ClCompile Include="Source\Editor\EditorRenderPipeline.cpp" />
     <ClCompile Include="Source\Editor\Selection\SelectionManager.cpp" />
     <ClCompile Include="Source\Editor\Settings\EditorSettings.cpp" />
     <ClCompile Include="Source\Editor\Subsystem\OverlayStatSystem.cpp" />
     <ClCompile Include="Source\Editor\UI\EditorConsoleWidget.cpp" />
     <ClCompile Include="Source\Editor\UI\EditorControlWidget.cpp" />
+    <ClCompile Include="Source\Editor\UI\EditorDetailsWidget.cpp" />
     <ClCompile Include="Source\Editor\UI\EditorDragSource.cpp" />
     <ClCompile Include="Source\Editor\UI\EditorFileUtils.cpp" />
     <ClCompile Include="Source\Editor\UI\EditorMainPanel.cpp" />
     <ClCompile Include="Source\Editor\UI\EditorMaterialInspector.cpp" />
+    <ClCompile Include="Source\Editor\UI\EditorOutlinerWidget.cpp" />
     <ClCompile Include="Source\Editor\UI\EditorPlaceActorsWidget.cpp" />
     <ClCompile Include="Source\Editor\UI\EditorPlayToolbarWidget.cpp" />
-    <ClCompile Include="Source\Editor\UI\EditorDetailsWidget.cpp" />
-    <ClCompile Include="Source\Editor\UI\EditorOutlinerWidget.cpp" />
     <ClCompile Include="Source\Editor\UI\EditorShadowMapDebugWidget.cpp" />
     <ClCompile Include="Source\Editor\UI\EditorStatWidget.cpp" />
     <ClCompile Include="Source\Editor\UI\EditorViewportWidget.cpp" />
@@ -291,12 +319,17 @@
     <ClCompile Include="Source\Engine\Component\ActorComponent.cpp" />
     <ClCompile Include="Source\Engine\Component\BillboardComponent.cpp" />
     <ClCompile Include="Source\Engine\Component\CameraComponent.cpp" />
+    <ClCompile Include="Source\Engine\Component\CanvasRootComponent.cpp" />
     <ClCompile Include="Source\Engine\Component\CylindricalBillboardComponent.cpp" />
     <ClCompile Include="Source\Engine\Component\DecalComponent.cpp" />
     <ClCompile Include="Source\Engine\Component\GizmoComponent.cpp" />
     <ClCompile Include="Source\Engine\Component\HeightFogComponent.cpp" />
     <ClCompile Include="Source\Engine\Component\MeshComponent.cpp" />
     <ClCompile Include="Source\Engine\Component\PrimitiveComponent.cpp" />
+    <ClCompile Include="Source\Engine\Component\UIButtonComponent.cpp" />
+    <ClCompile Include="Source\Engine\Component\UIImageComponent.cpp" />
+    <ClCompile Include="Source\Engine\Component\UIScreenTextComponent.cpp" />
+    <ClCompile Include="Source\Engine\Component\UWindowPanelComponent.cpp" />
     <ClCompile Include="Source\Engine\Component\SceneComponent.cpp" />
     <ClCompile Include="Source\Engine\Component\ScriptComponent.cpp" />
     <ClCompile Include="Source\Engine\Component\StaticMeshComponent.cpp" />
@@ -329,8 +362,13 @@
     <ClCompile Include="Source\Engine\GameFramework\DecalActor.cpp" />
     <ClCompile Include="Source\Engine\GameFramework\HeightFogActor.cpp" />
     <ClCompile Include="Source\Engine\GameFramework\ScreenTextActor.cpp" />
+    <ClCompile Include="Source\Engine\GameFramework\UIRootActor.cpp" />
+    <ClCompile Include="Source\Engine\GameFramework\WorldTextActor.cpp" />
     <ClCompile Include="Source\Engine\GameFramework\Level.cpp" />
     <ClCompile Include="Source\Engine\GameFramework\PawnActor.cpp" />
+    <ClCompile Include="Source\Engine\GameFramework\PlayerController.cpp" />
+    <ClCompile Include="Source\Engine\GameFramework\GameModeBase.cpp" />
+    <ClCompile Include="Source\Engine\GameFramework\GameInstance.cpp" />
     <ClCompile Include="Source\Engine\GameFramework\StaticMeshActor.cpp" />
     <ClCompile Include="Source\Engine\GameFramework\World.cpp" />
     <ClCompile Include="Source\Engine\GameFramework\Light\AmbientLightActor.cpp" />
@@ -372,6 +410,7 @@
     <ClCompile Include="Source\Engine\Render\Device\D3DDevice.cpp" />
     <ClCompile Include="Source\Engine\Render\Geometry\FontGeometry.cpp" />
     <ClCompile Include="Source\Engine\Render\Geometry\LineGeometry.cpp" />
+    <ClCompile Include="Source\Engine\Render\Geometry\ScreenQuadGeometry.cpp" />
     <ClCompile Include="Source\Engine\Render\Pipeline\DefaultRenderPipeline.cpp" />
     <ClCompile Include="Source\Engine\Render\Pipeline\RenderCollector.cpp" />
     <ClCompile Include="Source\Engine\Render\Pipeline\Renderer.cpp" />
@@ -392,7 +431,7 @@
     <ClCompile Include="Source\Engine\Render\RenderPass\GizmoOuterPass.cpp" />
     <ClCompile Include="Source\Engine\Render\RenderPass\LightCullingPass.cpp" />
     <ClCompile Include="Source\Engine\Render\RenderPass\OpaquePass.cpp" />
-    <ClCompile Include="Source\Engine\Render\RenderPass\OverlayFontPass.cpp" />
+    <ClCompile Include="Source\Engine\Render\RenderPass\ScreenTextPass.cpp" />
     <ClCompile Include="Source\Engine\Render\RenderPass\PassRenderStateTable.cpp" />
     <ClCompile Include="Source\Engine\Render\RenderPass\PostProcessPass.cpp" />
     <ClCompile Include="Source\Engine\Render\RenderPass\PreDepthPass.cpp" />
@@ -401,6 +440,8 @@
     <ClCompile Include="Source\Engine\Render\RenderPass\RenderPassRegistry.cpp" />
     <ClCompile Include="Source\Engine\Render\RenderPass\SelectionMaskPass.cpp" />
     <ClCompile Include="Source\Engine\Render\RenderPass\ShadowMapPass.cpp" />
+    <ClCompile Include="Source\Engine\Render\RenderPass\UIPass.cpp" />
+    <ClCompile Include="Source\Engine\Render\RenderPass\WorldTextPass.cpp" />
     <ClCompile Include="Source\Engine\Render\RenderState\BlendStateManager.cpp" />
     <ClCompile Include="Source\Engine\Render\RenderState\DepthStencilStateManager.cpp" />
     <ClCompile Include="Source\Engine\Render\RenderState\RasterizerStateManager.cpp" />
@@ -419,9 +460,12 @@
     <ClCompile Include="Source\Engine\Resource\ResourceManager.cpp" />
     <ClCompile Include="Source\Engine\Runtime\Engine.cpp" />
     <ClCompile Include="Source\Engine\Runtime\EngineLoop.cpp" />
+    <ClCompile Include="Source\Engine\Runtime\GameEngine.cpp" />
     <ClCompile Include="Source\Engine\Runtime\Launch.cpp" />
     <ClCompile Include="Source\Engine\Runtime\WindowsApplication.cpp" />
     <ClCompile Include="Source\Engine\Runtime\WindowsWindow.cpp" />
+    <ClCompile Include="Source\Engine\Scripting\LuaActorProxy.cpp" />
+    <ClCompile Include="Source\Engine\Scripting\LuaComponentProxy.cpp" />
     <ClCompile Include="Source\Engine\Scripting\LuaScriptInstance.cpp" />
     <ClCompile Include="Source\Engine\Scripting\LuaScriptRuntime.cpp" />
     <ClCompile Include="Source\Engine\Scripting\ScriptProperty.cpp" />
@@ -453,6 +497,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Editor\EditorEngine.h" />
+    <ClInclude Include="Source\Editor\History\SceneHistoryBuilder.h" />
+    <ClInclude Include="Source\Editor\History\SceneHistoryTypes.h" />
     <ClInclude Include="Source\Editor\EditorRenderPipeline.h" />
     <ClInclude Include="Source\Editor\PIE\PIETypes.h" />
     <ClInclude Include="Source\Editor\Selection\SelectionManager.h" />
@@ -460,14 +506,17 @@
     <ClInclude Include="Source\Editor\Subsystem\OverlayStatSystem.h" />
     <ClInclude Include="Source\Editor\UI\EditorConsoleWidget.h" />
     <ClInclude Include="Source\Editor\UI\EditorControlWidget.h" />
+    <ClInclude Include="Source\Editor\UI\EditorDetailsWidget.h" />
     <ClInclude Include="Source\Editor\UI\EditorDragSource.h" />
     <ClInclude Include="Source\Editor\UI\EditorFileUtils.h" />
     <ClInclude Include="Source\Editor\UI\EditorMainPanel.h" />
     <ClInclude Include="Source\Editor\UI\EditorMaterialInspector.h" />
+    <ClInclude Include="Source\Editor\UI\EditorOutlinerWidget.h" />
+    <ClInclude Include="Source\Editor\UI\EditorPanelTitleUtils.h" />
     <ClInclude Include="Source\Editor\UI\EditorPlaceActorsWidget.h" />
     <ClInclude Include="Source\Editor\UI\EditorPlayToolbarWidget.h" />
-    <ClInclude Include="Source\Editor\UI\EditorDetailsWidget.h" />
-    <ClInclude Include="Source\Editor\UI\EditorOutlinerWidget.h" />
+    <ClInclude Include="Source\Editor\UI\EditorPropertyWidget.h" />
+    <ClInclude Include="Source\Editor\UI\EditorSceneWidget.h" />
     <ClInclude Include="Source\Editor\UI\EditorShadowMapDebugWidget.h" />
     <ClInclude Include="Source\Editor\UI\EditorStatWidget.h" />
     <ClInclude Include="Source\Editor\UI\EditorViewportWidget.h" />
@@ -495,12 +544,17 @@
     <ClInclude Include="Source\Engine\Component\ActorComponent.h" />
     <ClInclude Include="Source\Engine\Component\BillboardComponent.h" />
     <ClInclude Include="Source\Engine\Component\CameraComponent.h" />
+    <ClInclude Include="Source\Engine\Component\CanvasRootComponent.h" />
     <ClInclude Include="Source\Engine\Component\CylindricalBillboardComponent.h" />
     <ClInclude Include="Source\Engine\Component\DecalComponent.h" />
     <ClInclude Include="Source\Engine\Component\GizmoComponent.h" />
     <ClInclude Include="Source\Engine\Component\HeightFogComponent.h" />
     <ClInclude Include="Source\Engine\Component\MeshComponent.h" />
     <ClInclude Include="Source\Engine\Component\PrimitiveComponent.h" />
+    <ClInclude Include="Source\Engine\Component\UIButtonComponent.h" />
+    <ClInclude Include="Source\Engine\Component\UIImageComponent.h" />
+    <ClInclude Include="Source\Engine\Component\UIScreenTextComponent.h" />
+    <ClInclude Include="Source\Engine\Component\UWindowPanelComponent.h" />
     <ClInclude Include="Source\Engine\Component\SceneComponent.h" />
     <ClInclude Include="Source\Engine\Component\ScriptComponent.h" />
     <ClInclude Include="Source\Engine\Component\StaticMeshComponent.h" />
@@ -525,11 +579,11 @@
     <ClInclude Include="Source\Engine\Core\CollisionEventTypes.h" />
     <ClInclude Include="Source\Engine\Core\CollisionTypes.h" />
     <ClInclude Include="Source\Engine\Core\Common.h" />
+    <ClInclude Include="Source\Engine\Core\ComponentMobility.h" />
     <ClInclude Include="Source\Engine\Core\CoreTypes.h" />
     <ClInclude Include="Source\Engine\Core\Delegate.h" />
     <ClInclude Include="Source\Engine\Core\EngineTypes.h" />
     <ClInclude Include="Source\Engine\Core\Log.h" />
-    <ClInclude Include="Source\Engine\Core\ComponentMobility.h" />
     <ClInclude Include="Source\Engine\Core\Notification.h" />
     <ClInclude Include="Source\Engine\Core\ProjectSettings.h" />
     <ClInclude Include="Source\Engine\Core\PropertyTypes.h" />
@@ -546,8 +600,11 @@
     <ClInclude Include="Source\Engine\GameFramework\GameModeBase.h" />
     <ClInclude Include="Source\Engine\GameFramework\HeightFogActor.h" />
     <ClInclude Include="Source\Engine\GameFramework\ScreenTextActor.h" />
+    <ClInclude Include="Source\Engine\GameFramework\UIRootActor.h" />
+    <ClInclude Include="Source\Engine\GameFramework\WorldTextActor.h" />
     <ClInclude Include="Source\Engine\GameFramework\Level.h" />
     <ClInclude Include="Source\Engine\GameFramework\PawnActor.h" />
+    <ClInclude Include="Source\Engine\GameFramework\PlayerController.h" />
     <ClInclude Include="Source\Engine\GameFramework\StaticMeshActor.h" />
     <ClInclude Include="Source\Engine\GameFramework\World.h" />
     <ClInclude Include="Source\Engine\GameFramework\WorldContext.h" />
@@ -601,6 +658,7 @@
     <ClInclude Include="Source\Engine\Render\Device\D3DDevice.h" />
     <ClInclude Include="Source\Engine\Render\Geometry\FontGeometry.h" />
     <ClInclude Include="Source\Engine\Render\Geometry\LineGeometry.h" />
+    <ClInclude Include="Source\Engine\Render\Geometry\ScreenQuadGeometry.h" />
     <ClInclude Include="Source\Engine\Render\Pipeline\DefaultRenderPipeline.h" />
     <ClInclude Include="Source\Engine\Render\Pipeline\IRenderPipeline.h" />
     <ClInclude Include="Source\Engine\Render\Pipeline\RenderCollector.h" />
@@ -623,7 +681,7 @@
     <ClInclude Include="Source\Engine\Render\RenderPass\GizmoOuterPass.h" />
     <ClInclude Include="Source\Engine\Render\RenderPass\LightCullingPass.h" />
     <ClInclude Include="Source\Engine\Render\RenderPass\OpaquePass.h" />
-    <ClInclude Include="Source\Engine\Render\RenderPass\OverlayFontPass.h" />
+    <ClInclude Include="Source\Engine\Render\RenderPass\ScreenTextPass.h" />
     <ClInclude Include="Source\Engine\Render\RenderPass\PassRenderStateTable.h" />
     <ClInclude Include="Source\Engine\Render\RenderPass\PostProcessPass.h" />
     <ClInclude Include="Source\Engine\Render\RenderPass\PreDepthPass.h" />
@@ -632,6 +690,8 @@
     <ClInclude Include="Source\Engine\Render\RenderPass\RenderPassRegistry.h" />
     <ClInclude Include="Source\Engine\Render\RenderPass\SelectionMaskPass.h" />
     <ClInclude Include="Source\Engine\Render\RenderPass\ShadowMapPass.h" />
+    <ClInclude Include="Source\Engine\Render\RenderPass\UIPass.h" />
+    <ClInclude Include="Source\Engine\Render\RenderPass\WorldTextPass.h" />
     <ClInclude Include="Source\Engine\Render\RenderState\BlendStateManager.h" />
     <ClInclude Include="Source\Engine\Render\RenderState\DepthStencilStateManager.h" />
     <ClInclude Include="Source\Engine\Render\RenderState\RasterizerStateManager.h" />
@@ -663,10 +723,13 @@
     <ClInclude Include="Source\Engine\Resource\ResourceManager.h" />
     <ClInclude Include="Source\Engine\Runtime\Engine.h" />
     <ClInclude Include="Source\Engine\Runtime\EngineLoop.h" />
+    <ClInclude Include="Source\Engine\Runtime\GameEngine.h" />
     <ClInclude Include="Source\Engine\Runtime\Launch.h" />
     <ClInclude Include="Source\Engine\Runtime\WindowsApplication.h" />
     <ClInclude Include="Source\Engine\Runtime\WindowsWindow.h" />
     <ClInclude Include="Source\Engine\Runtime\resource.h" />
+    <ClInclude Include="Source\Engine\Scripting\LuaActorProxy.h" />
+    <ClInclude Include="Source\Engine\Scripting\LuaComponentProxy.h" />
     <ClInclude Include="Source\Engine\Scripting\LuaScriptInstance.h" />
     <ClInclude Include="Source\Engine\Scripting\LuaScriptRuntime.h" />
     <ClInclude Include="Source\Engine\Scripting\ScriptProperty.h" />
@@ -825,205 +888,242 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\Common\ForwardLightData.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\Common\ForwardLighting.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\Common\Functions.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\Common\ShadowSampling.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\Common\SystemResources.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\Common\SystemSamplers.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\Common\VertexLayouts.hlsli">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\Editor\Editor.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\Editor\Gizmo.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\Geometry\Decal.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\Geometry\Primitive.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\Geometry\UberLit.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\Lighting\ClusterConstructCS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\Lighting\ClusterHeatMap.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\Lighting\HiZGenerate.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\Lighting\LightCullingCS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\Lighting\OcclusionTest.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\Lighting\ShadowDepth.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\Lighting\TileLightCulling.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\Lighting\VSMBlur.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\PostProcess\FXAA.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\PostProcess\HeightFog.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\PostProcess\LightCulling.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\PostProcess\NormalView.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\PostProcess\Outline.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\PostProcess\SceneDepth.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\PostProcess\SceneNormal.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\PostProcess\ShadowMapVis.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\UI\Billboard.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\UI\Font.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Shaders\UI\OverlayFont.hlsl">
+    <FxCompile Include="Shaders\UI\Image.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Shaders\UI\ScreenText.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Shaders\UI\SubUV.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Demo|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Shipping|x64'">true</ExcludedFromBuild>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="KraftonEngine.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

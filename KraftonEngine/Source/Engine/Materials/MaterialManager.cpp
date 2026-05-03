@@ -267,11 +267,12 @@ EBlendState FMaterialManager::StringToBlendState(const FString& Str, ERenderPass
 	switch (Pass)
 	{
 	case ERenderPass::AlphaBlend:
+	case ERenderPass::WorldText:
 	case ERenderPass::Decal:
 	case ERenderPass::EditorLines:
 	case ERenderPass::PostProcess:
 	case ERenderPass::GizmoInner:
-	case ERenderPass::OverlayFont:
+	case ERenderPass::ScreenText:
 		return EBlendState::AlphaBlend;
 	case ERenderPass::AdditiveDecal:
 		return EBlendState::Additive;
@@ -291,13 +292,15 @@ EDepthStencilState FMaterialManager::StringToDepthStencilState(const FString& St
 	// 문자열이 비어있으면 Pass 기반 기본값
 	switch (Pass)
 	{
+	case ERenderPass::WorldText:
+		return EDepthStencilState::Default;
 	case ERenderPass::Decal:
 	case ERenderPass::AdditiveDecal:
 		return EDepthStencilState::DepthReadOnly;
 	case ERenderPass::SelectionMask:
 		return EDepthStencilState::StencilWrite;
 	case ERenderPass::PostProcess:
-	case ERenderPass::OverlayFont:
+	case ERenderPass::ScreenText:
 		return EDepthStencilState::NoDepth;
 	case ERenderPass::GizmoOuter:
 		return EDepthStencilState::GizmoOutside;

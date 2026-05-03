@@ -9,6 +9,8 @@ public:
 	enum class EPlaceActorCategory : uint8
 	{
 		Basic,
+		Text,
+		UI,
 		Lights,
 		Shapes,
 		VFX

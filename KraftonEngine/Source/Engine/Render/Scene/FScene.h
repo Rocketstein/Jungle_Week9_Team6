@@ -9,6 +9,7 @@ class AActor;
 class UPrimitiveComponent;
 class UWorld;
 struct FFrameContext;
+struct ID3D11ShaderResourceView;
 
 // ============================================================
 // FScene — FPrimitiveSceneProxy의 소유자 겸 변경 추적 컨테이너
@@ -45,10 +46,23 @@ public:
 	// ===== Per-frame ephemeral data (cleared each viewport render) =====
 	void ClearFrameData();
 
-	// --- Overlay text (screen-space) ---
-	struct FOverlayText { FString Text; FVector2 Position; float Scale; };
-	void AddOverlayText(FString Text, const FVector2& Position, float Scale);
-	const TArray<FOverlayText>& GetOverlayTexts() const { return OverlayTexts; }
+	// --- Screen text (screen-space) ---
+	struct FScreenTextEntry { FString Text; FVector2 Position; float Scale; FVector4 Color = FVector4(1.0f, 1.0f, 1.0f, 1.0f); };
+	void AddScreenText(FString Text, const FVector2& Position, float Scale, const FVector4& Color = FVector4(1.0f, 1.0f, 1.0f, 1.0f));
+	const TArray<FScreenTextEntry>& GetScreenTexts() const { return ScreenTexts; }
+	struct FScreenQuadEntry
+	{
+		ID3D11ShaderResourceView* TextureSRV = nullptr;
+		FVector2 Position;
+		FVector2 Size;
+		FVector2 UVMin = FVector2(0.0f, 0.0f);
+		FVector2 UVMax = FVector2(1.0f, 1.0f);
+		FVector4 Color = FVector4(1.0f, 1.0f, 1.0f, 1.0f);
+		int32 ZOrder = 0;
+	};
+	void AddScreenQuad(ID3D11ShaderResourceView* TextureSRV, const FVector2& Position, const FVector2& Size, const FVector4& Color, int32 ZOrder,
+		const FVector2& UVMin = FVector2(0.0f, 0.0f), const FVector2& UVMax = FVector2(1.0f, 1.0f));
+	const TArray<FScreenQuadEntry>& GetScreenQuads() const { return ScreenQuads; }
 
 	// --- Debug AABB ---
 	struct FDebugAABB { FVector Min; FVector Max; FColor Color; };
@@ -113,7 +127,8 @@ private:
 	TArray<uint32> FreeSlots;
 
 	// --- Per-frame ephemeral data ---
-	TArray<FOverlayText> OverlayTexts;
+	TArray<FScreenTextEntry> ScreenTexts;
+	TArray<FScreenQuadEntry> ScreenQuads;
 	TArray<FDebugAABB>   DebugAABBs;
 	TArray<FDebugLine>   DebugLines;
 
