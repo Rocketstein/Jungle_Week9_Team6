@@ -1,6 +1,8 @@
 ﻿#include "AMapManager.h"
 #include "GameFramework/World.h"
 
+IMPLEMENT_CLASS(AMapManager, AActor)
+
 void AMapManager::BeginPlay() {
 	AActor::BeginPlay();
 	BuildTemplateLibrary();
@@ -11,7 +13,9 @@ void AMapManager::EndPlay() {
 }
 
 void AMapManager::Tick(float DeltaTime) {
-	if (!Player || Templates.empty()) return;
+	// Disabled for debugging
+	// if (!Player) return; 
+	if (Templates.empty()) return;
 
 	while ((int32)ActiveChunks.size() < TargetChunkCount)
 		SpawnNextChunk();
