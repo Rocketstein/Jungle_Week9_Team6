@@ -11,4 +11,9 @@ public:
 private:
 	FRotator GetRotationOffset() const;
 
+private:
+	FRotator StartRotation = FRotator::ZeroRotator;
+	FRotator TargetRotation = FRotator::ZeroRotator;
+	float Elapsed = 0.0f;
+	bool bTransforming = false;
 };

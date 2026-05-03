@@ -11,4 +11,9 @@ public:
 private:
 	FVector GetScaleOffset() const;
 
+private:
+	FVector StartScale = FVector::OneVector;
+	FVector TargetScale = FVector::OneVector;
+	float Elapsed = 0.0f;
+	bool bTransforming = false;
 };

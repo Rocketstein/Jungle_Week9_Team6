@@ -10,4 +10,10 @@ public:
 
 private:
 	FVector GetTranslateOffset() const;
+
+private:
+	FVector StartLocation = FVector::ZeroVector;
+	FVector TargetLocation = FVector::ZeroVector;
+	float Elapsed = 0.0f;
+	bool bTransforming = false;
 };
