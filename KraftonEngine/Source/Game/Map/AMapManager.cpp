@@ -57,7 +57,7 @@ void AMapManager::BuildTemplateLibrary() {
 	FFloorBlock StraightFloor = {};
 	StraightFloor.LocalPosition = FVector(ChunkLength * 0.5f, 0, 0);
 	StraightFloor.LocalRotation = FRotator(0, 0, 0);
-	StraightFloor.Scale			= FVector(ChunkLength, ChunkWidth, 1);
+	StraightFloor.Scale			= FVector(ChunkLength * 0.5, ChunkWidth, 1);
 	Straight.FloorBlockInfos.push_back(StraightFloor);
 
 	// Straight wall infos
