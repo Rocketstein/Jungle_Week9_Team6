@@ -126,7 +126,7 @@
               "Anchor Offset": [0.0, 0.0, 0.0],
               "Color": [0.92, 0.97, 1.0, 0.82],
               "Font": "D2Coding",
-              "Font Size": 1.8,
+              "Font Size": 1.7,
               "Screen Position": [507.052002, 664.155029, 0.0],
               "Text": "Dialogue will appear here.",
               "Use Anchored Layout": false,
