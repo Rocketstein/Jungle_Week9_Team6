@@ -1,18 +1,20 @@
-local ScreenConsoleAnimator = require("UI.ScreenConsoleAnimator")
+DeclareProperties({
+    ScenarioPath = { type = "string", default = "Asset/Content/Data/Scenarios/story_wip.scenario.json" },
+})
 
-local TEXTURES = {
-    off = "Asset/Content/Texture/Story/control_room_screen_off.png",
-    on = "Asset/Content/Texture/Story/control_room_screen_on.png",
-    baek = "Asset/Content/Texture/Story/control_room_screen_on_baek.png",
-    lim = "Asset/Content/Texture/Story/control_room_screen_on_lim.png",
-    baek_lim = "Asset/Content/Texture/Story/control_room_screen_on_baek_lim.png",
-}
+local ScenarioLoader = require("UI.ScenarioLoader")
+
+local SCENARIO_PATH = property("ScenarioPath", "Asset/Content/Data/Scenarios/story_wip.scenario.json")
 
 local ui = {}
-local animator = nil
-local preview_busy = false
-local current_mode = "off"
-local current_texture = TEXTURES.off
+local scenario = nil
+local pages = {}
+local current_index = 1
+
+local SPEAKER_COLORS = {
+    BAEK_COMMANDER = { 0.62, 0.86, 1.0, 1.0 },
+    LIM_COMMANDER = { 1.0, 0.77, 0.35, 1.0 },
+}
 
 local function get_component(name)
     local component = obj:GetComponent(name)
@@ -20,7 +22,7 @@ local function get_component(name)
         return component
     end
 
-    debug_log("StoryWIPScene component missing:", name)
+    warn("StoryWIPScene component missing:", name)
     return nil
 end
 
@@ -49,208 +51,112 @@ local function set_tint(name, r, g, b, a)
     end
 end
 
-local function reset_overlay_ui()
-    set_visible("Logo", false)
-    set_visible("CommsPanel", false)
-    set_visible("Portrait", false)
-    set_visible("DebugIconGrid", false)
-    set_visible("DebugIconWire", false)
-    set_visible("DebugIconGizmo", false)
-    set_visible("DebugIconPanel", false)
-    set_visible("RedOverlay", false)
-    set_visible("WhiteFlash", false)
-    set_visible("BootHeader", false)
-    set_visible("BootLine1", false)
-    set_visible("BootLine2", false)
-    set_visible("BootLine3", false)
-    set_visible("BootLine4", false)
-    set_visible("NarrationLine1", false)
-    set_visible("NarrationLine2", false)
-    set_visible("NarrationLine3", false)
-    set_visible("NarrationLine4", false)
-    set_visible("NarrationLine5", false)
-    set_visible("NarrationLine6", false)
-    set_visible("SystemLine1", false)
-    set_visible("SystemLine2", false)
-    set_visible("SystemLine3", false)
-    set_visible("SystemLine4", false)
-    set_visible("SpeakerName", false)
-    set_visible("DialogueLine1", false)
-    set_visible("DialogueLine2", false)
-    set_visible("DialogueLine3", false)
-    set_visible("DialogueLine4", false)
-    set_visible("MissionTitle", false)
-    set_visible("MissionLine1", false)
-    set_visible("MissionLine2", false)
-    set_visible("MissionLine3", false)
-    set_visible("MissionLine4", false)
-    set_visible("MissionLine5", false)
-    set_visible("HudLine1", false)
-    set_visible("HudLine2", false)
-    set_visible("HudLine3", false)
-    set_visible("HudLine4", false)
-    set_visible("CountdownText", false)
+local function set_texture(name, texture_path)
+    local component = ui[name]
+    if component and texture_path and texture_path ~= "" then
+        component:SetTexture(texture_path)
+    end
 end
 
-local function prepare_preview()
-    reset_overlay_ui()
-
-    set_visible("BgBase", false)
-    set_visible("BgTexture", true)
-    set_visible("PowerGlow", true)
-
-    set_text("SkipHint", "[SPACE] REPLAY  [B] BAEK  [L] LIM  [N] BAEK+LIM")
-    set_tint("SkipHint", 0.55, 0.72, 0.95, 0.9)
-    set_visible("SkipHint", true)
-
-    set_text("StatusText", "")
-    set_visible("StatusText", true)
-    set_tint("StatusText", 0.58, 0.88, 1.0, 1.0)
-
-    animator:reset_to_off(TEXTURES.off, TEXTURES.on)
-    current_mode = "off"
-    current_texture = TEXTURES.off
-end
-
-local function play_screen_texture(target_texture, status_text, style, mode_name)
-    if not animator or preview_busy or not target_texture or target_texture == "" then
-        return false
+local function resolve_page_background(page)
+    if not scenario or type(page) ~= "table" then
+        return nil
     end
 
-    if status_text and status_text ~= "" then
-        set_text("StatusText", status_text)
+    if type(page.background) == "string" then
+        local resolved = ScenarioLoader.resolve_asset(scenario, "images", page.background)
+        if resolved then
+            return resolved
+        end
+        if page.background:sub(1, 6) == "Asset/" then
+            return page.background
+        end
     end
 
-    animator:play_screen_transition(target_texture, style or "console")
-    current_texture = target_texture
-    current_mode = mode_name or current_mode
-    return true
+    return nil
 end
 
-function RunPreviewSequence()
-    if not animator or preview_busy then
+local function apply_page(page)
+    if type(page) ~= "table" then
         return
     end
 
-    preview_busy = true
-    prepare_preview()
+    local speaker_name = ScenarioLoader.resolve_speaker_name(scenario, page.speaker)
+    local message = tostring(page.message or "")
+    local background = resolve_page_background(page)
+    local color = SPEAKER_COLORS[page.speaker] or { 1.0, 1.0, 1.0, 1.0 }
 
-    set_text("StatusText", "CONTROL ROOM SCREEN POWER ON")
-    animator:play_power_on(TEXTURES.on)
-    current_mode = "on"
+    if background then
+        set_texture("StoryBackground", background)
+    end
 
-    set_text("StatusText", "SCREEN ONLINE")
-    wait(0.75)
+    set_text("SpeakerName", speaker_name)
+    set_tint("SpeakerName", color[1], color[2], color[3], color[4])
 
-    play_screen_texture(TEXTURES.baek, "SIGNAL PATCH: BAEK CHANNEL", "console", "baek")
+    set_text("DialogueText", message)
+    set_tint("DialogueText", 0.92, 0.97, 1.0, 1.0)
 
-    set_text("StatusText", "BAEK FEED LOCKED")
-    preview_busy = false
+    set_text("PageHint", "[SPACE / CLICK] NEXT  " .. tostring(current_index) .. "/" .. tostring(#pages))
 end
 
-function RunBaekOnly()
-    if not animator or preview_busy or current_mode == "off" then
+local function advance_page()
+    if #pages == 0 then
         return
     end
 
-    preview_busy = true
-    play_screen_texture(TEXTURES.baek, "SIGNAL PATCH: BAEK CHANNEL", "console", "baek")
-    set_text("StatusText", "BAEK FEED LOCKED")
-    preview_busy = false
+    current_index = current_index + 1
+    if current_index > #pages then
+        current_index = 1
+    end
+
+    apply_page(pages[current_index])
 end
 
-function RunLimOnly()
-    if not animator or preview_busy or current_mode == "off" then
+local function load_story()
+    scenario = ScenarioLoader.load(SCENARIO_PATH, load_json_file)
+    if not scenario then
+        warn("Failed to load story scenario:", SCENARIO_PATH)
+        set_text("SpeakerName", "SYSTEM")
+        set_text("DialogueText", "Scenario load failed.")
+        set_text("PageHint", SCENARIO_PATH)
         return
     end
 
-    preview_busy = true
-    play_screen_texture(TEXTURES.lim, "SIGNAL PATCH: LIM CHANNEL", "soft", "lim")
-    set_text("StatusText", "LIM FEED LOCKED")
-    preview_busy = false
-end
+    pages = scenario.sequence or {}
+    current_index = 1
 
-function RunBaekLimOnly()
-    if not animator or preview_busy or current_mode == "off" then
+    if #pages == 0 then
+        set_text("SpeakerName", "SYSTEM")
+        set_text("DialogueText", "No pages in scenario.")
+        set_text("PageHint", SCENARIO_PATH)
         return
     end
 
-    preview_busy = true
-    play_screen_texture(TEXTURES.baek_lim, "COMPOSITE FEED: BAEK + LIM", "glitch", "baek_lim")
-    set_text("StatusText", "COMPOSITE FEED LOCKED")
-    preview_busy = false
+    apply_page(pages[current_index])
 end
 
 function BeginPlay()
-    local names = {
-        "BgBase",
-        "BgTexture",
-        "PowerGlow",
-        "RedOverlay",
-        "WhiteFlash",
-        "Logo",
-        "CommsPanel",
-        "Portrait",
-        "DebugIconGrid",
-        "DebugIconWire",
-        "DebugIconGizmo",
-        "DebugIconPanel",
-        "BootHeader",
-        "BootLine1",
-        "BootLine2",
-        "BootLine3",
-        "BootLine4",
-        "NarrationLine1",
-        "NarrationLine2",
-        "NarrationLine3",
-        "NarrationLine4",
-        "NarrationLine5",
-        "NarrationLine6",
-        "SystemLine1",
-        "SystemLine2",
-        "SystemLine3",
-        "SystemLine4",
-        "SpeakerName",
-        "DialogueLine1",
-        "DialogueLine2",
-        "DialogueLine3",
-        "DialogueLine4",
-        "MissionTitle",
-        "MissionLine1",
-        "MissionLine2",
-        "MissionLine3",
-        "MissionLine4",
-        "MissionLine5",
-        "HudLine1",
-        "HudLine2",
-        "HudLine3",
-        "HudLine4",
-        "CountdownText",
-        "StatusText",
-        "SkipHint",
-    }
+    cache_component("StoryBackground")
+    cache_component("SpeakerName")
+    cache_component("DialogueText")
+    cache_component("PageHint")
+    cache_component("NextPageButton")
 
-    for _, name in ipairs(names) do
-        cache_component(name)
-    end
+    set_visible("StoryBackground", true)
+    set_visible("SpeakerName", true)
+    set_visible("DialogueText", true)
+    set_visible("PageHint", true)
 
-    animator = ScreenConsoleAnimator.new(ui["BgTexture"], ui["PowerGlow"])
-    prepare_preview()
-    StartCoroutine("RunPreviewSequence")
+    load_story()
 end
 
 function Tick(dt)
-    if preview_busy then
+    if GetKeyDown("SPACE") then
+        advance_page()
         return
     end
 
-    if GetKeyDown("SPACE") then
-        StartCoroutine("RunPreviewSequence")
-    elseif GetKeyDown("B") then
-        StartCoroutine("RunBaekOnly")
-    elseif GetKeyDown("L") then
-        StartCoroutine("RunLimOnly")
-    elseif GetKeyDown("N") then
-        StartCoroutine("RunBaekLimOnly")
+    if ui["NextPageButton"] and ui["NextPageButton"]:WasClicked() then
+        advance_page()
     end
 end

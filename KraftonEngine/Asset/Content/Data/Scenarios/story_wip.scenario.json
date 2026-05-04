@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "id": "story_wip_scene",
+  "name": "Story WIP Scene",
+  "characters": {
+    "BAEK_COMMANDER": {
+      "displayName": "Commander Baek",
+      "shortName": "Baek",
+      "defaultProfile": "profile_baek"
+    },
+    "LIM_COMMANDER": {
+      "displayName": "Commander Lim",
+      "shortName": "Lim",
+      "defaultProfile": "profile_lim"
+    }
+  },
+  "assets": {
+    "images": {
+      "control_room_baek_0": "Asset/Content/Texture/Story/control_room_screen_on_baek_0.png",
+      "control_room_baek_1": "Asset/Content/Texture/Story/control_room_screen_on_baek_1.png",
+      "control_room_lim_0": "Asset/Content/Texture/Story/control_room_screen_on_lim_0.png",
+      "control_room_lim_1": "Asset/Content/Texture/Story/control_room_screen_on_lim_1.png",
+      "control_room_baek_lim_0": "Asset/Content/Texture/Story/control_room_screen_on_baek_lim_0.png",
+      "control_room_baek_lim_1": "Asset/Content/Texture/Story/control_room_screen_on_baek_lim_1.png"
+    }
+  },
+  "sequence": [
+    {
+      "id": "page_001",
+      "type": "dialogue",
+      "speaker": "BAEK_COMMANDER",
+      "background": "control_room_baek_1",
+      "message": "Commander Lim, check the channel status."
+    },
+    {
+      "id": "page_002",
+      "type": "dialogue",
+      "speaker": "LIM_COMMANDER",
+      "background": "control_room_lim_1",
+      "message": "All clear. We can move scene by scene like this."
+    },
+    {
+      "id": "page_003",
+      "type": "dialogue",
+      "speaker": "BAEK_COMMANDER",
+      "background": "control_room_baek_1",
+      "message": "Good. For now, keep the background and dialogue swaps stable."
+    },
+    {
+      "id": "page_004",
+      "type": "dialogue",
+      "speaker": "LIM_COMMANDER",
+      "background": "control_room_lim_1",
+      "message": "We can add effects later. First confirm click and space input."
+    },
+    {
+      "id": "page_005",
+      "type": "dialogue",
+      "speaker": "BAEK_COMMANDER",
+      "background": "control_room_baek_lim_1",
+      "message": "Then we just keep adding new pages in this format."
+    },
+    {
+      "id": "page_006",
+      "type": "dialogue",
+      "speaker": "LIM_COMMANDER",
+      "background": "control_room_baek_lim_1",
+      "message": "Right. After the last page, it loops back to the first one."
+    }
+  ]
+}
