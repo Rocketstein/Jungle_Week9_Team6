@@ -22,6 +22,14 @@ namespace {
 	}
 }
 
+void AImposterScaleGizmo::Capture(AActor* InTarget) {
+	AImposterGizmoActorBase::Capture(InTarget);
+	if (!InTarget || !PreviewGizmo) return;
+	PreviewGizmo->SetScaleMode();
+	PreviewGizmo->SetTarget(Target);
+	PreviewGizmo->SetSelectedAxis(SetOffsetAxis());
+}
+
 void AImposterScaleGizmo::Transform(float DeltaTime) {
 	if (!Target) return;
 
@@ -51,7 +59,7 @@ void AImposterScaleGizmo::Transform(float DeltaTime) {
 // Return a scale within the range [1.2, 2]
 FVector AImposterScaleGizmo::GetScaleOffset() {
 
-	switch(SetOffsetAxis()) {
+	switch(OffsetAxis) {
 	case (0) :
 	{
 		return FVector(RandomScaleFactor(), 1, 1);

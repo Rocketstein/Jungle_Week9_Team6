@@ -22,6 +22,14 @@ namespace {
 	}
 }
 
+void AImposterRotationGizmo::Capture(AActor* InTarget) {
+	AImposterGizmoActorBase::Capture(InTarget);
+	if (!Target || !PreviewGizmo) return;
+	PreviewGizmo->SetRotateMode();
+	PreviewGizmo->SetTarget(Target);
+	PreviewGizmo->SetSelectedAxis(SetOffsetAxis());
+}
+
 void AImposterRotationGizmo::Transform(float DeltaTime) {
 	if (!Target) return;
 
@@ -50,7 +58,7 @@ void AImposterRotationGizmo::Transform(float DeltaTime) {
 
 FRotator AImposterRotationGizmo::GetRotationOffset() {
 	const float Angle = RandomAngle();
-	switch (SetOffsetAxis())
+	switch (OffsetAxis)
 	{
 	case 0:
 		return FRotator(Angle, 0.0f, 0.0f);
