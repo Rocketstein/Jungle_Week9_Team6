@@ -100,7 +100,7 @@ static AObstacleActorBase* SpawnObstacleOfType(UWorld* World, EObstacleType Type
 	}
 }
 
-static AObstacleActorBase* SpawnObstacleAt(UWorld* World, EObstacleType Type, const FVector& Location)
+static AObstacleActorBase* SpawnObstacleAt(UWorld* World, EObstacleType Type, const FVector& Location, const FRotator& Rotation)
 {
 	AObstacleActorBase* Obstacle = SpawnObstacleOfType(World, Type);
 	if (!Obstacle)
@@ -115,6 +115,7 @@ static AObstacleActorBase* SpawnObstacleAt(UWorld* World, EObstacleType Type, co
 	// TODO: 마감 이후 장애물별 Damage 테이블을 Lua Config로 옮기면 여기 하드코딩은 제거하면 됨.
 	Obstacle->SetDamage(Type == EObstacleType::Misc ? 2 : 1);
 	Obstacle->SetActorLocation(Location);
+	Obstacle->SetActorRotation(Rotation);
 	World->InsertActorToOctree(Obstacle);
 
 	if (!Obstacle->HasActorBegunPlay())
@@ -265,6 +266,7 @@ static void ApplyCubeMesh(UStaticMeshComponent* MeshComponent, const FString& Ma
 void AMapChunk::SpawnObstacle()
 {
 	FQuat WorldQuat = FQuat::FromRotator(GetActorRotation());
+	const FRotator ObstacleRotation = GetActorRotation();
 	const float LaneY[3] = { -Template.Width / 1.5f, 0.0f, Template.Width / 1.5f };
 	constexpr float ObstacleZ = 1.0f;
 
@@ -285,41 +287,41 @@ void AMapChunk::SpawnObstacle()
 		switch (Decision) {
 		case (SingleBarrierLeft):
 		{
-			if (AObstacleActorBase* Obs = SpawnObstacleAt(GetWorld(), EObstacleType::Barrier, WorldPositionForLane(0)))
+			if (AObstacleActorBase* Obs = SpawnObstacleAt(GetWorld(), EObstacleType::Barrier, WorldPositionForLane(0), ObstacleRotation))
 				SpawnedObstacles.push_back(Obs);
 			break;
 		}
 		case (SingleBarrierMiddle):
 		{
-			if (AObstacleActorBase* Obs = SpawnObstacleAt(GetWorld(), EObstacleType::Barrier, WorldPositionForLane(1)))
+			if (AObstacleActorBase* Obs = SpawnObstacleAt(GetWorld(), EObstacleType::Barrier, WorldPositionForLane(1), ObstacleRotation))
 				SpawnedObstacles.push_back(Obs);
 			break;
 		}
 		case (SingleBarrierRight):
 		{
-			if (AObstacleActorBase* Obs = SpawnObstacleAt(GetWorld(), EObstacleType::Barrier, WorldPositionForLane(2)))
+			if (AObstacleActorBase* Obs = SpawnObstacleAt(GetWorld(), EObstacleType::Barrier, WorldPositionForLane(2), ObstacleRotation))
 				SpawnedObstacles.push_back(Obs);
 			break;
 		}
 		case (DoubleBarrierLeft):
 		{
-			if (AObstacleActorBase* Obs0 = SpawnObstacleAt(GetWorld(), EObstacleType::Barrier, WorldPositionForLane(0)))
+			if (AObstacleActorBase* Obs0 = SpawnObstacleAt(GetWorld(), EObstacleType::Barrier, WorldPositionForLane(0), ObstacleRotation))
 				SpawnedObstacles.push_back(Obs0);
-			if (AObstacleActorBase* Obs1 = SpawnObstacleAt(GetWorld(), EObstacleType::Barrier, WorldPositionForLane(1)))
+			if (AObstacleActorBase* Obs1 = SpawnObstacleAt(GetWorld(), EObstacleType::Barrier, WorldPositionForLane(1), ObstacleRotation))
 				SpawnedObstacles.push_back(Obs1);
 			break;
 		}
 		case (DoubleBarrierRight):
 		{
-			if (AObstacleActorBase* Obs0 = SpawnObstacleAt(GetWorld(), EObstacleType::Barrier, WorldPositionForLane(2)))
+			if (AObstacleActorBase* Obs0 = SpawnObstacleAt(GetWorld(), EObstacleType::Barrier, WorldPositionForLane(2), ObstacleRotation))
 				SpawnedObstacles.push_back(Obs0);
-			if (AObstacleActorBase* Obs1 = SpawnObstacleAt(GetWorld(), EObstacleType::Barrier, WorldPositionForLane(1)))
+			if (AObstacleActorBase* Obs1 = SpawnObstacleAt(GetWorld(), EObstacleType::Barrier, WorldPositionForLane(1), ObstacleRotation))
 				SpawnedObstacles.push_back(Obs1);
 			break;
 		}
 		//case (MustJump):
 		//{
-		//	if (AObstacleActorBase* Obs = SpawnObstacleAt(GetWorld(), EObstacleType::LowBar, WorldPositionForLane(1))) {
+		//	if (AObstacleActorBase* Obs = SpawnObstacleAt(GetWorld(), EObstacleType::LowBar, WorldPositionForLane(1), ObstacleRotation)) {
 		//		SpawnedObstacles.push_back(Obs);
 		//	}
 		//	break;
@@ -328,7 +330,7 @@ void AMapChunk::SpawnObstacle()
 		{
 			FVector SpawnLoc = WorldPositionForLane(1);
 			SpawnLoc.Z = SpawnLoc.Z + 0.35f;
-			if (AObstacleActorBase* Obs = SpawnObstacleAt(GetWorld(), EObstacleType::HighBar, SpawnLoc)) {
+			if (AObstacleActorBase* Obs = SpawnObstacleAt(GetWorld(), EObstacleType::HighBar, SpawnLoc, ObstacleRotation)) {
 				SpawnedObstacles.push_back(Obs);
 			}
 			break;
@@ -337,7 +339,7 @@ void AMapChunk::SpawnObstacle()
 		{
 			FVector SpawnLoc = WorldPositionForLane(1);
 			SpawnLoc.Z = SpawnLoc.Z + 0.35f;
-			if (AObstacleActorBase* Obs = SpawnObstacleAt(GetWorld(), EObstacleType::Pendulum, SpawnLoc)) {
+			if (AObstacleActorBase* Obs = SpawnObstacleAt(GetWorld(), EObstacleType::Pendulum, SpawnLoc, ObstacleRotation)) {
 				SpawnedObstacles.push_back(Obs);
 			}
 			break;

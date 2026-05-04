@@ -23,7 +23,7 @@ void AMapManager::EndPlay() {
 
 void AMapManager::Tick(float DeltaTime) {
 	if (!bEnabled) return;
-/*	if (!Player) return;*/ 
+	if (!Player) return; 
 	if (Templates.empty()) return;
 
 	while ((int32)ActiveChunks.size() < TargetChunkCount) {
@@ -37,14 +37,14 @@ void AMapManager::Tick(float DeltaTime) {
 	{
 		AMapChunk* Front = ActiveChunks[0];
 		FQuat ExitQuat = FQuat::FromRotator(Front->GetExitRotation());
-		//FVector ToPlayer = Player->GetActorLocation() - Front->GetExitLocation();
-		//float ExitProgress = ToPlayer.Dot(ExitQuat.GetForwardVector());
+		FVector ToPlayer = Player->GetActorLocation() - Front->GetExitLocation();
+		float ExitProgress = ToPlayer.Dot(ExitQuat.GetForwardVector());
 
-		//if (ExitProgress > 10.0f)
-		//{
-		//	DespawnFrontChunk();
-		//	TrySpawnGimmickAtChunkEnd();
-		//}
+		if (ExitProgress > 10.0f)
+		{
+			DespawnFrontChunk();
+			TrySpawnGimmickAtChunkEnd();
+		}
 	}
 
 }
