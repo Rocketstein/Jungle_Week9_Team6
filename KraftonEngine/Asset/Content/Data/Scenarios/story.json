@@ -39,7 +39,7 @@
     "introHoldSeconds": 1.5,
     "outroFadeSeconds": 0.9,
     "controlRoomFadeSeconds": 0.9,
-    "crtLeadSeconds": 3.5,
+    "crtLeadSeconds": 0.0,
     "crtSwitchDelaySeconds": 0.2,
     "postCrtHoldSeconds": 1.2,
     "lines": [

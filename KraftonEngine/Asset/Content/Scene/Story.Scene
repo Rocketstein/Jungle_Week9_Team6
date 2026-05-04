@@ -7,7 +7,7 @@
           "ClassName": "UScriptComponent",
           "ObjectName": "UScriptComponent_Story",
           "Properties": {
-            "ScriptPath": "Scripts/UI/StoryWIPScene.lua",
+            "ScriptPath": "Scripts/UI/StoryScene.lua",
             "bEditorOnly": false,
             "bTickEnable": true
           }
