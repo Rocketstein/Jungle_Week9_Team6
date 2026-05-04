@@ -1,6 +1,5 @@
 ﻿
 #include "ImposterTranslateGizmo.h"
-#include "Game/Player/Runner.h"
 #include "Game/GameActors/Obstacle/ObstacleActorBase.h"
 
 #include <algorithm>

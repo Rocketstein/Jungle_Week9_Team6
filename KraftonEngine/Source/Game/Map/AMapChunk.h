@@ -16,6 +16,7 @@ public:
 	FRotator   GetExitRotation() const;
 	float      GetChunkLength()  const { return Template.Length; }
 	EChunkType GetChunkType()    const { return Template.ChunkType; }
+	TArray<AObstacleActorBase*>& GetSpawnedObstacles() { return SpawnedObstacles; }
 
 private:
 	// Random Obstacle generator

@@ -20,7 +20,7 @@ void AMapManager::EndPlay() {
 }
 
 void AMapManager::Tick(float DeltaTime) {
-	//if (!Player) return; 
+	if (!Player) return;
 	if (!bEnabled) return;
 	if (Templates.empty()) return;
 
@@ -35,11 +35,14 @@ void AMapManager::Tick(float DeltaTime) {
 	{
 		AMapChunk* Front = ActiveChunks[0];
 		FQuat ExitQuat = FQuat::FromRotator(Front->GetExitRotation());
-		//FVector ToPlayer = Player->GetActorLocation() - Front->GetExitLocation();
-		//float ExitProgress = ToPlayer.Dot(ExitQuat.GetForwardVector());
+		FVector ToPlayer = Player->GetActorLocation() - Front->GetExitLocation();
+		float ExitProgress = ToPlayer.Dot(ExitQuat.GetForwardVector());
 
-		//if (ExitProgress > 0.0f)
-		//	DespawnFrontChunk();
+		if (ExitProgress > 0.0f)
+		{
+			DespawnFrontChunk();
+			TrySpawnGimmickAtChunkEnd();
+		}
 	}
 }
 
@@ -333,6 +336,16 @@ void AMapManager::DespawnFrontChunk() {
 	AMapChunk* Front = ActiveChunks.front();
 	GetWorld()->DestroyActor(Front);
 	ActiveChunks.erase(ActiveChunks.begin());
+}
+
+void AMapManager::TrySpawnGimmickAtChunkEnd()
+{
+	if (!Player)
+	{
+		return;
+	}
+
+	GimmickManager.TrySpawnRandomGimmick(GetWorld(), GimmickSpawnChance);
 }
 
 void AMapManager::Initialize(AActor* InPlayer)

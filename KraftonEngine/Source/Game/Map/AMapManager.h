@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "GameFramework/AActor.h"
 #include "AMapChunk.h"
+#include "Game/GameActors/Enemy/GimmickManager.h"
 
 class AMapManager : public AActor
 {
@@ -23,13 +24,16 @@ private:
 	void  SpawnNextChunk(bool Init = false);
 	void  DespawnFrontChunk();
 	int32 SelectNextTemplateIndex();
+	void  TrySpawnGimmickAtChunkEnd();
 
 	TArray<FMapChunkTemplate> Templates;
 	TArray<AMapChunk*>        ActiveChunks;
+	FGimmickManager GimmickManager;
 	AActor* Player = nullptr;
 	bool bEnabled = true;
 
 	int32 StraightRunLength = 0;
 	int32 MinStraightsBetweenTurns = 2;
 	int32 TargetChunkCount = 6;
+	float GimmickSpawnChance = 0.25f;
 };
