@@ -6,18 +6,25 @@
 #include "Game/GameActors/Obstacle/ObstacleActorBase.h"
 #include "Game/Map/MapRandom.h"
 #include "GameFramework/World.h"
+#include "Object/Object.h"
 
-AGimmickActorBase* FGimmickManager::TrySpawnRandomGimmick(UWorld* World, float SpawnChance)
+AGimmickActorBase* FGimmickManager::TrySpawnRandomGimmick(
+	UWorld* World,
+	const TArray<AObstacleActorBase*>& CandidateObstacles,
+	float SpawnChance)
 {
 	if (!World || !MapRandom::Chance(SpawnChance))
 	{
 		return nullptr;
 	}
 
-	return SpawnGimmickActor(World, SelectRandomGimmickType());
+	return SpawnGimmickActor(World, SelectRandomGimmickType(), CandidateObstacles);
 }
 
-AGimmickActorBase* FGimmickManager::SpawnGimmickActor(UWorld* World, EGimmickType Gimmick)
+AGimmickActorBase* FGimmickManager::SpawnGimmickActor(
+	UWorld* World,
+	EGimmickType Gimmick,
+	const TArray<AObstacleActorBase*>& CandidateObstacles)
 {
 	if (!World)
 	{
@@ -28,7 +35,7 @@ AGimmickActorBase* FGimmickManager::SpawnGimmickActor(UWorld* World, EGimmickTyp
 	{
 	case EGimmickType::TranslateGizmo:
 	{
-		AActor* Target = FindRandomObstacleTarget(World);
+		AObstacleActorBase* Target = FindRandomObstacleTarget(CandidateObstacles);
 		if (!Target)
 		{
 			return nullptr;
@@ -43,7 +50,7 @@ AGimmickActorBase* FGimmickManager::SpawnGimmickActor(UWorld* World, EGimmickTyp
 	}
 	case EGimmickType::RotationGizmo:
 	{
-		AActor* Target = FindRandomObstacleTarget(World);
+		AObstacleActorBase* Target = FindRandomObstacleTarget(CandidateObstacles);
 		if (!Target)
 		{
 			return nullptr;
@@ -58,7 +65,7 @@ AGimmickActorBase* FGimmickManager::SpawnGimmickActor(UWorld* World, EGimmickTyp
 	}
 	case EGimmickType::ScaleGizmo:
 	{
-		AActor* Target = FindRandomObstacleTarget(World);
+		AObstacleActorBase* Target = FindRandomObstacleTarget(CandidateObstacles);
 		if (!Target)
 		{
 			return nullptr;
@@ -76,28 +83,23 @@ AGimmickActorBase* FGimmickManager::SpawnGimmickActor(UWorld* World, EGimmickTyp
 	}
 }
 
-AActor* FGimmickManager::FindRandomObstacleTarget(UWorld* World) const
+AObstacleActorBase* FGimmickManager::FindRandomObstacleTarget(const TArray<AObstacleActorBase*>& CandidateObstacles) const
 {
-	if (!World)
+	TArray<AObstacleActorBase*> AliveCandidates;
+	for (AObstacleActorBase* Obstacle : CandidateObstacles)
 	{
-		return nullptr;
-	}
-
-	TArray<AActor*> Candidates;
-	for (AActor* Actor : World->GetActors())
-	{
-		if (Actor && Actor->IsA<AObstacleActorBase>())
+		if (Obstacle && IsAliveObject(Obstacle))
 		{
-			Candidates.push_back(Actor);
+			AliveCandidates.push_back(Obstacle);
 		}
 	}
 
-	if (Candidates.empty())
+	if (AliveCandidates.empty())
 	{
 		return nullptr;
 	}
 
-	return Candidates[MapRandom::Index(static_cast<int32>(Candidates.size()))];
+	return AliveCandidates[MapRandom::Index(static_cast<int32>(AliveCandidates.size()))];
 }
 
 EGimmickType FGimmickManager::SelectRandomGimmickType() const

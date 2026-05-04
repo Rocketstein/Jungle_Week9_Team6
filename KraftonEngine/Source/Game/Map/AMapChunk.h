@@ -17,6 +17,7 @@ public:
 	float      GetChunkLength()  const { return Template.Length; }
 	EChunkType GetChunkType()    const { return Template.ChunkType; }
 	TArray<AObstacleActorBase*>& GetSpawnedObstacles() { return SpawnedObstacles; }
+	const TArray<AObstacleActorBase*>& GetSpawnedObstacles() const { return SpawnedObstacles; }
 
 private:
 	// Random Obstacle generator

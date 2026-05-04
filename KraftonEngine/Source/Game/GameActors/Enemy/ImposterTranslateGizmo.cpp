@@ -24,7 +24,7 @@ namespace {
 
 	float RandomOffset()
 	{
-		std::uniform_int_distribution<int> Distribution(0, 2);
+		std::uniform_int_distribution<int> Distribution(1, 3);
 		return static_cast<float>(Distribution(RandomEngine()));
 	}
 }
@@ -33,14 +33,18 @@ void AImposterTranslateGizmo::Capture(AActor* InTarget) {
 	if (!InTarget) return;
 	if (!InTarget->IsA<AObstacleActorBase>()) return;
 	AImposterGizmoActorBase::Capture(InTarget);
-	if (!Target || !PreviewGizmo) return;
+	if (!HasAliveTarget() || !PreviewGizmo) return;
 	PreviewGizmo->SetTranslateMode();
 	PreviewGizmo->SetTarget(Target);
 	PreviewGizmo->SetSelectedAxis(SetOffsetAxis());
 }
 
 void AImposterTranslateGizmo::Transform(float DeltaTime) {
-	if (!Target) return;
+	if (!HasAliveTarget())
+	{
+		Release();
+		return;
+	}
 
 	if (!bTransforming)
 	{

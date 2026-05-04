@@ -1,6 +1,8 @@
 ﻿#include "AMapManager.h"
 #include "GameFramework/World.h"
 #include "Game/Map/MapRandom.h"
+#include "Game/GameActors/Obstacle/ObstacleActorBase.h"
+#include "Object/Object.h"
 
 IMPLEMENT_CLASS(AMapManager, AActor)
 
@@ -345,7 +347,43 @@ void AMapManager::TrySpawnGimmickAtChunkEnd()
 		return;
 	}
 
-	GimmickManager.TrySpawnRandomGimmick(GetWorld(), GimmickSpawnChance);
+	TArray<AObstacleActorBase*> CandidateObstacles = GatherNearbyObstacleCandidates();
+	GimmickManager.TrySpawnRandomGimmick(GetWorld(), CandidateObstacles, GimmickSpawnChance);
+}
+
+TArray<AObstacleActorBase*> AMapManager::GatherNearbyObstacleCandidates() const
+{
+	TArray<AObstacleActorBase*> Candidates;
+	if (!Player)
+	{
+		return Candidates;
+	}
+
+	const FVector PlayerLocation = Player->GetActorLocation();
+	const float MaxDistanceSq = GimmickTargetSearchDistance * GimmickTargetSearchDistance;
+
+	for (AMapChunk* Chunk : ActiveChunks)
+	{
+		if (!Chunk || !IsAliveObject(Chunk))
+		{
+			continue;
+		}
+
+		if (FVector::DistSquared(PlayerLocation, Chunk->GetActorLocation()) > MaxDistanceSq)
+		{
+			continue;
+		}
+
+		for (AObstacleActorBase* Obstacle : Chunk->GetSpawnedObstacles())
+		{
+			if (Obstacle && IsAliveObject(Obstacle))
+			{
+				Candidates.push_back(Obstacle);
+			}
+		}
+	}
+
+	return Candidates;
 }
 
 void AMapManager::Initialize(AActor* InPlayer)

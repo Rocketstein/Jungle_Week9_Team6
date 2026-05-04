@@ -17,7 +17,7 @@ namespace {
 
 	float RandomAngle()
 	{
-		std::uniform_int_distribution<int> Distribution(0, 3);
+		std::uniform_int_distribution<int> Distribution(1, 3);
 		return static_cast<float>(Distribution(RandomEngine()) + 1) * 45.0f;
 	}
 }
@@ -25,14 +25,18 @@ namespace {
 void AImposterRotationGizmo::Capture(AActor* InTarget) {
 	if (!InTarget || !InTarget->IsA<AObstacleActorBase>()) return;
 	AImposterGizmoActorBase::Capture(InTarget);
-	if (!Target || !PreviewGizmo) return;
+	if (!HasAliveTarget() || !PreviewGizmo) return;
 	PreviewGizmo->SetRotateMode();
 	PreviewGizmo->SetTarget(Target);
 	PreviewGizmo->SetSelectedAxis(SetOffsetAxis());
 }
 
 void AImposterRotationGizmo::Transform(float DeltaTime) {
-	if (!Target) return;
+	if (!HasAliveTarget())
+	{
+		Release();
+		return;
+	}
 
 	if (!bTransforming)
 	{

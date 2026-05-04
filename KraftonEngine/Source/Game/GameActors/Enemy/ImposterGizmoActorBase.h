@@ -16,11 +16,12 @@ public:
 	uint8 SetOffsetAxis();
 	void Release();
 
-	AActor* GetCapturedActor() const { if (Target) return Target; return nullptr; }
+	AActor* GetCapturedActor() const;
 	FLuaActorProxy GetCapturedActorProxy() const;
 
 protected:
 	virtual ~AImposterGizmoActorBase() = default;
+	bool HasAliveTarget() const;
 
 protected:
 	UGizmoComponent* PreviewGizmo = nullptr; 

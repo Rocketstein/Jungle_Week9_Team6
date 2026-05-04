@@ -17,7 +17,7 @@ namespace {
 
 	float RandomScaleFactor()
 	{
-		std::uniform_real_distribution<float> Distribution(1.2f, 2.0f);
+		std::uniform_real_distribution<float> Distribution(3.f, 5.0f);
 		return Distribution(RandomEngine());
 	}
 }
@@ -25,14 +25,18 @@ namespace {
 void AImposterScaleGizmo::Capture(AActor* InTarget) {
 	if (!InTarget || !InTarget->IsA<AObstacleActorBase>()) return;
 	AImposterGizmoActorBase::Capture(InTarget);
-	if (!Target || !PreviewGizmo) return;
+	if (!HasAliveTarget() || !PreviewGizmo) return;
 	PreviewGizmo->SetScaleMode();
 	PreviewGizmo->SetTarget(Target);
 	PreviewGizmo->SetSelectedAxis(SetOffsetAxis());
 }
 
 void AImposterScaleGizmo::Transform(float DeltaTime) {
-	if (!Target) return;
+	if (!HasAliveTarget())
+	{
+		Release();
+		return;
+	}
 
 	if (!bTransforming)
 	{
