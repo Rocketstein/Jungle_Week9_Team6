@@ -22,8 +22,8 @@ void AMapManager::EndPlay() {
 }
 
 void AMapManager::Tick(float DeltaTime) {
-	if (!Player) return;
 	if (!bEnabled) return;
+	if (!Player) return; 
 	if (Templates.empty()) return;
 
 	while ((int32)ActiveChunks.size() < TargetChunkCount) {
