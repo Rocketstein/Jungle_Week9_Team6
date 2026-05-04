@@ -117,7 +117,7 @@ FRay UCameraComponent::DeprojectScreenToWorld(float MouseX, float MouseY, float 
 void UCameraComponent::BeginPlay()
 {
 	USceneComponent::BeginPlay();
-	// 카메라 modifier 갱신은 엔진 내부 로직이라 사용자 bTickEnable과 무관하게 항상 tick.
+	// 카메라 modifier 갱신은 엔진 내부 로직이라 사용자 bTickEnable과 무관하게 항상 tick
 	SetComponentTickEnabled(true);
 }
 
@@ -228,7 +228,7 @@ void UCameraComponent::AddHitEffect(float Intensity, float Duration)
 
 UCameraShakeBase* UCameraComponent::StartCameraShake(float Intensity, float Duration)
 {
-	// Back-compat: 기존 시그니처는 SinWaveCameraShake에 Intensity/Duration을 직접 set.
+	// Back-compat기존 시그니처는 SinWaveCameraShake에 Intensity/Duration을 직접 set
 	UCameraShakeBase* Shake = StartCameraShakeByName("USinWaveCameraShake", 1.0f);
 	if (Shake)
 	{
@@ -250,7 +250,7 @@ void UCameraComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	USceneComponent::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// 카메라 자체 modifier 체인을 평가해 Self layer offset/HitEffect 캐시.
-	// PCM이 없는 경우(예: Playground의 TestPlayer.lua)에도 이 경로만으로 쉐이크/히트 이펙트 동작.
+	// PCM이 없는 경우(Playground의 TestPlayer.lua)에도 이 경로만으로 쉐이크/히트 이펙트 동작
 	FMinimalViewInfo View;
 	View.Location = FVector::ZeroVector;
 	View.Rotation = FRotator::ZeroRotator;

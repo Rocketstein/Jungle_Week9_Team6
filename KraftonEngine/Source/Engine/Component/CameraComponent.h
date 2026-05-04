@@ -57,16 +57,16 @@ public:
 
 	FRay DeprojectScreenToWorld(float MouseX, float MouseY, float ScreenWidth, float ScreenHeight);
 
-	// === Modifier chain (UE의 PCM modifier list와 같은 구조를 카메라 자체에도 부여) ===
+	// Modifier chain (PCM modifier list와 같은 구조를 카메라 자체에도 부여)
 	UCameraModifier* AddCameraModifier(UClass* ModifierClass);
 	UCameraModifier* AddCameraModifierByName(const char* ModifierClassName);
 	void RemoveCameraModifier(UCameraModifier* Modifier);
 	const TArray<UCameraModifier*>& GetCameraModifiers() const { return CameraModifiers; }
 
-	// 모든 modifier를 외부 view에 적용 (PCM이 호출할 진입점). InOutView에 누적.
+	// 모든 modifier를 외부 view에 적용 (PCM이 호출할 진입점) InOutView에 누적.
 	void ApplyCameraModifiers(float DeltaTime, struct FMinimalViewInfo& InOutView);
 
-	// === Convenience API — UE-style 클래스 기반 ===
+	// Convenience API — UE-style 클래스 기반
 	UCameraShakeBase* StartCameraShake(UClass* ShakeClass, float Scale = 1.0f);
 	UCameraShakeBase* StartCameraShakeByName(const char* ShakeClassName, float Scale = 1.0f);
 	void StopCameraShake(UCameraShakeBase* Instance, bool bImmediate = false);
@@ -74,10 +74,10 @@ public:
 
 	void AddHitEffect(float Intensity, float Duration);
 
-	// === Back-compat API — 기존 (Intensity, Duration) 호출 호환 ===
+	//  Back-compat API  기존 (Intensity, Duration) 호출 호환
 	UCameraShakeBase* StartCameraShake(float Intensity, float Duration);
 
-	// === Render-side getters ===
+	// Render-side getters 
 	// 두 layer 합산 — frame CB로 push되는 최종 hit-effect 강도
 	float GetHitEffectIntensity() const { return SelfHitEffectIntensity + ExternalHitEffectIntensity; }
 

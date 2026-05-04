@@ -976,7 +976,7 @@ bool FLuaComponentProxy::StartCameraShake(float Intensity, float Duration)
 	if (TargetComp && TargetComp->IsA<UCameraComponent>())
 	{
 		UCameraComponent* Camera = static_cast<UCameraComponent*>(TargetComp);
-		// Back-compat: 기본 SinWave 셰이크에 Intensity/Duration 직접 set
+	
 		Camera->StartCameraShake(Intensity, Duration);
 		return true;
 	}

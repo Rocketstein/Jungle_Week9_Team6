@@ -3,7 +3,7 @@
 #include "Math/Vector.h"
 #include "Math/Rotator.h"
 
-// 카메라 modifier 체인을 통과하는 view 정보 — UE의 FMinimalViewInfo 대응.
+// 카메라 modifier 체인을 통과하는 view 정보 FMinimalViewInfo
 // 각 modifier는 InOut 으로 받아 필요한 필드만 변형한다.
 struct FMinimalViewInfo
 {

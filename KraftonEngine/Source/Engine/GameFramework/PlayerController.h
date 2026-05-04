@@ -9,8 +9,8 @@ struct FInputMappingContext;
 struct FInputAction;
 
 // 플레이어 입력을 받아 Pawn을 조종하는 액터.
-// UE의 APlayerController 대응 — 자체 FEnhancedInputManager로 매핑 컨텍스트/액션 바인딩을 관리한다.
-// BeginPlay 시 APlayerCameraManager를 스폰해 카메라 view를 관리한다 (UE와 동일 패턴).
+// APlayerController 대응 자체 FEnhancedInputManager로 매핑 컨텍스트/액션 바인딩을 관리한다.
+// BeginPlay 시 APlayerCameraManager를 스폰해 카메라 view를 관리한다
 class APlayerController : public AActor
 {
 public:
@@ -46,7 +46,7 @@ public:
 	}
 
 protected:
-	// PCM 클래스 이름 — 서브클래스가 ctor에서 변경 가능 (UE의 PlayerCameraManagerClass 대응)
+	// PCM 클래스 이름  서브클래스가 ctor에서 변경 가능 
 	FString PlayerCameraManagerClassName = "APlayerCameraManager";
 
 	APawnActor* PossessedPawn = nullptr;
