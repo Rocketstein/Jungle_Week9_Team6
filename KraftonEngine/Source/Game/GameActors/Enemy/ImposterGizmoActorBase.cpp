@@ -31,10 +31,10 @@ void AImposterGizmoActorBase::Capture(AActor* InActor) {
 	PreviewGizmo = AddComponent<UGizmoComponent>();
 }
 
-uint8 AImposterGizmoActorBase::SetPreviewAxis() {
+uint8 AImposterGizmoActorBase::SetOffsetAxis() {
 	std::uniform_int_distribution<int> Distribution(0, 2);
-	PreviewAxis = Distribution(RandomEngine());
-	return PreviewAxis;
+	OffsetAxis = Distribution(RandomEngine());
+	return OffsetAxis;
 }
 
 FLuaActorProxy AImposterGizmoActorBase::GetCapturedActorProxy() const {

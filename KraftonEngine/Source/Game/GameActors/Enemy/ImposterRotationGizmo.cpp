@@ -50,7 +50,7 @@ void AImposterRotationGizmo::Transform(float DeltaTime) {
 
 FRotator AImposterRotationGizmo::GetRotationOffset() {
 	const float Angle = RandomAngle();
-	switch (SetPreviewAxis())
+	switch (SetOffsetAxis())
 	{
 	case 0:
 		return FRotator(Angle, 0.0f, 0.0f);

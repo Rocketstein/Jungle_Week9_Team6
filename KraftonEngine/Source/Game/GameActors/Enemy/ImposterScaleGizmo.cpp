@@ -51,7 +51,7 @@ void AImposterScaleGizmo::Transform(float DeltaTime) {
 // Return a scale within the range [1.2, 2]
 FVector AImposterScaleGizmo::GetScaleOffset() {
 
-	switch(SetPreviewAxis()) {
+	switch(SetOffsetAxis()) {
 	case (0) :
 	{
 		return FVector(RandomScaleFactor(), 1, 1);

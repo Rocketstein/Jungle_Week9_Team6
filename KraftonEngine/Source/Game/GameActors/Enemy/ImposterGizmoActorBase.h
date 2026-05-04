@@ -14,7 +14,7 @@ public:
 	virtual void Capture(AActor* InTarget);
 	virtual void Transform(float DeltaTime) = 0;
 
-	uint8 SetPreviewAxis();
+	uint8 SetOffsetAxis();
 	void Release() { Target = nullptr; }
 
 	AActor* GetCapturedActor() const { if (Target) return Target; return nullptr; }
@@ -30,5 +30,5 @@ protected:
 	float   ElapsedDelay	= 0.f;
 	float	Elapsed			= 0.f;
 	bool	bTransforming   = false;
-	uint8	PreviewAxis		= 0;
+	uint8	OffsetAxis		= 0;
 };

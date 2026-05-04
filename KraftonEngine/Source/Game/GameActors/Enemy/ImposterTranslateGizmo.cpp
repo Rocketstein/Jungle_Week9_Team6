@@ -30,6 +30,14 @@ namespace {
 	}
 }
 
+void AImposterTranslateGizmo::Capture(AActor* InTarget) {
+	AImposterGizmoActorBase::Capture(InTarget);
+	if (!Target || !PreviewGizmo) return;
+	PreviewGizmo->SetTranslateMode();
+	PreviewGizmo->SetTarget(Target);
+	
+}
+
 void AImposterTranslateGizmo::Transform(float DeltaTime) {
 	if (!Target) return;
 
@@ -53,7 +61,7 @@ void AImposterTranslateGizmo::Transform(float DeltaTime) {
 }
 
 FVector AImposterTranslateGizmo::GetTranslateOffset() {
-	switch (SetPreviewAxis())
+	switch (SetOffsetAxis())
 	{
 	case 0:
 		return FVector(RandomOffset() * RandomSign(), 0.0f, 0.0f);
