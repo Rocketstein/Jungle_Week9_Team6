@@ -12,6 +12,8 @@ public:
 
 	void Init(FWindowsWindow* InWindow) override;
 	void BeginPlay() override;
+	bool LoadScene(const FString& InSceneReference) override;
+	void Tick(float DeltaTime) override;
 
 protected:
 	void LoadStartLevel();

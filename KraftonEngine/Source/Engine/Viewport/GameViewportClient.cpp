@@ -1,10 +1,13 @@
 ﻿#include "Viewport/GameViewportClient.h"
 
 #include "Component/CameraComponent.h"
+#include "Component/ScriptComponent.h"
+#include "GameFramework/AActor.h"
 #include "Engine/Input/InputManager.h"
 #include "Engine/Input/InputModifier.h"
 #include "Engine/Input/InputTrigger.h"
 #include "Math/MathUtils.h"
+#include "Viewport/Viewport.h"
 
 #include <windows.h>
 
@@ -83,6 +86,48 @@ void UGameViewportClient::SetCursorClipRect(const FRect& InViewportScreenRect)
 	}
 }
 
+bool UGameViewportClient::TryGetCursorViewportPosition(float& OutViewportX, float& OutViewportY) const
+{
+	OutViewportX = 0.0f;
+	OutViewportY = 0.0f;
+
+	if (!Viewport || !bHasCursorClipRect || !OwnerHWnd)
+	{
+		return false;
+	}
+
+	const float ViewportWidth = static_cast<float>(Viewport->GetWidth());
+	const float ViewportHeight = static_cast<float>(Viewport->GetHeight());
+	const float RectWidth = static_cast<float>(CursorClipClientRect.right - CursorClipClientRect.left);
+	const float RectHeight = static_cast<float>(CursorClipClientRect.bottom - CursorClipClientRect.top);
+	if (ViewportWidth <= 0.0f || ViewportHeight <= 0.0f || RectWidth <= 0.0f || RectHeight <= 0.0f)
+	{
+		return false;
+	}
+
+	POINT CursorPoint{};
+	if (!::GetCursorPos(&CursorPoint))
+	{
+		return false;
+	}
+
+	if (!::ScreenToClient(OwnerHWnd, &CursorPoint))
+	{
+		return false;
+	}
+
+	const float LocalX = static_cast<float>(CursorPoint.x - CursorClipClientRect.left);
+	const float LocalY = static_cast<float>(CursorPoint.y - CursorClipClientRect.top);
+	if (LocalX < 0.0f || LocalY < 0.0f || LocalX >= RectWidth || LocalY >= RectHeight)
+	{
+		return false;
+	}
+
+	OutViewportX = LocalX * (ViewportWidth / RectWidth);
+	OutViewportY = LocalY * (ViewportHeight / RectHeight);
+	return true;
+}
+
 void UGameViewportClient::SetPossessed(bool bPossessed)
 {
 	if (bPIEPossessedInputEnabled == bPossessed)
@@ -125,67 +170,100 @@ void UGameViewportClient::ResetInputState()
 
 bool UGameViewportClient::Tick(float DeltaTime)
 {
-	if (!bPIEPossessedInputEnabled || !HasPossessedTarget())
+	if (!HasPossessedTarget())
 	{
 		return false;
 	}
 
-	//If possessed, we capture and center the mouse
-	SetCursorCaptured(true);
-
-	// Reset accumulators before processing
-	MoveInputAccumulator = FVector::ZeroVector;
-	LookInputAccumulator = FVector::ZeroVector;
-
-	// Process Enhanced Input
-	EnhancedInputManager.ProcessInput(&FInputManager::Get(), DeltaTime);
-
-	// Apply Accumulated Input
-	UCameraComponent* TargetCamera = GetPossessedTarget();
-	if (!TargetCamera) return false;
-
 	bool bChanged = false;
 
-	// Movement
-	if (!MoveInputAccumulator.IsNearlyZero())
+	// possessed 상태면 마우스 캡처 및 중앙 고정 수행 (스크립트 제어 카메라여도 뷰포트 포커스 유지 목적)
+	SetCursorCaptured(true);
+
+	if (bPIEPossessedInputEnabled)
 	{
-		MoveInputAccumulator = MoveInputAccumulator.Normalized();
+		// Reset accumulators before processing
+		MoveInputAccumulator = FVector::ZeroVector;
+		LookInputAccumulator = FVector::ZeroVector;
 
-		FVector FlatForward = TargetCamera->GetForwardVector();
-		FVector FlatRight = TargetCamera->GetRightVector();
-		FlatForward.Z = 0.0f;
-		FlatRight.Z = 0.0f;
-		if (!FlatForward.IsNearlyZero()) FlatForward = FlatForward.Normalized();
-		if (!FlatRight.IsNearlyZero()) FlatRight = FlatRight.Normalized();
+		// Process Enhanced Input
+		EnhancedInputManager.ProcessInput(&FInputManager::Get(), DeltaTime);
 
-		const float SpeedBoost = bIsSprinting ? InputSettings.SprintMultiplier : 1.0f;
-		const FVector WorldDelta = (FlatForward * MoveInputAccumulator.X + FlatRight * MoveInputAccumulator.Y + FVector::UpVector * MoveInputAccumulator.Z)
-			* (InputSettings.MoveSpeed * SpeedBoost * DeltaTime);
+		// Apply Accumulated Input
+		UCameraComponent* TargetCamera = GetPossessedTarget();
 
-		TargetCamera->SetWorldLocation(TargetCamera->GetWorldLocation() + WorldDelta);
-		bChanged = true;
-	}
+		// 카메라 owner에 UScriptComponent가 붙어 있으면 스크립트가 카메라/액터를 직접 제어하므로
+		// GameViewportClient 기본 WASD/Mouse 드라이브를 yield 
+		bool bScriptDrivesCamera = false;
+		if (TargetCamera)
+		{
+			if (AActor* OwnerActor = TargetCamera->GetOwner())
+			{
+				for (UActorComponent* Comp : OwnerActor->GetComponents())
+				{
+					if (Comp && Comp->IsA<UScriptComponent>())
+					{
+						bScriptDrivesCamera = true;
+						break;
+					}
+				}
+			}
+		}
 
-	// Look
-	if (!LookInputAccumulator.IsNearlyZero())
-	{
-		FRotator Rotation = TargetCamera->GetRelativeRotation();
-		Rotation.Yaw += LookInputAccumulator.X * InputSettings.LookSensitivity;
-		Rotation.Pitch = Clamp(
-			Rotation.Pitch + LookInputAccumulator.Y * InputSettings.LookSensitivity,
-			InputSettings.MinPitch,
-			InputSettings.MaxPitch);
-		Rotation.Roll = 0.0f;
-		TargetCamera->SetRelativeRotation(Rotation);
-		bChanged = true;
+		if (TargetCamera && !bScriptDrivesCamera)
+		{
+			// Movement
+			if (!MoveInputAccumulator.IsNearlyZero())
+			{
+				MoveInputAccumulator = MoveInputAccumulator.Normalized();
+
+				FVector FlatForward = TargetCamera->GetForwardVector();
+				FVector FlatRight = TargetCamera->GetRightVector();
+				FlatForward.Z = 0.0f;
+				FlatRight.Z = 0.0f;
+				if (!FlatForward.IsNearlyZero()) FlatForward = FlatForward.Normalized();
+				if (!FlatRight.IsNearlyZero()) FlatRight = FlatRight.Normalized();
+
+				const float SpeedBoost = bIsSprinting ? InputSettings.SprintMultiplier : 1.0f;
+				const FVector WorldDelta = (FlatForward * MoveInputAccumulator.X + FlatRight * MoveInputAccumulator.Y + FVector::UpVector * MoveInputAccumulator.Z)
+					* (InputSettings.MoveSpeed * SpeedBoost * DeltaTime);
+
+				TargetCamera->SetWorldLocation(TargetCamera->GetWorldLocation() + WorldDelta);
+				bChanged = true;
+			}
+
+			// Look
+			if (!LookInputAccumulator.IsNearlyZero())
+			{
+				FRotator Rotation = TargetCamera->GetRelativeRotation();
+				Rotation.Yaw += LookInputAccumulator.X * InputSettings.LookSensitivity;
+				Rotation.Pitch = Clamp(
+					Rotation.Pitch + LookInputAccumulator.Y * InputSettings.LookSensitivity,
+					InputSettings.MinPitch,
+					InputSettings.MaxPitch);
+				Rotation.Roll = 0.0f;
+				TargetCamera->SetRelativeRotation(Rotation);
+				bChanged = true;
+			}
+		}
 	}
 
 	// Recenter mouse after processing to allow continuous rotation
 	if (bCursorCaptured && OwnerHWnd)
 	{
-		RECT rect;
-		::GetClientRect(OwnerHWnd, &rect);
-		POINT center = { (rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2 };
+		POINT center{};
+		if (bHasCursorClipRect)
+		{
+			center.x = (CursorClipClientRect.left + CursorClipClientRect.right) / 2;
+			center.y = (CursorClipClientRect.top + CursorClipClientRect.bottom) / 2;
+		}
+		else
+		{
+			RECT rect;
+			::GetClientRect(OwnerHWnd, &rect);
+			center.x = (rect.left + rect.right) / 2;
+			center.y = (rect.top + rect.bottom) / 2;
+		}
 		::ClientToScreen(OwnerHWnd, &center);
 		::SetCursorPos(center.x, center.y);
 		FInputManager::Get().SetLastMousePos(center);

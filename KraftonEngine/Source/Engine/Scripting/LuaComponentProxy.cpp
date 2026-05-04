@@ -1,4 +1,4 @@
-﻿#include "Scripting/LuaComponentProxy.h"
+#include "Scripting/LuaComponentProxy.h"
 
 #include "Component/ActorComponent.h"
 #include "Component/Movement/InterpToMovementComponent.h"
@@ -11,16 +11,17 @@
 #include "Component/UIButtonComponent.h"
 #include "Component/UIImageComponent.h"
 #include "Component/TextRenderComponent.h"
+#include "Component/UIScreenTextComponent.h"
 #include "Engine/Runtime/Engine.h"
 #include "GameFramework/AActor.h"
 #include "Mesh/ObjManager.h"
 #include "Object/Object.h"
 #include "Object/UClass.h"
 #include "Scripting/LuaActorProxy.h"
+#include "Component/CameraComponent.h"
 #include "Component/Shape/BoxComponent.h"
 #include "Component/Shape/CapsuleComponent.h"
 #include "Component/Shape/SphereComponent.h"
-
 #include <algorithm>
 #include <cmath>
 
@@ -144,6 +145,24 @@ bool FLuaComponentProxy::IsActive() const
 {
 	UActorComponent* TargetComponent = GetComponent();
 	return TargetComponent ? TargetComponent->IsActive() : false;
+}
+
+bool FLuaComponentProxy::SetVisible(bool bVisible)
+{
+	UPrimitiveComponent* PrimitiveComponent = Cast<UPrimitiveComponent>(GetComponent());
+	if (!PrimitiveComponent)
+	{
+		return false;
+	}
+
+	PrimitiveComponent->SetVisibility(bVisible);
+	return true;
+}
+
+bool FLuaComponentProxy::IsVisible() const
+{
+	UPrimitiveComponent* PrimitiveComponent = Cast<UPrimitiveComponent>(GetComponent());
+	return PrimitiveComponent ? PrimitiveComponent->IsVisible() : false;
 }
 
 sol::optional<FVector> FLuaComponentProxy::GetWorldLocation() const
@@ -351,6 +370,36 @@ bool FLuaComponentProxy::SetLocalScaleXYZ(float X, float Y, float Z)
 	return SetLocalScale(FVector(X, Y, Z));
 }
 
+sol::optional<FVector> FLuaComponentProxy::GetForwardVector() const
+{
+	UActorComponent* Comp = GetComponent();
+	if (USceneComponent* SceneComp = Cast<USceneComponent>(Comp))
+	{
+		return SceneComp->GetForwardVector();
+	}
+	return sol::nullopt;
+}
+
+sol::optional<FVector> FLuaComponentProxy::GetRightVector() const
+{
+	UActorComponent* Comp = GetComponent();
+	if (USceneComponent* SceneComp = Cast<USceneComponent>(Comp))
+	{
+		return SceneComp->GetRightVector();
+	}
+	return sol::nullopt;
+}
+
+sol::optional<FVector> FLuaComponentProxy::GetUpVector() const
+{
+	UActorComponent* Comp = GetComponent();
+	if (USceneComponent* SceneComp = Cast<USceneComponent>(Comp))
+	{
+		return SceneComp->GetUpVector();
+	}
+	return sol::nullopt;
+}
+
 bool FLuaComponentProxy::SetCollisionEnabled(bool bEnabled)
 {
 	UPrimitiveComponent* PrimitiveComponent = Cast<UPrimitiveComponent>(GetComponent());
@@ -427,7 +476,7 @@ sol::optional<float> FLuaComponentProxy::GetShapeHalfHeight() const
 
 bool FLuaComponentProxy::SetShapeHalfHeight(float HalfHeight)
 {
-	const float SafeHalfHeight = (std::max)(1.0f, std::isfinite(HalfHeight) ? HalfHeight : 1.0f);
+	const float SafeHalfHeight = (std::max)(0.01f, std::isfinite(HalfHeight) ? HalfHeight : 1.0f);
 	UActorComponent* TargetComponent = GetComponent();
 	if (UBoxComponent* BoxComponent = Cast<UBoxComponent>(TargetComponent))
 	{
@@ -478,7 +527,7 @@ sol::optional<float> FLuaComponentProxy::GetShapeRadius() const
 
 bool FLuaComponentProxy::SetShapeRadius(float Radius)
 {
-	const float SafeRadius = (std::max)(1.0f, std::isfinite(Radius) ? Radius : 1.0f);
+	const float SafeRadius = (std::max)(0.01f, std::isfinite(Radius) ? Radius : 1.0f);
 	UActorComponent* TargetComponent = GetComponent();
 	if (UBoxComponent* BoxComponent = Cast<UBoxComponent>(TargetComponent))
 	{
@@ -534,9 +583,9 @@ sol::optional<FVector> FLuaComponentProxy::GetShapeExtent() const
 bool FLuaComponentProxy::SetShapeExtent(const FVector& Extent)
 {
 	const FVector SafeExtent(
-		(std::max)(1.0f, std::isfinite(Extent.X) ? Extent.X : 1.0f),
-		(std::max)(1.0f, std::isfinite(Extent.Y) ? Extent.Y : 1.0f),
-		(std::max)(1.0f, std::isfinite(Extent.Z) ? Extent.Z : 1.0f)
+		(std::max)(0.01f, std::isfinite(Extent.X) ? Extent.X : 1.0f),
+		(std::max)(0.01f, std::isfinite(Extent.Y) ? Extent.Y : 1.0f),
+		(std::max)(0.01f, std::isfinite(Extent.Z) ? Extent.Z : 1.0f)
 	);
 
 	UActorComponent* TargetComponent = GetComponent();
@@ -596,25 +645,39 @@ bool FLuaComponentProxy::SetStaticMesh(const FString& MeshPath)
 bool FLuaComponentProxy::SetText(const FString& Text)
 {
 	UTextRenderComponent* TextComponent = Cast<UTextRenderComponent>(GetComponent());
-	if (!TextComponent)
+	if (TextComponent)
+	{
+		TextComponent->SetText(Text);
+		TextComponent->PostEditProperty("Text");
+		return true;
+	}
+
+	UUIScreenTextComponent* ScreenTextComponent = Cast<UUIScreenTextComponent>(GetComponent());
+	if (!ScreenTextComponent)
 	{
 		return false;
 	}
 
-	TextComponent->SetText(Text);
-	TextComponent->PostEditProperty("Text");
+	ScreenTextComponent->SetText(Text);
+	ScreenTextComponent->PostEditProperty("Text");
 	return true;
 }
 
 sol::optional<FString> FLuaComponentProxy::GetText() const
 {
 	UTextRenderComponent* TextComponent = Cast<UTextRenderComponent>(GetComponent());
-	if (!TextComponent)
+	if (TextComponent)
+	{
+		return TextComponent->GetText();
+	}
+
+	UUIScreenTextComponent* ScreenTextComponent = Cast<UUIScreenTextComponent>(GetComponent());
+	if (!ScreenTextComponent)
 	{
 		return sol::nullopt;
 	}
 
-	return TextComponent->GetText();
+	return ScreenTextComponent->GetText();
 }
 
 bool FLuaComponentProxy::SetTexture(const FString& TexturePath)
@@ -647,12 +710,19 @@ bool FLuaComponentProxy::SetTint(const FVector& TintRGB)
 bool FLuaComponentProxy::SetTintRGBA(float R, float G, float B, float A)
 {
 	UUIImageComponent* ImageComponent = Cast<UUIImageComponent>(GetComponent());
-	if (!ImageComponent)
+	if (ImageComponent)
+	{
+		ImageComponent->SetTint(FVector4(R, G, B, A));
+		return true;
+	}
+
+	UUIScreenTextComponent* ScreenTextComponent = Cast<UUIScreenTextComponent>(GetComponent());
+	if (!ScreenTextComponent)
 	{
 		return false;
 	}
 
-	ImageComponent->SetTint(FVector4(R, G, B, A));
+	ScreenTextComponent->SetColor(FVector4(R, G, B, A));
 	return true;
 }
 
@@ -697,7 +767,7 @@ bool FLuaComponentProxy::WasClicked() const
 	return ButtonComponent ? ButtonComponent->WasClicked() : false;
 }
 
-bool FLuaComponentProxy::SetSoundPath(const FString& SoundPath)
+bool FLuaComponentProxy::SetAudioPath(const FString& AudioPath)
 {
 	USoundComponent* SoundComponent = Cast<USoundComponent>(GetComponent());
 	if (!SoundComponent)
@@ -705,11 +775,11 @@ bool FLuaComponentProxy::SetSoundPath(const FString& SoundPath)
 		return false;
 	}
 
-	SoundComponent->SetSound(FName(SoundPath));
+	SoundComponent->SetSound(FName(AudioPath));
 	return true;
 }
 
-sol::optional<FString> FLuaComponentProxy::GetSoundPath() const
+sol::optional<FString> FLuaComponentProxy::GetAudioPath() const
 {
 	USoundComponent* SoundComponent = Cast<USoundComponent>(GetComponent());
 	if (!SoundComponent)
@@ -720,7 +790,7 @@ sol::optional<FString> FLuaComponentProxy::GetSoundPath() const
 	return SoundComponent->GetSound().ToString();
 }
 
-bool FLuaComponentProxy::SetSoundCategory(const FString& CategoryName)
+bool FLuaComponentProxy::SetAudioCategory(const FString& CategoryName)
 {
 	USoundComponent* SoundComponent = Cast<USoundComponent>(GetComponent());
 	if (!SoundComponent)
@@ -738,7 +808,7 @@ bool FLuaComponentProxy::SetSoundCategory(const FString& CategoryName)
 	return true;
 }
 
-sol::optional<FString> FLuaComponentProxy::GetSoundCategory() const
+sol::optional<FString> FLuaComponentProxy::GetAudioCategory() const
 {
 	USoundComponent* SoundComponent = Cast<USoundComponent>(GetComponent());
 	if (!SoundComponent)
@@ -749,7 +819,7 @@ sol::optional<FString> FLuaComponentProxy::GetSoundCategory() const
 	return USoundComponent::CategoryToString(SoundComponent->GetCategory());
 }
 
-bool FLuaComponentProxy::SetSoundLooping(bool bLooping)
+bool FLuaComponentProxy::SetAudioLooping(bool bLooping)
 {
 	USoundComponent* SoundComponent = Cast<USoundComponent>(GetComponent());
 	if (!SoundComponent)
@@ -761,7 +831,7 @@ bool FLuaComponentProxy::SetSoundLooping(bool bLooping)
 	return true;
 }
 
-bool FLuaComponentProxy::IsSoundLooping() const
+bool FLuaComponentProxy::IsAudioLooping() const
 {
 	USoundComponent* SoundComponent = Cast<USoundComponent>(GetComponent());
 	return SoundComponent ? SoundComponent->IsLooping() : false;
@@ -773,31 +843,31 @@ bool FLuaComponentProxy::PlayAudio()
 	return SoundComponent ? SoundComponent->Play() : false;
 }
 
-bool FLuaComponentProxy::PlayAudioPath(const FString& SoundPath)
+bool FLuaComponentProxy::PlayAudioPath(const FString& AudioPath)
 {
 	USoundComponent* SoundComponent = Cast<USoundComponent>(GetComponent());
-	return SoundComponent ? SoundComponent->PlayPath(SoundPath) : false;
+	return SoundComponent ? SoundComponent->PlayPath(AudioPath) : false;
 }
 
-bool FLuaComponentProxy::StopSound()
+bool FLuaComponentProxy::StopAudio()
 {
 	USoundComponent* SoundComponent = Cast<USoundComponent>(GetComponent());
 	return SoundComponent ? SoundComponent->Stop() : false;
 }
 
-bool FLuaComponentProxy::PauseSound()
+bool FLuaComponentProxy::PauseAudio()
 {
 	USoundComponent* SoundComponent = Cast<USoundComponent>(GetComponent());
 	return SoundComponent ? SoundComponent->Pause() : false;
 }
 
-bool FLuaComponentProxy::ResumeSound()
+bool FLuaComponentProxy::ResumeAudio()
 {
 	USoundComponent* SoundComponent = Cast<USoundComponent>(GetComponent());
 	return SoundComponent ? SoundComponent->Resume() : false;
 }
 
-bool FLuaComponentProxy::IsSoundPlaying() const
+bool FLuaComponentProxy::IsAudioPlaying() const
 {
 	USoundComponent* SoundComponent = Cast<USoundComponent>(GetComponent());
 	return SoundComponent ? SoundComponent->IsPlaying() : false;
@@ -940,18 +1010,43 @@ bool FLuaComponentProxy::IsMoveDone() const
 	return false;
 }
 
+bool FLuaComponentProxy::StartCameraShake(float Intensity, float Duration)
+{
+	UActorComponent* TargetComp = this->GetComponent();
+	if (TargetComp && TargetComp->IsA<UCameraComponent>())
+	{
+		UCameraComponent* Camera = static_cast<UCameraComponent*>(TargetComp);
+		Camera->StartCameraShake(Intensity, Duration);
+		return true;
+	}
+	return false;
+}
+
+bool FLuaComponentProxy::AddHitEffect(float Intensity, float Duration)
+{
+	UActorComponent* TargetComp = this->GetComponent();
+	if (TargetComp && TargetComp->IsA<UCameraComponent>())
+	{
+		UCameraComponent* Camera = static_cast<UCameraComponent*>(TargetComp);
+		Camera->AddHitEffect(Intensity, Duration);
+		return true;
+	}
+	return false;
+}
+
 bool FLuaComponentProxy::SetBoxExtent(const FVector& Extent)
 {
-	UBoxComponent* BoxComponent = Cast<UBoxComponent>(GetComponent());
+	UActorComponent* TargetComp = this->GetComponent();
+	UBoxComponent* BoxComponent = (TargetComp && TargetComp->IsA<UBoxComponent>()) ? static_cast<UBoxComponent*>(TargetComp) : nullptr;
 	if (!BoxComponent)
 	{
 	return false;
 }
 
 	const FVector SafeExtent(
-		std::max(1.0f, Extent.X),
-		std::max(1.0f, Extent.Y),
-		std::max(1.0f, Extent.Z)
+		std::max(0.01f, Extent.X),
+		std::max(0.01f, Extent.Y),
+		std::max(0.01f, Extent.Z)
 	);
 
 	BoxComponent->SetBoxExtent(SafeExtent);

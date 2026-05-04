@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "Core/CoreTypes.h"
 #include "Math/Vector.h"
@@ -26,6 +26,8 @@ struct FLuaComponentProxy
 
 	bool SetActive(bool bActive);
 	bool IsActive() const;
+	bool SetVisible(bool bVisible);
+	bool IsVisible() const;
 
 	sol::optional<FVector> GetWorldLocation() const;
 	bool SetWorldLocation(const FVector& InLocation);
@@ -49,6 +51,10 @@ struct FLuaComponentProxy
 	sol::optional<FVector> GetLocalScale() const;
 	bool SetLocalScale(const FVector& InScale);
 	bool SetLocalScaleXYZ(float X, float Y, float Z);
+
+	sol::optional<FVector> GetForwardVector() const;
+	sol::optional<FVector> GetRightVector() const;
+	sol::optional<FVector> GetUpVector() const;
 
 	bool SetCollisionEnabled(bool bEnabled);
 	bool SetGenerateOverlapEvents(bool bEnabled);
@@ -76,18 +82,18 @@ struct FLuaComponentProxy
 	bool IsHovered() const;
 	bool IsPressed() const;
 	bool WasClicked() const;
-	bool SetSoundPath(const FString& SoundPath);
-	sol::optional<FString> GetSoundPath() const;
-	bool SetSoundCategory(const FString& CategoryName);
-	sol::optional<FString> GetSoundCategory() const;
-	bool SetSoundLooping(bool bLooping);
-	bool IsSoundLooping() const;
+	bool SetAudioPath(const FString& AudioPath);
+	sol::optional<FString> GetAudioPath() const;
+	bool SetAudioCategory(const FString& CategoryName);
+	sol::optional<FString> GetAudioCategory() const;
+	bool SetAudioLooping(bool bLooping);
+	bool IsAudioLooping() const;
 	bool PlayAudio();
-	bool PlayAudioPath(const FString& SoundPath);
-	bool StopSound();
-	bool PauseSound();
-	bool ResumeSound();
-	bool IsSoundPlaying() const;
+	bool PlayAudioPath(const FString& AudioPath);
+	bool StopAudio();
+	bool PauseAudio();
+	bool ResumeAudio();
+	bool IsAudioPlaying() const;
 
 	bool SetSpeed(float Speed);
 	sol::optional<float> GetSpeed() const;
@@ -98,7 +104,9 @@ struct FLuaComponentProxy
 	bool StopMove();
 	bool IsMoveDone() const;
 
-	// Box Extent (�浹 ó��) ����
+	bool StartCameraShake(float Intensity, float Duration);
+	bool AddHitEffect(float Intensity, float Duration);
+
 	bool SetBoxExtent(const FVector& Extent);
 	bool SetBoxExtentXYZ(float X, float Y, float Z);
 	sol::optional<FVector> GetBoxExtent() const;

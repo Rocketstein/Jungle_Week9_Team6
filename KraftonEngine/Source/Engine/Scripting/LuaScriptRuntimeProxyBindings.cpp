@@ -37,6 +37,8 @@ void FLuaScriptRuntime::BindComponentProxyType()
 		"GetTypeName", &FLuaComponentProxy::GetTypeName,
 		"SetActive", &FLuaComponentProxy::SetActive,
 		"IsActive", &FLuaComponentProxy::IsActive,
+		"SetVisible", &FLuaComponentProxy::SetVisible,
+		"IsVisible", &FLuaComponentProxy::IsVisible,
 		"GetWorldLocation", &FLuaComponentProxy::GetWorldLocation,
 		"SetWorldLocation", sol::overload(
 			static_cast<bool(FLuaComponentProxy::*)(const FVector&)>(&FLuaComponentProxy::SetWorldLocation),
@@ -75,6 +77,9 @@ void FLuaScriptRuntime::BindComponentProxyType()
 			static_cast<bool(FLuaComponentProxy::*)(const FVector&)>(&FLuaComponentProxy::SetLocalScale),
 			&FLuaComponentProxy::SetLocalScaleXYZ),
 		"SetLocalScaleXYZ", &FLuaComponentProxy::SetLocalScaleXYZ,
+		"GetForwardVector", &FLuaComponentProxy::GetForwardVector,
+		"GetRightVector", &FLuaComponentProxy::GetRightVector,
+		"GetUpVector", &FLuaComponentProxy::GetUpVector,
 		"SetCollisionEnabled", &FLuaComponentProxy::SetCollisionEnabled,
 		"SetGenerateOverlapEvents", &FLuaComponentProxy::SetGenerateOverlapEvents,
 		"IsOverlappingActor", &FLuaComponentProxy::IsOverlappingActor,
@@ -98,19 +103,19 @@ void FLuaScriptRuntime::BindComponentProxyType()
 		"IsHovered", &FLuaComponentProxy::IsHovered,
 		"IsPressed", &FLuaComponentProxy::IsPressed,
 		"WasClicked", &FLuaComponentProxy::WasClicked,
-		"SetSoundPath", &FLuaComponentProxy::SetSoundPath,
-		"GetSoundPath", &FLuaComponentProxy::GetSoundPath,
-		"SetSoundCategory", &FLuaComponentProxy::SetSoundCategory,
-		"GetSoundCategory", &FLuaComponentProxy::GetSoundCategory,
-		"SetSoundLooping", &FLuaComponentProxy::SetSoundLooping,
-		"IsSoundLooping", &FLuaComponentProxy::IsSoundLooping,
-		"PlaySound", sol::overload(
+		"SetAudioPath", &FLuaComponentProxy::SetAudioPath,
+		"GetAudioPath", &FLuaComponentProxy::GetAudioPath,
+		"SetAudioCategory", &FLuaComponentProxy::SetAudioCategory,
+		"GetAudioCategory", &FLuaComponentProxy::GetAudioCategory,
+		"SetAudioLooping", &FLuaComponentProxy::SetAudioLooping,
+		"IsAudioLooping", &FLuaComponentProxy::IsAudioLooping,
+		"PlayAudio", sol::overload(
 			static_cast<bool(FLuaComponentProxy::*)()>(&FLuaComponentProxy::PlayAudio),
 			&FLuaComponentProxy::PlayAudioPath),
-		"StopSound", &FLuaComponentProxy::StopSound,
-		"PauseSound", &FLuaComponentProxy::PauseSound,
-		"ResumeSound", &FLuaComponentProxy::ResumeSound,
-		"IsSoundPlaying", &FLuaComponentProxy::IsSoundPlaying,
+		"StopAudio", &FLuaComponentProxy::StopAudio,
+		"PauseAudio", &FLuaComponentProxy::PauseAudio,
+		"ResumeAudio", &FLuaComponentProxy::ResumeAudio,
+		"IsAudioPlaying", &FLuaComponentProxy::IsAudioPlaying,
 		"SetSpeed", &FLuaComponentProxy::SetSpeed,
 		"GetSpeed", &FLuaComponentProxy::GetSpeed,
 		"MoveTo", sol::overload(
@@ -121,6 +126,8 @@ void FLuaScriptRuntime::BindComponentProxyType()
 			&FLuaComponentProxy::MoveByXYZ),
 		"StopMove", &FLuaComponentProxy::StopMove,
 		"IsMoveDone", &FLuaComponentProxy::IsMoveDone,
+		"StartCameraShake", &FLuaComponentProxy::StartCameraShake,
+		"AddHitEffect", &FLuaComponentProxy::AddHitEffect,
 		"SetBoxExtent", sol::overload(
 			&FLuaComponentProxy::SetBoxExtent,
 			&FLuaComponentProxy::SetBoxExtentXYZ),
@@ -137,6 +144,9 @@ void FLuaScriptRuntime::BindActorProxyType()
 		"Name", sol::property(&FLuaActorProxy::GetName),
 		"UUID", sol::property(&FLuaActorProxy::GetUUID),
 		"Tag", sol::property(&FLuaActorProxy::GetTag, &FLuaActorProxy::SetTag),
+		"Location", sol::property(&FLuaActorProxy::GetWorldLocation, &FLuaActorProxy::SetWorldLocation),
+		"Rotation", sol::property(&FLuaActorProxy::GetWorldRotation, &FLuaActorProxy::SetWorldRotation),
+		"Scale", sol::property(&FLuaActorProxy::GetWorldScale, &FLuaActorProxy::SetWorldScale),
 		"Velocity", sol::property(&FLuaActorProxy::GetVelocity, &FLuaActorProxy::SetVelocity),
 		"HasTag", &FLuaActorProxy::HasTag,
 		"GetWorldLocation", &FLuaActorProxy::GetWorldLocation,
@@ -161,6 +171,9 @@ void FLuaScriptRuntime::BindActorProxyType()
 		"AddWorldOffset", sol::overload(
 			static_cast<void(FLuaActorProxy::*)(const FVector&)>(&FLuaActorProxy::AddWorldOffset),
 			&FLuaActorProxy::AddWorldOffsetXYZ),
+		"GetForwardVector", &FLuaActorProxy::GetForwardVector,
+		"GetRightVector", &FLuaActorProxy::GetRightVector,
+		"GetUpVector", &FLuaActorProxy::GetUpVector,
 		"FindGround", [](const FLuaActorProxy& ActorProxy, float MaxDistance, float SkinWidth)
 		{
 			const FLuaGroundHit GroundHit = ActorProxy.FindGround(MaxDistance, SkinWidth);

@@ -110,6 +110,11 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup>
+    <FxCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir)Shaders;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </FxCompile>
+  </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(ProjectDir)Bin\$(Configuration)\</OutDir>
     <IntDir>$(ProjectDir)Build\$(Configuration)\</IntDir>
@@ -285,6 +290,7 @@
     <ClCompile Include="Source\Game\GameActors\Enemy\ImposterRotationGizmo.cpp" />
     <ClCompile Include="Source\Game\GameActors\Enemy\ImposterScaleGizmo.cpp" />
     <ClCompile Include="Source\Game\GameActors\Enemy\ImposterTranslateGizmo.cpp" />
+    <ClCompile Include="Source\Engine\Camera\CameraShake.cpp" />
     <ClCompile Include="Source\Game\GameMode\ARunnerGameMode.cpp" />
     <ClCompile Include="Source\Game\Player\Runner.cpp" />
     <ClCompile Include="Source\Editor\EditorEngine.cpp" />
@@ -372,6 +378,7 @@
     <ClCompile Include="Source\Engine\GameFramework\CharacterActor.cpp" />
     <ClCompile Include="Source\Engine\GameFramework\DecalActor.cpp" />
     <ClCompile Include="Source\Engine\GameFramework\HeightFogActor.cpp" />
+    <ClCompile Include="Source\Engine\GameFramework\ItemActorBase.cpp" />
     <ClCompile Include="Source\Engine\GameFramework\ScreenTextActor.cpp" />
     <ClCompile Include="Source\Engine\GameFramework\UIRootActor.cpp" />
     <ClCompile Include="Source\Engine\GameFramework\WorldTextActor.cpp" />
@@ -515,6 +522,7 @@
     <ClInclude Include="Source\Game\GameActors\Enemy\ImposterRotationGizmo.h" />
     <ClInclude Include="Source\Game\GameActors\Enemy\ImposterScaleGizmo.h" />
     <ClInclude Include="Source\Game\GameActors\Enemy\ImposterTranslateGizmo.h" />
+    <ClInclude Include="Source\Engine\Camera\CameraShake.h" />
     <ClInclude Include="Source\Game\GameMode\ARunnerGameMode.h" />
     <ClInclude Include="Source\Game\Player\Runner.h" />
     <ClInclude Include="Source\Editor\EditorEngine.h" />
@@ -624,6 +632,7 @@
     <ClInclude Include="Source\Engine\GameFramework\GameInstance.h" />
     <ClInclude Include="Source\Engine\GameFramework\GameModeBase.h" />
     <ClInclude Include="Source\Engine\GameFramework\HeightFogActor.h" />
+    <ClInclude Include="Source\Engine\GameFramework\ItemActorBase.h" />
     <ClInclude Include="Source\Engine\GameFramework\ScreenTextActor.h" />
     <ClInclude Include="Source\Engine\GameFramework\UIRootActor.h" />
     <ClInclude Include="Source\Engine\GameFramework\WorldTextActor.h" />

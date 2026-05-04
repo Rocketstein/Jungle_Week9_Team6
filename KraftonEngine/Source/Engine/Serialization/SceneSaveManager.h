@@ -42,7 +42,7 @@ public:
 
 	static std::wstring GetSceneDirectory() { return FPaths::SceneDir(); }
 
-	static void SaveSceneAsJSON(const string& SceneName, FWorldContext& WorldContext, UCameraComponent* PerspectiveCam = nullptr);
+	static void SaveSceneAsJSON(const FString& ScenePathOrName, FWorldContext& WorldContext, UCameraComponent* PerspectiveCam = nullptr);
 	static string SerializeWorldToJSONString(FWorldContext& WorldContext, UCameraComponent* PerspectiveCam = nullptr);
 	static string SerializeActorToJSONString(AActor* Actor);
 	static void LoadSceneFromJSON(const string& filepath, FWorldContext& OutWorldContext, FPerspectiveCameraData& OutCam);
@@ -61,6 +61,8 @@ public:
 
 	// 모든 .Scene 파일을 일괄 쿠킹. 같은 디렉터리에 .umap 파일을 생성한다.
 	static int32 CookAllScenes();
+
+	static bool IsJsonFile(const FString& FilePath);
 
 private:
 	// ---- Serialization ----

@@ -100,11 +100,27 @@ UObject* UWorld::Duplicate(UObject* NewOuter) const
 		NewWorld->GetPersistentLevel()->SetOutlinerFolders(PersistentLevel->GetOutlinerFolders());
 	}
 
-	for (AActor* Src : GetActors())
+	if (PersistentLevel)
 	{
-		if (!Src) continue;
-		Src->Duplicate(NewWorld);
+		NewWorld->PersistentLevel = Cast<ULevel>(PersistentLevel->Duplicate(NewWorld));
+		if (NewWorld->PersistentLevel)
+		{
+			NewWorld->PersistentLevel->SetWorld(NewWorld);
+			NewWorld->Levels.push_back(NewWorld->PersistentLevel);
+			NewWorld->CurrentLevel = NewWorld->PersistentLevel;
+
+			for (AActor* Actor : NewWorld->PersistentLevel->GetActors())
+			{
+				if (Actor)
+				{
+					NewWorld->InsertActorToOctree(Actor);
+				}
+			}
+			NewWorld->MarkWorldPrimitivePickingBVHDirty();
+		}
 	}
+
+	NewWorld->StreamingLevels = StreamingLevels;
 
 	NewWorld->PostDuplicate();
 	return NewWorld;
@@ -125,11 +141,27 @@ UWorld* UWorld::DuplicateAs(EWorldType InWorldType) const
 	// TODO: 임시 처리. 추후 제거 하고 Level Duplicate 하는 과정 추가해야할듯
 	NewWorld->PersistentLevel->SetGameModeClassName(PersistentLevel->GetGameModeClassName());
 
-	for (AActor* Src : GetActors())
+	if (PersistentLevel)
 	{
-		if (!Src) continue;
-		Src->Duplicate(NewWorld);
+		NewWorld->PersistentLevel = Cast<ULevel>(PersistentLevel->Duplicate(NewWorld));
+		if (NewWorld->PersistentLevel)
+		{
+			NewWorld->PersistentLevel->SetWorld(NewWorld);
+			NewWorld->Levels.push_back(NewWorld->PersistentLevel);
+			NewWorld->CurrentLevel = NewWorld->PersistentLevel;
+
+			for (AActor* Actor : NewWorld->PersistentLevel->GetActors())
+			{
+				if (Actor)
+				{
+					NewWorld->InsertActorToOctree(Actor);
+				}
+			}
+			NewWorld->MarkWorldPrimitivePickingBVHDirty();
+		}
 	}
+
+	NewWorld->StreamingLevels = StreamingLevels;
 
 	NewWorld->PostDuplicate();
 	return NewWorld;
@@ -168,6 +200,15 @@ void UWorld::Serialize(FArchive& Ar)
 		PersistentLevel->Serialize(Ar);
 		Levels.push_back(PersistentLevel);
 		CurrentLevel = PersistentLevel;
+
+		for (AActor* Actor : PersistentLevel->GetActors())
+		{
+			if (Actor)
+			{
+				InsertActorToOctree(Actor);
+			}
+		}
+		MarkWorldPrimitivePickingBVHDirty();
 
 		// Deserialize Streaming Levels Metadata
 		int32 StreamingCount = 0;
@@ -543,6 +584,7 @@ void UWorld::SpawnGameMode()
 
 void UWorld::BeginPlay()
 {
+	if (bHasBegunPlay) return;
 	bHasBegunPlay = true;
 
 	SpawnGameMode();
@@ -621,7 +663,10 @@ void UWorld::ProcessOverlapEvents() {
 				ResolvePenetration(Shape, Other, Info.HitResult);
 				Other->MarkUpdateOverlaps();
 			}
-			else if (Other->GetOverlapBehaviour() == EOverlapBehaviour::Overlap) {
+			// 한쪽이라도 Overlap이면 overlap pair를 만듭니다.
+			// 예: ItemTrigger=Overlap, PlayerCollider=Hit 조합에서도 item 쪽 Lua OnBeginOverlap이 반드시 호출되어야 합니다.
+			else if (Shape->GetOverlapBehaviour() == EOverlapBehaviour::Overlap ||
+				Other->GetOverlapBehaviour() == EOverlapBehaviour::Overlap) {
 				// Overlap
 				FOverlapInfo Info;
 				Info.HitResult.bBlocking = false;
@@ -629,6 +674,12 @@ void UWorld::ProcessOverlapEvents() {
 				if (FCollisionDispatcher::Get().CheckCollision(Shape, Other, Info)) {
 					Shape->BeginComponentOverlap(Info, true);
 					Shape->ShapeColor = FColor(255, 0, 0);
+
+					// 기존 코드는 Shape 기준으로만 이벤트를 보냈습니다.
+					// reverse overlap을 함께 등록해야 Other owner의 ScriptComponent도 selfComp=Other 기준으로 begin/end pair를 유지할 수 있습니다.
+					FOverlapInfo ReverseInfo = Info;
+					ReverseInfo.HitResult.Component = Shape;
+					Other->BeginComponentOverlap(ReverseInfo, true);
 				}
 				Other->MarkUpdateOverlaps();
 			}

@@ -23,13 +23,41 @@
 #include "Engine/Platform/Paths.h"
 #include "Texture/Texture2D.h"
 #include "Object/Object.h"
+#include <cctype>
 #include <filesystem>
+#include <fstream>
 #include <set>
 
 IMPLEMENT_CLASS(UEditorEngine, UEngine)
 
 namespace
 {
+bool EndsWithIgnoreCase(const FString& Value, const char* Suffix)
+{
+	if (!Suffix)
+	{
+		return false;
+	}
+
+	const FString SuffixString = Suffix;
+	if (Value.size() < SuffixString.size())
+	{
+		return false;
+	}
+
+	for (size_t Index = 0; Index < SuffixString.size(); ++Index)
+	{
+		const char Left = static_cast<char>(std::tolower(static_cast<unsigned char>(Value[Value.size() - SuffixString.size() + Index])));
+		const char Right = static_cast<char>(std::tolower(static_cast<unsigned char>(SuffixString[Index])));
+		if (Left != Right)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
 FString BuildScenePathFromStem(const FString& InStem)
 {
 	std::filesystem::path ScenePath = std::filesystem::path(FSceneSaveManager::GetSceneDirectory())
@@ -172,8 +200,12 @@ void UEditorEngine::OnWindowResized(uint32 Width, uint32 Height)
 
 void UEditorEngine::Tick(float DeltaTime)
 {
-	FInputManager::Get().Tick();
-
+	if (!PendingSceneLoadReference.empty())
+	{
+		const FString SceneToLoad = PendingSceneLoadReference;
+		PendingSceneLoadReference.clear();
+		LoadScene(SceneToLoad);
+	}
 	// --- PIE 요청 처리 (프레임 경계에서 처리되도록 Tick 선두에서 소비) ---
 	if (bRequestEndPlayMapQueued)
 	{
@@ -184,6 +216,7 @@ void UEditorEngine::Tick(float DeltaTime)
 	{
 		StartQueuedPlaySessionRequest();
 	}
+	ProcessDeferredEditorActions();
 
 	ApplyTransformSettingsToGizmo();
 	FDirectoryWatcher::Get().ProcessChanges();
@@ -198,7 +231,152 @@ void UEditorEngine::Tick(float DeltaTime)
 
 	WorldTick(DeltaTime);
 	Render(DeltaTime);
-	SelectionManager.Tick();
+
+	if (!IsPIEPossessedMode())
+	{
+		SelectionManager.Tick();
+	}
+}
+
+bool UEditorEngine::LoadScene(const FString& InSceneReference)
+{
+	if (!IsPlayingInEditor() || InSceneReference.empty())
+	{
+		UE_LOG_CATEGORY(EditorEngine, Warning, "[SceneLoad] Ignored PIE load request. IsPlayingInEditor=%d Scene=%s", IsPlayingInEditor() ? 1 : 0, InSceneReference.c_str());
+		return false;
+	}
+
+	std::filesystem::path ChosenPath;
+	const std::filesystem::path RawPath = FPaths::ToWide(InSceneReference);
+	const std::filesystem::path SceneDir = FSceneSaveManager::GetSceneDirectory();
+
+	auto TrySetChosenPath = [&ChosenPath](const std::filesystem::path& Candidate)
+	{
+		if (!Candidate.empty() && std::filesystem::exists(Candidate))
+		{
+			ChosenPath = Candidate;
+			return true;
+		}
+		return false;
+	};
+
+	if (RawPath.is_absolute())
+	{
+		TrySetChosenPath(RawPath);
+	}
+	else
+	{
+		TrySetChosenPath(RawPath);
+		if (ChosenPath.empty())
+		{
+			TrySetChosenPath(SceneDir / RawPath);
+		}
+	}
+
+	if (ChosenPath.empty())
+	{
+		const bool bHasSceneExtension = EndsWithIgnoreCase(InSceneReference, ".scene");
+		const bool bHasUmapExtension = EndsWithIgnoreCase(InSceneReference, ".umap");
+		if (bHasSceneExtension || bHasUmapExtension)
+		{
+			const std::filesystem::path FileName = RawPath.filename();
+			if (!TrySetChosenPath(SceneDir / FileName))
+			{
+				UE_LOG_CATEGORY(EditorEngine, Error, "[SceneLoad] Failed to resolve scene path from reference: %s", InSceneReference.c_str());
+				FNotificationManager::Get().AddNotification("Scene load failed: " + InSceneReference, ENotificationType::Error, 3.0f);
+				return false;
+			}
+		}
+		else
+		{
+			const std::wstring StemW = FPaths::ToWide(InSceneReference);
+			if (!TrySetChosenPath(SceneDir / (StemW + L".umap")))
+			{
+				if (!TrySetChosenPath(SceneDir / (StemW + FSceneSaveManager::SceneExtension)))
+				{
+					UE_LOG_CATEGORY(EditorEngine, Error, "[SceneLoad] Failed to find scene file for reference: %s", InSceneReference.c_str());
+					FNotificationManager::Get().AddNotification("Scene not found: " + InSceneReference, ENotificationType::Error, 3.0f);
+					return false;
+				}
+			}
+		}
+	}
+
+	FWorldContext* Context = GetWorldContextFromHandle(GetActiveWorldHandle());
+	if (!Context)
+	{
+		UE_LOG_CATEGORY(EditorEngine, Error, "[SceneLoad] No active world context for handle: %s", GetActiveWorldHandle().ToString().c_str());
+		return false;
+	}
+
+	UE_LOG_CATEGORY(EditorEngine, Info, "[SceneLoad] Loading PIE scene '%s' from '%s'", InSceneReference.c_str(), FPaths::ToUtf8(ChosenPath.wstring()).c_str());
+
+	if (IRenderPipeline* Pipeline = GetRenderPipeline())
+	{
+		Pipeline->OnSceneCleared();
+	}
+
+	SelectionManager.ClearSelection();
+	SelectionManager.SetWorld(nullptr);
+
+	if (Context->World)
+	{
+		Context->World->EndPlay();
+		UObjectManager::Get().DestroyObject(Context->World);
+		Context->World = nullptr;
+	}
+
+	FPerspectiveCameraData DummyCamera;
+	const FString FilePath = FPaths::ToUtf8(ChosenPath.wstring());
+	if (EndsWithIgnoreCase(FilePath, ".umap"))
+	{
+		Context->World = UObjectManager::Get().CreateObject<UWorld>();
+		FSceneSaveManager::LoadWorldFromBinary(FilePath, Context->World);
+		Context->WorldType = EWorldType::PIE;
+		Context->ContextName = RawPath.stem().empty() ? "PIE" : FPaths::ToUtf8(RawPath.stem().wstring());
+		Context->ContextHandle = GetActiveWorldHandle();
+	}
+	else
+	{
+		FSceneSaveManager::LoadSceneFromJSON(FilePath, *Context, DummyCamera);
+		Context->WorldType = EWorldType::PIE;
+		Context->ContextHandle = GetActiveWorldHandle();
+	}
+
+	SetActiveWorld(Context->ContextHandle);
+
+	if (!Context->World)
+	{
+		UE_LOG_CATEGORY(EditorEngine, Error, "[SceneLoad] Context world is null after loading '%s'", InSceneReference.c_str());
+		FNotificationManager::Get().AddNotification("Scene load failed: " + InSceneReference, ENotificationType::Error, 3.0f);
+		return false;
+	}
+
+	Context->World->SetWorldType(EWorldType::PIE);
+	SelectionManager.SetWorld(Context->World);
+	Context->World->WarmupPickingData();
+	if (!Context->World->HasBegunPlay())
+	{
+		Context->World->BeginPlay();
+	}
+
+	if (UGameViewportClient* PIEViewportClient = GetGameViewportClient())
+	{
+		if (FLevelEditorViewportClient* ActiveVC = ViewportLayout.GetActiveViewport())
+		{
+			PIEViewportClient->SetViewport(ActiveVC->GetViewport());
+			PIEViewportClient->SetCursorClipRect(ActiveVC->GetViewportScreenRect());
+		}
+
+		if (UCameraComponent* GameCamera = Context->World->GetActiveCamera())
+		{
+			PIEViewportClient->Possess(GameCamera);
+		}
+	}
+
+	FNotificationManager::Get().AddNotification("Loaded scene: " + InSceneReference, ENotificationType::Success, 2.0f);
+	UE_LOG_CATEGORY(EditorEngine, Info, "[SceneLoad] Loaded PIE scene successfully: %s", InSceneReference.c_str());
+	return true;
 }
 
 UCameraComponent* UEditorEngine::GetCamera() const
@@ -355,12 +533,16 @@ void UEditorEngine::StartPlayInEditorSession(const FRequestPlaySessionParams& Pa
 		Pipeline->OnSceneCleared();
 	}
 
-	// 5) 활성 뷰포트 카메라를 PIE 월드의 ActiveCamera로 설정 —
-	//    LOD 갱신 등에서 ActiveCamera를 참조하므로 설정 필요.
+	// 활성 뷰포트 카메라를 PIE 월드의 ActiveCamera로  설정 —
+	//    LOD 갱신 등에서 ActiveCamera를 참조하므로 BeginPlay 전 placeholder가 필요.
+	//    BeginPlay 이후에는 GameMode/PlayerController가 possess한 카메라가 있으면
+	//    그 쪽으로 교체되고, 없으면 씬 안의 첫 CameraComponent로 교체된다 
+	UCameraComponent* PlaceholderCamera = nullptr;
 	if (FLevelEditorViewportClient* ActiveVC = ViewportLayout.GetActiveViewport())
 	{
 		if (UCameraComponent* VCCamera = ActiveVC->GetCamera())
 		{
+			PlaceholderCamera = VCCamera;
 			PIEWorld->SetActiveCamera(VCCamera);
 		}
 	}
@@ -368,7 +550,7 @@ void UEditorEngine::StartPlayInEditorSession(const FRequestPlaySessionParams& Pa
 	// 6) Selection을 PIE 월드 기준으로 재바인딩 — 에디터 액터를 가리킨 채로 두면
 	//    픽킹(=PIE 월드) / outliner / outline 렌더가 모두 어긋난다.
 	SelectionManager.ClearSelection();
-	//SelectionManager.SetGizmoEnabled(false); //PIE가 시작되면 gizmo 비활성화
+	SelectionManager.SetGizmoEnabled(false); // PIE 중에는 에디터 gizmo를 숨긴다.
 	SelectionManager.SetWorld(PIEWorld);
 
 	if (!GetGameViewportClient())
@@ -403,7 +585,32 @@ void UEditorEngine::StartPlayInEditorSession(const FRequestPlaySessionParams& Pa
 	//    SpawnActor로 만든 신규 액터도 자동으로 BeginPlay된다.
 	PIEWorld->BeginPlay();
 
-	// 임시 코드
+	// GameMode/PlayerController가 ActiveCamera를 갱신하지 않은 경우
+	//    (레벨에 GameMode가 지정되지 않은 Playground) 씬 안에 미리 배치된
+	//    첫 CameraComponent를 찾아 ActiveCamera로 사용한다. GameEngine::LoadLevel과
+	//    동일한 폴백 — Editor VC 카메라가 PIE에서 그대로 보이는 버그를 막기 위한 것
+	if (PIEWorld->GetActiveCamera() == PlaceholderCamera)
+	{
+		UCameraComponent* SceneCamera = nullptr;
+		for (AActor* Actor : PIEWorld->GetActors())
+		{
+			if (!Actor) continue;
+			for (UActorComponent* Comp : Actor->GetComponents())
+			{
+				if (UCameraComponent* Cam = Cast<UCameraComponent>(Comp))
+				{
+					SceneCamera = Cam;
+					break;
+				}
+			}
+			if (SceneCamera) break;
+		}
+		if (SceneCamera)
+		{
+			PIEWorld->SetActiveCamera(SceneCamera);
+		}
+	}
+
 	if (UGameViewportClient* PIEViewportClient = GetGameViewportClient())
 	{
 		if (UCameraComponent* GameCamera = PIEWorld->GetActiveCamera())
@@ -461,7 +668,7 @@ void UEditorEngine::EndPlayMap()
 
 	// Selection을 에디터 월드로 복원 — PIE 액터는 곧 파괴되므로 먼저 비운다.
 	SelectionManager.ClearSelection();
-	//SelectionManager.SetGizmoEnabled(true); //PIE가 끝나면 gizmo 활성화
+	SelectionManager.SetGizmoEnabled(true); // PIE 종료 후 에디터 gizmo 복원
 	SelectionManager.SetWorld(GetWorld());
 	
 	//이 코드와 대응되는 게 위의 StartPlayInEditorSession()에 있음.
@@ -1024,9 +1231,7 @@ bool UEditorEngine::SaveSceneAs(const FString& InScenePath)
 	}
 	else
 	{
-		// Extract stem to pass to SaveSceneAsJSON
-		FString Stem = GetFileStem(InScenePath);
-		FSceneSaveManager::SaveSceneAsJSON(Stem, *Context, FindSceneViewportCamera());
+		FSceneSaveManager::SaveSceneAsJSON(InScenePath, *Context, FindSceneViewportCamera());
 	}
 	
 	CurrentLevelFilePath = InScenePath;
@@ -1041,6 +1246,13 @@ bool UEditorEngine::SaveScene()
 	}
 
 	return SaveSceneAsWithDialog();
+}
+
+void UEditorEngine::RequestSaveSceneAsDialog()
+{
+	// Native file dialogs are deferred to the next tick so they do not open
+	// while the ImGui menu/popup stack is still being processed.
+	bRequestSaveSceneAsDialogQueued = true;
 }
 
 bool UEditorEngine::SaveSceneAsWithDialog()
@@ -1068,6 +1280,17 @@ bool UEditorEngine::SaveSceneAsWithDialog()
 	return SaveSceneAs(SelectedPath);
 }
 
+void UEditorEngine::ProcessDeferredEditorActions()
+{
+	if (!bRequestSaveSceneAsDialogQueued)
+	{
+		return;
+	}
+
+	bRequestSaveSceneAsDialogQueued = false;
+	SaveSceneAsWithDialog();
+}
+
 bool UEditorEngine::LoadSceneFromPath(const FString& InScenePath)
 {
 	if (InScenePath.empty())
@@ -1080,7 +1303,8 @@ bool UEditorEngine::LoadSceneFromPath(const FString& InScenePath)
 
 	FWorldContext LoadContext;
 	FPerspectiveCameraData CameraData;
-	if (InScenePath.ends_with(".Scene")||InScenePath.ends_with(".scene"))
+
+	if (FSceneSaveManager::IsJsonFile(InScenePath))
 	{
 		FSceneSaveManager::LoadSceneFromJSON(InScenePath, LoadContext, CameraData);
 	}

@@ -517,7 +517,7 @@ void FEditorMainPanel::RenderMainMenuBar()
 			}
 			if (ImGui::MenuItem("Save Scene As...", "Ctrl+Shift+S") && EditorEngine)
 			{
-				EditorEngine->SaveSceneAsWithDialog();
+				EditorEngine->RequestSaveSceneAsDialog();
 			}
 			DrawPopupSectionHeader("IMPORT");
 			if (ImGui::MenuItem("Import Material...") && EditorEngine)
@@ -788,14 +788,28 @@ void FEditorMainPanel::RenderMainMenuBar()
 	const float DragRegionStartX = MenuEndX + 8.0f;
 	const float DragRegionEndX = ImGui::GetWindowWidth() - ImGui::GetStyle().WindowPadding.x - RightControlsWidth - SceneTabWidth - 20.0f;
 	const float DragRegionWidth = DragRegionEndX - DragRegionStartX;
+	const float TitleBarClientOriginX = OuterPadding;
+	const float TitleBarClientOriginY = TopFrameInset + OuterPadding;
+	const float TitleBarControlRegionX = TitleBarClientOriginX + (ImGui::GetWindowWidth() - RightControlsWidth);
+	const float TitleBarControlRegionY = TitleBarClientOriginY + floorf((TitleBarHeight - WindowControlHeight) * 0.5f);
 
 	if (Window && DragRegionWidth > 24.0f)
 	{
-		Window->SetTitleBarDragRegion(DragRegionStartX, 0.0f, DragRegionWidth, TitleBarHeight);
+		Window->SetTitleBarDragRegion(
+			TitleBarClientOriginX + DragRegionStartX,
+			TitleBarClientOriginY,
+			DragRegionWidth,
+			TitleBarHeight);
+		Window->SetTitleBarControlRegion(
+			TitleBarControlRegionX,
+			TitleBarControlRegionY,
+			RightControlsWidth,
+			WindowControlHeight);
 	}
 	else if (Window)
 	{
 		Window->ClearTitleBarDragRegion();
+		Window->ClearTitleBarControlRegion();
 	}
 
 	ImGui::End();
@@ -858,7 +872,6 @@ void FEditorMainPanel::RenderProjectSettingsWindow()
 		ProjectSettings.SaveToFile(FProjectSettings::GetDefaultPath());
 		if (Window)
 		{
-			Window->SetResizeLocked(ProjectSettings.Game.bLockWindowResolution);
 			Window->ResizeClientArea(ProjectSettings.Game.WindowWidth, ProjectSettings.Game.WindowHeight);
 		}
 	}
@@ -866,13 +879,10 @@ void FEditorMainPanel::RenderProjectSettingsWindow()
 	ImGui::PopStyleColor(4);
 	ImGui::SameLine();
 	ImGui::TextDisabled(ProjectSettings.Game.bLockWindowResolution
-		? "Resize is locked. Editor and packaged game will keep this size."
-		: "Editor and packaged game will use this size on next launch.");
+		? "Packaged game resize is locked. The editor window stays resizable."
+		: "The editor stays resizable. Packaged game uses this size on next launch.");
 
-	DrawPopupSectionHeader("GAME");
-	DrawClassDropdown("GameInstance Class", UGameInstance::StaticClass(), ProjectSettings.Game.GameInstanceClass);
-	DrawClassDropdown("Default GameMode Class", AGameModeBase::StaticClass(), ProjectSettings.Game.DefaultGameModeClass);
-	ImGui::TextDisabled("(GameInstance class change requires restart)");
+	
 
 	DrawPopupSectionHeader("PERFORMANCE");
 	bool bPerformanceChanged = false;
@@ -920,6 +930,30 @@ void FEditorMainPanel::RenderProjectSettingsWindow()
 	ImGui::Combo("Mode", &SceneDepthMode, "Power\0Linear\0");
 	ProjectSettings.SceneDepth.Mode = static_cast<uint32>(SceneDepthMode);
 	ImGui::SliderFloat("Exponent", &ProjectSettings.SceneDepth.Exponent, 1.0f, 512.0f, "%.0f");
+
+	DrawPopupSectionHeader("GAME");
+	DrawClassDropdown("GameInstance Class", UGameInstance::StaticClass(), ProjectSettings.Game.GameInstanceClass);
+	DrawClassDropdown("Default GameMode Class", AGameModeBase::StaticClass(), ProjectSettings.Game.DefaultGameModeClass);
+
+	// Default Map
+	{
+		const TArray<FString> Scenes = FSceneSaveManager::GetSceneFileList();
+		const char* Preview = ProjectSettings.Game.DefaultScene.empty() ? "(none)" : ProjectSettings.Game.DefaultScene.c_str();
+		if (ImGui::BeginCombo("Default Map", Preview))
+		{
+			for (const FString& Stem : Scenes)
+			{
+				const bool bSelected = (ProjectSettings.Game.DefaultScene == Stem);
+				if (ImGui::Selectable(Stem.c_str(), bSelected))
+				{
+					ProjectSettings.Game.DefaultScene = Stem;
+				}
+				if (bSelected) ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
+	}
+	ImGui::TextDisabled("(GameInstance class change requires restart)");
 
 	if (ImGui::Button("Save"))
 	{
@@ -1106,7 +1140,7 @@ void FEditorMainPanel::HandleGlobalShortcuts()
 	{
 		if (bShift)
 		{
-			EditorEngine->SaveSceneAsWithDialog();
+			EditorEngine->RequestSaveSceneAsDialog();
 		}
 		else
 		{

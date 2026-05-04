@@ -4,6 +4,7 @@
 #include "Audio/AudioManager.h"
 #include "Core/Log.h"
 #include "Engine/Input/InputManager.h"
+#include "Engine/Runtime/GameEngine.h"
 #include "GameFramework/AActor.h"
 #include "GameFramework/StaticMeshActor.h"
 #include "GameFramework/World.h"
@@ -378,19 +379,19 @@ namespace
 			return true;
 		}
 
-		if (UpperKey == "CTRL" || UpperKey == "CONTROL")
+		if (UpperKey == "CTRL" || UpperKey == "CONTROL" || UpperKey == "LCONTROL" || UpperKey == "LCTRL" || UpperKey == "RCONTROL" || UpperKey == "RCTRL")
 		{
 			OutVirtualKey = VK_CONTROL;
 			return true;
 		}
 
-		if (UpperKey == "SHIFT")
+		if (UpperKey == "SHIFT" || UpperKey == "LSHIFT" || UpperKey == "RSHIFT")
 		{
 			OutVirtualKey = VK_SHIFT;
 			return true;
 		}
 
-		if (UpperKey == "ALT")
+		if (UpperKey == "ALT" || UpperKey == "MENU" || UpperKey == "LALT" || UpperKey == "RALT")
 		{
 			OutVirtualKey = VK_MENU;
 			return true;
@@ -1140,22 +1141,32 @@ void FLuaScriptInstance::BindInputFunctions()
 	}
 
 	// 입력 바인딩은 문자열 기반 API로 노출해서 Lua 스크립트가 엔진 키코드 상수를 직접 알 필요 없게 만든다.
+	// ImGui가 키보드를 캡처 중이면(text input 등) 게임 입력을 받지 않는다 — PIE에서 입력 분리.
 	auto GetKey = [](const FString& KeyName)
 	{
 		int VirtualKey = 0;
-		return TryParseVirtualKey(KeyName, VirtualKey) ? FInputManager::Get().IsKeyDown(VirtualKey) : false;
+		if (!TryParseVirtualKey(KeyName, VirtualKey)) return false;
+		FInputManager& Input = FInputManager::Get();
+		if (Input.IsGuiUsingKeyboard()) return false;
+		return Input.IsKeyDown(VirtualKey);
 	};
 
 	auto GetKeyDown = [](const FString& KeyName)
 	{
 		int VirtualKey = 0;
-		return TryParseVirtualKey(KeyName, VirtualKey) ? FInputManager::Get().IsKeyPressed(VirtualKey) : false;
+		if (!TryParseVirtualKey(KeyName, VirtualKey)) return false;
+		FInputManager& Input = FInputManager::Get();
+		if (Input.IsGuiUsingKeyboard()) return false;
+		return Input.IsKeyPressed(VirtualKey);
 	};
 
 	auto GetKeyUp = [](const FString& KeyName)
 	{
 		int VirtualKey = 0;
-		return TryParseVirtualKey(KeyName, VirtualKey) ? FInputManager::Get().IsKeyReleased(VirtualKey) : false;
+		if (!TryParseVirtualKey(KeyName, VirtualKey)) return false;
+		FInputManager& Input = FInputManager::Get();
+		if (Input.IsGuiUsingKeyboard()) return false;
+		return Input.IsKeyReleased(VirtualKey);
 	};
 
 	Impl->Env.set_function("GetKey", GetKey);
@@ -1324,47 +1335,47 @@ void FLuaScriptInstance::BindSoundFunctions()
 		return FAudioManager::Get().PlaySFX(SoundPath, Looping.value_or(false));
 	});
 
-	Impl->Env.set_function("play_background", [](const FString& SoundPath, sol::optional<bool> Looping)
+	Impl->Env.set_function("play_bgm", [](const FString& SoundPath, sol::optional<bool> Looping)
 	{
 		return FAudioManager::Get().PlayBackground(SoundPath, Looping.value_or(true));
 	});
 
-	Impl->Env.set_function("stop_sound", [](const FString& Handle)
+	Impl->Env.set_function("stop_audio_by_handle", [](const FString& Handle)
 	{
 		return FAudioManager::Get().StopSound(Handle);
 	});
 
-	Impl->Env.set_function("pause_sound", [](const FString& Handle)
+	Impl->Env.set_function("pause_audio_by_handle", [](const FString& Handle)
 	{
 		return FAudioManager::Get().PauseSound(Handle);
 	});
 
-	Impl->Env.set_function("resume_sound", [](const FString& Handle)
+	Impl->Env.set_function("resume_audio_by_handle", [](const FString& Handle)
 	{
 		return FAudioManager::Get().ResumeSound(Handle);
 	});
 
-	Impl->Env.set_function("is_sound_playing", [](const FString& Handle)
+	Impl->Env.set_function("is_audio_playing_by_handle", [](const FString& Handle)
 	{
 		return FAudioManager::Get().IsSoundPlaying(Handle);
 	});
 
-	Impl->Env.set_function("stop_background", []()
+	Impl->Env.set_function("stop_bgm", []()
 	{
 		return FAudioManager::Get().StopBackground();
 	});
 
-	Impl->Env.set_function("pause_background", []()
+	Impl->Env.set_function("pause_bgm", []()
 	{
 		return FAudioManager::Get().PauseBackground();
 	});
 
-	Impl->Env.set_function("resume_background", []()
+	Impl->Env.set_function("resume_bgm", []()
 	{
 		return FAudioManager::Get().ResumeBackground();
 	});
 
-	Impl->Env.set_function("is_background_playing", []()
+	Impl->Env.set_function("is_bgm_playing", []()
 	{
 		return FAudioManager::Get().IsBackgroundPlaying();
 	});
@@ -1506,6 +1517,11 @@ void FLuaScriptInstance::BindWorldFunctions()
 	{
 		// destroy_actor는 Lua가 Actor를 소유한다는 뜻이 아니라 Proxy의 Destroy 래퍼일 뿐이다.
 		ActorProxy.Destroy();
+	});
+
+	Impl->Env.set_function("load_scene", [](const FString& SceneReference)
+	{
+		return GEngine ? GEngine->RequestSceneLoad(SceneReference) : false;
 	});
 }
 
