@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <random>
 
-DEFINE_CLASS(AImposterGizmoActorBase, AEnemyActorBase)
+DEFINE_CLASS(AImposterGizmoActorBase, AGimmickActorBase)
 
 namespace {
 	std::mt19937& RandomEngine()

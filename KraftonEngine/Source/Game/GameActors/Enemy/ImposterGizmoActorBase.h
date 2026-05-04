@@ -1,13 +1,13 @@
 ﻿#pragma once
-#include "EnemyActorBase.h"
+#include "GimmickActorBase.h"
 #include "Scripting/LuaActorProxy.h"
 #include "Component/GizmoComponent.h"
 
 // "Captures" Actor (Obstacles). 
 // Obstacles could be captured and move, rotate, and scale arbitraily (in a way that does not coerce game over)
-class AImposterGizmoActorBase : public AEnemyActorBase {
+class AImposterGizmoActorBase : public AGimmickActorBase {
 public:
-	DECLARE_CLASS(AImposterGizmoActorBase, AEnemyActorBase)
+	DECLARE_CLASS(AImposterGizmoActorBase, AGimmickActorBase)
 	
 	virtual void Tick(float DeltaTime) override;
 	virtual void Capture(AActor* InTarget);

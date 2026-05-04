@@ -285,7 +285,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Game\GameActors\Enemy\EnemyActorBase.cpp" />
+    <ClCompile Include="Source\Game\GameActors\Enemy\GimmickActorBase.cpp" />
     <ClCompile Include="Source\Game\GameActors\Enemy\ImposterGizmoActorBase.cpp" />
     <ClCompile Include="Source\Game\GameActors\Enemy\ImposterRotationGizmo.cpp" />
     <ClCompile Include="Source\Game\GameActors\Enemy\ImposterScaleGizmo.cpp" />
@@ -517,7 +517,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Source\Game\GameActors\Enemy\EnemyActorBase.h" />
+    <ClInclude Include="Source\Game\GameActors\Enemy\GimmickActorBase.h" />
     <ClInclude Include="Source\Game\GameActors\Enemy\ImposterGizmoActorBase.h" />
     <ClInclude Include="Source\Game\GameActors\Enemy\ImposterRotationGizmo.h" />
     <ClInclude Include="Source\Game\GameActors\Enemy\ImposterScaleGizmo.h" />
