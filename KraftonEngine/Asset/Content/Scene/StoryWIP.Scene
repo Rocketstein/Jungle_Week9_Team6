@@ -251,6 +251,76 @@
           },
           {
             "Children": [],
+            "ClassName": "UUIImageComponent",
+            "ObjectName": "StoryBackgroundBaekLim0",
+            "Properties": {
+              "Alignment": [0.0, 0.0, 0.0],
+              "Anchor": [0.0, 0.0, 0.0],
+              "Anchor Offset": [0.0, 0.0, 0.0],
+              "Background Content Alignment": 0,
+              "Background Fit Mode": 0,
+              "Background Texture": {
+                "Path": ""
+              },
+              "Border Color": [1.0, 1.0, 1.0, 1.0],
+              "Border Thickness": 0.0,
+              "Content Alignment": 1,
+              "Draw Background": false,
+              "Fit Mode": 1,
+              "Hover Fill": [0.0, 0.0, 0.0, 0.0],
+              "Hover Tint": [1.0, 1.0, 1.0, 0.0],
+              "Normal Fill": [0.0, 0.0, 0.0, 0.0],
+              "Normal Tint": [1.0, 1.0, 1.0, 1.0],
+              "Pressed Fill": [0.0, 0.0, 0.0, 0.0],
+              "Pressed Tint": [1.0, 1.0, 1.0, 1.0],
+              "Screen Position": [0.0, 0.0, 0.0],
+              "Screen Size": [1920.0, 1080.0, 0.0],
+              "Texture": {
+                "Path": "Asset/Content/Texture/Story/control_room_screen_on_baek_lim_0.png"
+              },
+              "Tint": [1.0, 1.0, 1.0, 0.0],
+              "Use Anchored Layout": false,
+              "Visible": false,
+              "Z Order": 1
+            }
+          },
+          {
+            "Children": [],
+            "ClassName": "UUIImageComponent",
+            "ObjectName": "StoryBackgroundBaekLim1",
+            "Properties": {
+              "Alignment": [0.0, 0.0, 0.0],
+              "Anchor": [0.0, 0.0, 0.0],
+              "Anchor Offset": [0.0, 0.0, 0.0],
+              "Background Content Alignment": 0,
+              "Background Fit Mode": 0,
+              "Background Texture": {
+                "Path": ""
+              },
+              "Border Color": [1.0, 1.0, 1.0, 1.0],
+              "Border Thickness": 0.0,
+              "Content Alignment": 1,
+              "Draw Background": false,
+              "Fit Mode": 1,
+              "Hover Fill": [0.0, 0.0, 0.0, 0.0],
+              "Hover Tint": [1.0, 1.0, 1.0, 0.0],
+              "Normal Fill": [0.0, 0.0, 0.0, 0.0],
+              "Normal Tint": [1.0, 1.0, 1.0, 1.0],
+              "Pressed Fill": [0.0, 0.0, 0.0, 0.0],
+              "Pressed Tint": [1.0, 1.0, 1.0, 1.0],
+              "Screen Position": [0.0, 0.0, 0.0],
+              "Screen Size": [1920.0, 1080.0, 0.0],
+              "Texture": {
+                "Path": "Asset/Content/Texture/Story/control_room_screen_on_baek_lim_1.png"
+              },
+              "Tint": [1.0, 1.0, 1.0, 0.0],
+              "Use Anchored Layout": false,
+              "Visible": false,
+              "Z Order": 2
+            }
+          },
+          {
+            "Children": [],
             "ClassName": "UIButtonComponent",
             "ObjectName": "NextPageButton",
             "Properties": {
@@ -323,11 +393,28 @@
               "Anchor Offset": [0.0, 0.0, 0.0],
               "Color": [0.92, 0.97, 1.0, 0.82],
               "Font": "D2Coding",
-              "Font Size": 1.7,
+              "Font Size": 1.65,
               "Screen Position": [507.052002, 664.155029, 0.0],
               "Text": "Dialogue will appear here.",
               "Use Anchored Layout": false,
               "Visible": true
+            }
+          },
+          {
+            "Children": [],
+            "ClassName": "UUIScreenTextComponent",
+            "ObjectName": "NarrationText",
+            "Properties": {
+              "Alignment": [0.0, 0.0, 0.0],
+              "Anchor": [0.0, 0.0, 0.0],
+              "Anchor Offset": [0.0, 0.0, 0.0],
+              "Color": [0.92, 0.97, 1.0, 0.88],
+              "Font": "D2Coding",
+              "Font Size": 1.9,
+              "Screen Position": [430.0, 500.0, 0.0],
+              "Text": "Narration will appear here.",
+              "Use Anchored Layout": false,
+              "Visible": false
             }
           },
           {
@@ -339,12 +426,27 @@
               "Anchor": [0.0, 0.0, 0.0],
               "Anchor Offset": [0.0, 0.0, 0.0],
               "Color": [0.72, 0.84, 1.0, 0.9],
-              "Font": "D2Coding",
-              "Font Size": 0.95,
-              "Screen Position": [1370.0, 1000.0, 0.0],
-              "Text": "[SPACE / CLICK] NEXT",
+              "Font": "Cascadia Code Light",
+              "Font Size": 1.7,
+              "Screen Position": [1305.0, 985.0, 0.0],
+              "Text": "Hold Space to Skip...",
               "Use Anchored Layout": false,
               "Visible": true
+            }
+          },
+          {
+            "Children": [],
+            "ClassName": "UUIImageComponent",
+            "ObjectName": "WhiteFlash",
+            "Properties": {
+              "Screen Position": [0.0, 0.0, 0.0],
+              "Screen Size": [1920.0, 1080.0, 0.0],
+              "Texture": {
+                "Path": "Asset/Content/Texture/sample/checker.png"
+              },
+              "Tint": [1.0, 1.0, 1.0, 0.0],
+              "Visible": false,
+              "Z Order": 95
             }
           }
         ],

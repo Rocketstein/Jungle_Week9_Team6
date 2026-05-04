@@ -1,10 +1,12 @@
 DeclareProperties({
     ScenarioPath = { type = "string", default = "Asset/Content/Data/Scenarios/story_wip.scenario.json" },
+    NextScene = { type = "string", default = "playerdev.scene" },
 })
 
 local ScenarioLoader = require("UI.ScenarioLoader")
 
 local SCENARIO_PATH = property("ScenarioPath", "Asset/Content/Data/Scenarios/story_wip.scenario.json")
+local NEXT_SCENE = property("NextScene", "playerdev.scene")
 
 local ui = {}
 local scenario = nil
@@ -12,7 +14,20 @@ local pages = {}
 local current_index = 1
 local input_cooldown = 0.0
 local auto_advance_timer = nil
+local scene_change_timer = nil
+local scene_change_duration = 0.18
 local pending_page_index = nil
+local current_story_background_path = nil
+local story_finished = false
+local skip_hold_elapsed = 0.0
+local typing_state = {
+    active = false,
+    chars = {},
+    visible_count = 0,
+    elapsed = 0.0,
+    interval = 0.028,
+    full_text = "",
+}
 local dialogue_background_state = {
     current_one_key = nil,
 }
@@ -22,6 +37,8 @@ local OVERLAY_COMPONENTS = {
     control_room_lim_0 = "StoryBackgroundLim0",
     control_room_lim_1 = "StoryBackgroundLim1",
     control_room_pod = "StoryBackgroundPod",
+    control_room_baek_lim_0 = "StoryBackgroundBaekLim0",
+    control_room_baek_lim_1 = "StoryBackgroundBaekLim1",
 }
 local dialogue_transition = {
     active = false,
@@ -34,42 +51,76 @@ local dialogue_transition = {
     one_path = nil,
 }
 local pending_dialogue_ui = nil
+local prologue_state = {
+    mode = nil,
+    elapsed = 0.0,
+    line_index = 0,
+    lines = {},
+    intro_fade_seconds = 3.0,
+    intro_hold_seconds = 1.5,
+    outro_fade_seconds = 0.9,
+    control_room_fade_seconds = 0.9,
+    crt_lead_seconds = 1.0,
+    crt_switch_delay_seconds = 0.2,
+    post_crt_hold_seconds = 1.2,
+}
 
 local MAX_LINE_WIDTH_UNITS = 28
 local SPEAKER_NAME_COLOR = { 134.0 / 255.0, 251.0 / 255.0, 255.0 / 255.0, 233.0 / 255.0 }
 local DIALOGUE_TEXT_COLOR = { 235.0 / 255.0, 247.0 / 255.0, 255.0 / 255.0, 209.0 / 255.0 }
+local PROLOGUE_TEXT_COLOR = { 235.0 / 255.0, 247.0 / 255.0, 255.0 / 255.0, 0.94 }
+local PROLOGUE_HINT_COLOR = { 0.72, 0.84, 1.0, 0.88 }
+local PROLOGUE_DIM_BACKGROUND = 0.32
 local INPUT_COOLDOWN_SECONDS = 0.18
+local DIALOGUE_TRANSITION_DURATION = 0.3
+local TYPEWRITER_INTERVAL_SECONDS = 0.028
+local NEXT_PAGE_SOUND_PATH = "Asset/Content/Sound/SFX/story_next.mp3"
+local TYPEWRITER_SOUND_PATH = "Asset/Content/Sound/SFX/crt-type.wav"
+local DEFAULT_BOOT_SOUND_PATH = "Asset/Content/Sound/SFX/windows-98-startup.mp3"
+local DEFAULT_CRT_ON_SOUND_PATH = "Asset/Content/Sound/SFX/crt-on.mp3"
+local DEFAULT_GO_SOUND_PATH = "Sound.SFX.go"
+local TERMINAL_PROMPT = ">_ "
+local HOLD_SKIP_SECONDS = 2.0
+local HOLD_SKIP_HINT_TEXT = "Hold Space to Skip..."
 local apply_page = nil
 local resolve_neutral_background = nil
+
+local function split_utf8_chars(value)
+    local chars = {}
+    if type(value) ~= "string" or value == "" then
+        return chars
+    end
+
+    local index = 1
+    local length = #value
+
+    while index <= length do
+        local byte = string.byte(value, index)
+        local char_length = 1
+
+        if byte >= 0xF0 then
+            char_length = 4
+        elseif byte >= 0xE0 then
+            char_length = 3
+        elseif byte >= 0xC0 then
+            char_length = 2
+        end
+
+        chars[#chars + 1] = value:sub(index, index + char_length - 1)
+        index = index + char_length
+    end
+
+    return chars
+end
+
+local function is_typing_sound_character(char)
+    return char ~= nil and char ~= "" and char ~= " " and char ~= "\n" and char ~= "\t"
+end
 
 local function format_terminal_message(text)
     local source = type(text) == "string" and text or ""
     if source == "" then
-        return ">_"
-    end
-
-    local function split_utf8_chars(value)
-        local chars = {}
-        local index = 1
-        local length = #value
-
-        while index <= length do
-            local byte = string.byte(value, index)
-            local char_length = 1
-
-            if byte >= 0xF0 then
-                char_length = 4
-            elseif byte >= 0xE0 then
-                char_length = 3
-            elseif byte >= 0xC0 then
-                char_length = 2
-            end
-
-            chars[#chars + 1] = value:sub(index, index + char_length - 1)
-            index = index + char_length
-        end
-
-        return chars
+        return ""
     end
 
     local function normalize_newlines(value)
@@ -230,17 +281,16 @@ local function format_terminal_message(text)
     end
 
     if #wrapped_lines == 0 then
-        return ">_"
+        return ""
     end
 
     local message = table.concat(wrapped_lines, "\n")
     if message == "" then
-        return ">_"
+        return ""
     end
 
     local continuation_indent = "   "
-    local indented_message = message:gsub("\n", "\n" .. continuation_indent)
-    return ">_ " .. indented_message
+    return message:gsub("\n", "\n" .. continuation_indent)
 end
 
 local function get_component(name)
@@ -285,10 +335,80 @@ local function set_texture(name, texture_path)
     end
 end
 
+local function play_story_sfx(sound_path)
+    if type(sound_path) == "string" and sound_path ~= "" then
+        play_sfx(sound_path, false)
+    end
+end
+
+local function resolve_story_image(image_key, fallback_path)
+    local resolved = ScenarioLoader.resolve_asset(scenario, "images", image_key)
+    if resolved and resolved ~= "" then
+        return resolved
+    end
+    return fallback_path
+end
+
+local function resolve_story_sound(sound_key, fallback_path)
+    local resolved = ScenarioLoader.resolve_asset(scenario, "sounds", sound_key)
+    if resolved and resolved ~= "" then
+        return resolved
+    end
+    return fallback_path
+end
+
+local function play_story_bgm(sound_path, looping)
+    if type(sound_path) == "string" and sound_path ~= "" then
+        stop_bgm()
+        play_bgm(sound_path, looping == true)
+    end
+end
+
+local function ease_in_power(value, power)
+    local t = math.max(0.0, math.min(1.0, value or 0.0))
+    local exponent = power or 4.0
+    return math.pow(t, exponent)
+end
+
+local function set_story_background_texture(texture_path)
+    if not texture_path or texture_path == "" then
+        return
+    end
+
+    if current_story_background_path == texture_path then
+        return
+    end
+
+    set_texture("StoryBackground", texture_path)
+    current_story_background_path = texture_path
+end
+
+local function preload_component_texture(name)
+    local component = ui[name]
+    if not component or not component.GetTexturePath then
+        return
+    end
+
+    local texture_path = component:GetTexturePath()
+    if not texture_path or texture_path == "" or texture_path == "None" then
+        return
+    end
+
+    component:SetTexture(texture_path)
+end
+
+local function preload_story_background_layers()
+    preload_component_texture("StoryBackground")
+
+    for _, component_name in pairs(OVERLAY_COMPONENTS) do
+        preload_component_texture(component_name)
+    end
+end
+
 local function set_default_background()
     local _, neutral_path = resolve_neutral_background()
     if neutral_path then
-        set_texture("StoryBackground", neutral_path)
+        set_story_background_texture(neutral_path)
     end
     set_tint("StoryBackground", 1.0, 1.0, 1.0, 1.0)
 end
@@ -311,6 +431,7 @@ end
 local function reset_dialogue_transition()
     dialogue_transition.active = false
     dialogue_transition.elapsed = 0.0
+    dialogue_transition.duration = 0.0
     dialogue_transition.mode = nil
     dialogue_transition.zero_key = nil
     dialogue_transition.zero_path = nil
@@ -322,13 +443,135 @@ local function clear_pending_dialogue_ui()
     pending_dialogue_ui = nil
 end
 
+local function reset_typewriter()
+    typing_state.active = false
+    typing_state.chars = {}
+    typing_state.visible_count = 0
+    typing_state.elapsed = 0.0
+    typing_state.interval = TYPEWRITER_INTERVAL_SECONDS
+    typing_state.full_text = ""
+end
+
 local function hide_dialogue_ui()
+    reset_typewriter()
     set_text("SpeakerName", "")
     set_text("DialogueText", "")
-    set_text("PageHint", "")
+    set_text("NarrationText", "")
+    set_text("PageHint", HOLD_SKIP_HINT_TEXT)
     set_visible("SpeakerName", false)
     set_visible("DialogueText", false)
-    set_visible("PageHint", false)
+    set_visible("NarrationText", false)
+    set_visible("PageHint", true)
+end
+
+local function finish_story(target_scene)
+    if story_finished then
+        return
+    end
+
+    story_finished = true
+    stop_bgm()
+    load_scene(target_scene or NEXT_SCENE)
+end
+
+local function start_scene_change_flash()
+    scene_change_duration = 2.0
+    scene_change_timer = scene_change_duration
+    set_visible("WhiteFlash", true)
+    set_tint("WhiteFlash", 1.0, 1.0, 1.0, 0.0)
+end
+
+local function is_skip_key_held()
+    return GetKey("SPACE") or GetKey("Space")
+end
+
+local function update_skip_hold(dt)
+    if scene_change_timer or story_finished then
+        skip_hold_elapsed = 0.0
+        return false
+    end
+
+    if is_skip_key_held() then
+        skip_hold_elapsed = skip_hold_elapsed + (dt or 0.0)
+        if skip_hold_elapsed >= HOLD_SKIP_SECONDS then
+            finish_story()
+            return true
+        end
+    else
+        skip_hold_elapsed = 0.0
+    end
+
+    return false
+end
+
+local function set_dialogue_alpha(alpha)
+    local clamped = math.max(0.0, math.min(1.0, alpha or 0.0))
+    set_tint("NarrationText", PROLOGUE_TEXT_COLOR[1], PROLOGUE_TEXT_COLOR[2], PROLOGUE_TEXT_COLOR[3], PROLOGUE_TEXT_COLOR[4] * clamped)
+    set_tint("PageHint", PROLOGUE_HINT_COLOR[1], PROLOGUE_HINT_COLOR[2], PROLOGUE_HINT_COLOR[3], PROLOGUE_HINT_COLOR[4] * clamped)
+end
+
+local function build_prologue_text(line_count)
+    local lines = {}
+    local visible_count = math.min(line_count or 0, #prologue_state.lines)
+
+    for index = 1, visible_count do
+        lines[#lines + 1] = tostring(prologue_state.lines[index] or "")
+    end
+
+    return table.concat(lines, "\n")
+end
+
+local function show_prologue_lines()
+    set_visible("SpeakerName", false)
+    set_visible("DialogueText", false)
+    set_visible("NarrationText", true)
+    set_visible("PageHint", true)
+    set_text("SpeakerName", "")
+    set_text("NarrationText", build_prologue_text(prologue_state.line_index))
+    set_text("PageHint", HOLD_SKIP_HINT_TEXT)
+    set_tint("StoryBackground", PROLOGUE_DIM_BACKGROUND, PROLOGUE_DIM_BACKGROUND, PROLOGUE_DIM_BACKGROUND, 1.0)
+    set_dialogue_alpha(1.0)
+end
+
+local function update_typewriter_text()
+    if not typing_state.full_text or typing_state.full_text == "" then
+        set_text("DialogueText", TERMINAL_PROMPT)
+        return
+    end
+
+    if typing_state.visible_count <= 0 then
+        set_text("DialogueText", TERMINAL_PROMPT)
+        return
+    end
+
+    set_text("DialogueText", TERMINAL_PROMPT .. table.concat(typing_state.chars, "", 1, typing_state.visible_count))
+end
+
+local function complete_typewriter()
+    if typing_state.full_text == "" then
+        reset_typewriter()
+        set_text("DialogueText", TERMINAL_PROMPT)
+        return
+    end
+
+    typing_state.active = false
+    typing_state.visible_count = #typing_state.chars
+    update_typewriter_text()
+end
+
+local function start_typewriter(text)
+    reset_typewriter()
+    typing_state.full_text = type(text) == "string" and text or ""
+    typing_state.chars = split_utf8_chars(typing_state.full_text)
+
+    if #typing_state.chars == 0 then
+        set_text("DialogueText", TERMINAL_PROMPT)
+        return
+    end
+
+    typing_state.active = true
+    typing_state.interval = TYPEWRITER_INTERVAL_SECONDS
+    update_typewriter_text()
 end
 
 local function show_dialogue_ui(page)
@@ -337,12 +580,14 @@ local function show_dialogue_ui(page)
 
     set_visible("SpeakerName", true)
     set_visible("DialogueText", true)
+    set_visible("NarrationText", false)
     set_visible("PageHint", true)
     set_text("SpeakerName", speaker_name)
     set_tint("SpeakerName", SPEAKER_NAME_COLOR[1], SPEAKER_NAME_COLOR[2], SPEAKER_NAME_COLOR[3], SPEAKER_NAME_COLOR[4])
-    set_text("DialogueText", message)
     set_tint("DialogueText", DIALOGUE_TEXT_COLOR[1], DIALOGUE_TEXT_COLOR[2], DIALOGUE_TEXT_COLOR[3], DIALOGUE_TEXT_COLOR[4])
-    set_text("PageHint", "[SPACE / CLICK] NEXT  " .. tostring(current_index) .. "/" .. tostring(#pages))
+    set_text("PageHint", HOLD_SKIP_HINT_TEXT)
+    set_text("DialogueText", TERMINAL_PROMPT)
+    start_typewriter(message)
 end
 
 local function resolve_page_background(page)
@@ -423,23 +668,8 @@ local function set_background_immediately(background_key, background_path)
     clear_pending_dialogue_ui()
     set_default_background()
     hide_dialogue_background_layers()
-    local zero_key = background_key
-    local zero_path = background_path
-    local one_key = nil
-    local one_path = nil
-
-    if type(background_key) == "string" and background_key:sub(-2) == "_1" then
-        zero_key, zero_path = resolve_fade_source_background({ background = background_key })
-        one_key = background_key
-        one_path = background_path
-    end
-
-    if zero_key then
-        set_overlay_alpha(zero_key, 1.0)
-    end
-
-    if one_key then
-        set_overlay_alpha(one_key, 1.0)
+    if background_key then
+        set_overlay_alpha(background_key, 1.0)
     end
 
     dialogue_background_state.current_one_key = background_key
@@ -482,23 +712,22 @@ local function begin_dialogue_transition(mode, zero_key, zero_path, one_key, one
 
     if mode == "enter" then
         if one_key then
-            set_overlay_alpha(one_key, 1.0)
-        end
-        dialogue_background_state.current_one_key = one_key
-        show_dialogue_ui(pending_dialogue_ui)
-        clear_pending_dialogue_ui()
-    else
-        if one_key then
             set_overlay_alpha(one_key, 0.0)
         end
-        dialogue_background_state.current_one_key = nil
-        if pending_page_index then
-            current_index = pending_page_index
-            pending_page_index = nil
-            apply_page(pages[current_index])
+    else
+        if one_key then
+            set_overlay_alpha(one_key, 1.0)
         end
     end
-    reset_dialogue_transition()
+
+    dialogue_transition.active = true
+    dialogue_transition.elapsed = 0.0
+    dialogue_transition.duration = DIALOGUE_TRANSITION_DURATION
+    dialogue_transition.mode = mode
+    dialogue_transition.zero_key = zero_key
+    dialogue_transition.zero_path = zero_path
+    dialogue_transition.one_key = one_key
+    dialogue_transition.one_path = one_path
 end
 
 local function is_transition_dialogue_page(page)
@@ -541,6 +770,203 @@ local function is_auto_page(page)
         and page.duration > 0.0
 end
 
+local function start_story_sequence()
+    prologue_state.mode = "story"
+    prologue_state.elapsed = 0.0
+    prologue_state.line_index = 0
+    set_tint("StoryBackground", 1.0, 1.0, 1.0, 1.0)
+    set_visible("StoryBackground", true)
+    hide_dialogue_background_layers()
+    play_story_bgm(resolve_story_sound("stage_intro", "Asset/Content/Sound/Background/06. Stage Intro.mp3"), true)
+    apply_page(pages[current_index])
+end
+
+local function start_story_prologue()
+    local prologue = type(scenario) == "table" and scenario.prologue or nil
+    local lines = type(prologue) == "table" and prologue.lines or nil
+    if type(lines) ~= "table" or #lines == 0 then
+        start_story_sequence()
+        return
+    end
+
+    prologue_state.lines = lines
+    prologue_state.line_index = 0
+    prologue_state.elapsed = 0.0
+    prologue_state.mode = "intro_fade_in"
+    prologue_state.intro_fade_seconds = (type(prologue.introFadeSeconds) == "number" and prologue.introFadeSeconds > 0.0) and prologue.introFadeSeconds or 3.0
+    prologue_state.intro_hold_seconds = (type(prologue.introHoldSeconds) == "number" and prologue.introHoldSeconds >= 0.0) and prologue.introHoldSeconds or 1.5
+    prologue_state.outro_fade_seconds = (type(prologue.outroFadeSeconds) == "number" and prologue.outroFadeSeconds > 0.0) and prologue.outroFadeSeconds or 0.9
+    prologue_state.control_room_fade_seconds = (type(prologue.controlRoomFadeSeconds) == "number" and prologue.controlRoomFadeSeconds > 0.0) and prologue.controlRoomFadeSeconds or 0.9
+    prologue_state.crt_lead_seconds = (type(prologue.crtLeadSeconds) == "number" and prologue.crtLeadSeconds >= 0.0) and prologue.crtLeadSeconds or 1.0
+    prologue_state.crt_switch_delay_seconds = (type(prologue.crtSwitchDelaySeconds) == "number" and prologue.crtSwitchDelaySeconds >= 0.0) and prologue.crtSwitchDelaySeconds or 0.2
+    prologue_state.post_crt_hold_seconds = (type(prologue.postCrtHoldSeconds) == "number" and prologue.postCrtHoldSeconds >= 0.0) and prologue.postCrtHoldSeconds or 1.2
+
+    stop_bgm()
+    reset_typewriter()
+    clear_pending_dialogue_ui()
+    hide_dialogue_background_layers()
+    set_texture("StoryBackground", resolve_story_image("introduce", "Asset/Content/Texture/Story/introduce.png"))
+    current_story_background_path = nil
+    set_visible("StoryBackground", true)
+    set_tint("StoryBackground", 0.0, 0.0, 0.0, 1.0)
+    set_visible("SpeakerName", false)
+    set_visible("DialogueText", false)
+    set_visible("NarrationText", false)
+    set_visible("PageHint", false)
+    set_text("SpeakerName", "")
+    set_text("DialogueText", "")
+    set_text("NarrationText", "")
+    set_text("PageHint", "")
+    play_story_bgm(resolve_story_sound("boot_startup", DEFAULT_BOOT_SOUND_PATH), false)
+end
+
+local function try_advance_prologue()
+    if input_cooldown > 0.0 then
+        return false
+    end
+
+    if prologue_state.mode ~= "line_reveal" then
+        return false
+    end
+
+    input_cooldown = INPUT_COOLDOWN_SECONDS
+    play_story_sfx(NEXT_PAGE_SOUND_PATH)
+
+    if prologue_state.line_index < #prologue_state.lines then
+        prologue_state.line_index = prologue_state.line_index + 1
+        show_prologue_lines()
+        if prologue_state.line_index >= #prologue_state.lines then
+            prologue_state.mode = "line_complete_hold"
+            prologue_state.elapsed = 0.0
+        end
+        return true
+    end
+
+    return false
+end
+
+local function update_prologue(dt)
+    local delta = dt or 0.0
+
+    if prologue_state.mode == "intro_fade_in" then
+        prologue_state.elapsed = prologue_state.elapsed + delta
+        local raw_progress = math.min(prologue_state.elapsed / prologue_state.intro_fade_seconds, 1.0)
+        local progress = ease_in_power(raw_progress, 2.8)
+        set_tint("StoryBackground", progress, progress, progress, 1.0)
+        if raw_progress >= 1.0 then
+            prologue_state.mode = "intro_hold"
+            prologue_state.elapsed = 0.0
+        end
+        return true
+    end
+
+    if prologue_state.mode == "intro_hold" then
+        prologue_state.elapsed = prologue_state.elapsed + delta
+        if prologue_state.elapsed >= prologue_state.intro_hold_seconds then
+            prologue_state.mode = "line_reveal"
+            prologue_state.elapsed = 0.0
+            prologue_state.line_index = 0
+            set_texture("StoryBackground", resolve_story_image("introduce", "Asset/Content/Texture/Story/introduce.png"))
+            show_prologue_lines()
+        end
+        return true
+    end
+
+    if prologue_state.mode == "line_reveal" then
+        return true
+    end
+
+    if prologue_state.mode == "line_complete_hold" then
+        prologue_state.elapsed = prologue_state.elapsed + delta
+        if prologue_state.elapsed >= 0.8 then
+            prologue_state.mode = "outro_fade_out"
+            prologue_state.elapsed = 0.0
+        end
+        return true
+    end
+
+    if prologue_state.mode == "outro_fade_out" then
+        prologue_state.elapsed = prologue_state.elapsed + delta
+        local progress = math.min(prologue_state.elapsed / prologue_state.outro_fade_seconds, 1.0)
+        local alpha = 1.0 - progress
+        local brightness = PROLOGUE_DIM_BACKGROUND + ((1.0 - PROLOGUE_DIM_BACKGROUND) * progress)
+        set_tint("StoryBackground", brightness, brightness, brightness, 1.0)
+        set_dialogue_alpha(alpha)
+        if progress >= 1.0 then
+            prologue_state.mode = "control_room_fade_in"
+            prologue_state.elapsed = 0.0
+            hide_dialogue_ui()
+            set_texture("StoryBackground", resolve_story_image("control_room_off", "Asset/Content/Texture/Story/control_room_screen_off.png"))
+            set_tint("StoryBackground", 1.0, 1.0, 1.0, 0.0)
+        end
+        return true
+    end
+
+    if prologue_state.mode == "control_room_fade_in" then
+        prologue_state.elapsed = prologue_state.elapsed + delta
+        local progress = math.min(prologue_state.elapsed / prologue_state.control_room_fade_seconds, 1.0)
+        set_tint("StoryBackground", 1.0, 1.0, 1.0, progress)
+        if progress >= 1.0 then
+            play_story_sfx(resolve_story_sound("crt_on", DEFAULT_CRT_ON_SOUND_PATH))
+            prologue_state.mode = "crt_audio_lead"
+            prologue_state.elapsed = 0.0
+        end
+        return true
+    end
+
+    if prologue_state.mode == "crt_audio_lead" then
+        prologue_state.elapsed = prologue_state.elapsed + delta
+        if prologue_state.elapsed >= prologue_state.crt_lead_seconds then
+            prologue_state.mode = "crt_power_on"
+            prologue_state.elapsed = 0.0
+            set_texture("StoryBackground", resolve_story_image("control_room_on", "Asset/Content/Texture/Story/control_room_screen_on.png"))
+            set_tint("StoryBackground", 0.2, 0.2, 0.2, 1.0)
+        end
+        return true
+    end
+
+    if prologue_state.mode == "crt_power_on" then
+        prologue_state.elapsed = prologue_state.elapsed + delta
+        local crt_progress = 1.0
+        if prologue_state.crt_switch_delay_seconds > 0.0 then
+            crt_progress = math.min(prologue_state.elapsed / prologue_state.crt_switch_delay_seconds, 1.0)
+        end
+
+        local brightness = 1.0
+        if crt_progress < 0.12 then
+            brightness = 0.0
+        elseif crt_progress < 0.24 then
+            brightness = 1.35
+        elseif crt_progress < 0.38 then
+            brightness = 0.18
+        elseif crt_progress < 0.62 then
+            brightness = 1.08
+        elseif crt_progress < 0.82 then
+            brightness = 0.82
+        else
+            brightness = 1.0
+        end
+        set_tint("StoryBackground", brightness, brightness, brightness, 1.0)
+
+        if crt_progress >= 1.0 then
+            set_tint("StoryBackground", 1.0, 1.0, 1.0, 1.0)
+            prologue_state.mode = "post_crt_hold"
+            prologue_state.elapsed = 0.0
+        end
+        return true
+    end
+
+    if prologue_state.mode == "post_crt_hold" then
+        prologue_state.elapsed = prologue_state.elapsed + delta
+        if prologue_state.elapsed >= prologue_state.post_crt_hold_seconds then
+            start_story_sequence()
+        end
+        return true
+    end
+
+    return prologue_state.mode ~= "story"
+end
+
 apply_page = function(page)
     if type(page) ~= "table" then
         return
@@ -548,15 +974,8 @@ apply_page = function(page)
 
     local background = resolve_page_background(page)
     local auto_page = is_auto_page(page)
-    local should_delay_dialogue_ui = is_transition_dialogue_page(page)
-
     if background then
-        if should_delay_dialogue_ui and dialogue_background_state.current_one_key ~= page.background then
-            pending_dialogue_ui = page
-            hide_dialogue_ui()
-            start_dialogue_intro_transition(page, background)
-            return
-        elseif should_delay_dialogue_ui then
+        if page.type == "dialogue" then
             set_background_immediately(page.background, background)
         else
             set_non_dialogue_background(background)
@@ -564,14 +983,17 @@ apply_page = function(page)
     end
 
     if auto_page then
+        reset_typewriter()
         clear_pending_dialogue_ui()
         auto_advance_timer = page.duration
         set_text("SpeakerName", "")
         set_text("DialogueText", "")
-        set_text("PageHint", "")
+        set_text("NarrationText", "")
+        set_text("PageHint", HOLD_SKIP_HINT_TEXT)
         set_visible("SpeakerName", false)
         set_visible("DialogueText", false)
-        set_visible("PageHint", false)
+        set_visible("NarrationText", false)
+        set_visible("PageHint", true)
         return
     end
 
@@ -586,26 +1008,37 @@ local function advance_page()
         return
     end
 
-    local next_index = current_index + 1
-    if next_index > #pages then
-        next_index = 1
-    end
-
-    local current_page = pages[current_index]
-    if is_transition_dialogue_page(current_page) then
-        pending_page_index = next_index
+    if current_index >= #pages then
+        play_story_sfx(resolve_story_sound("go", DEFAULT_GO_SOUND_PATH))
         hide_dialogue_ui()
-        start_dialogue_exit_transition(current_page)
+        start_scene_change_flash()
         return
     end
 
+    play_story_sfx(NEXT_PAGE_SOUND_PATH)
+
+    local next_index = current_index + 1
     current_index = next_index
     apply_page(pages[current_index])
 end
 
 local function try_advance_page()
-    if input_cooldown > 0.0 or dialogue_transition.active or pending_page_index then
+    if prologue_state.mode and prologue_state.mode ~= "story" then
+        return try_advance_prologue()
+    end
+
+    if scene_change_timer then
         return false
+    end
+
+    if input_cooldown > 0.0 then
+        return false
+    end
+
+    if typing_state.active then
+        input_cooldown = INPUT_COOLDOWN_SECONDS
+        complete_typewriter()
+        return true
     end
 
     input_cooldown = INPUT_COOLDOWN_SECONDS
@@ -633,7 +1066,7 @@ local function load_story()
         return
     end
 
-    apply_page(pages[current_index])
+    start_story_prologue()
 end
 
 function BeginPlay()
@@ -643,37 +1076,73 @@ function BeginPlay()
     cache_component("StoryBackgroundLim0")
     cache_component("StoryBackgroundLim1")
     cache_component("StoryBackgroundPod")
+    cache_component("StoryBackgroundBaekLim0")
+    cache_component("StoryBackgroundBaekLim1")
     cache_component("SpeakerName")
     cache_component("DialogueText")
+    cache_component("NarrationText")
     cache_component("PageHint")
+    cache_component("WhiteFlash")
     cache_component("NextPageButton")
 
+    preload_story_background_layers()
     set_visible("StoryBackground", true)
-    set_default_background()
     hide_dialogue_background_layers()
-    set_visible("SpeakerName", true)
-    set_visible("DialogueText", true)
+    hide_dialogue_ui()
+    set_text("PageHint", HOLD_SKIP_HINT_TEXT)
     set_visible("PageHint", true)
+    set_visible("WhiteFlash", false)
+    set_tint("WhiteFlash", 1.0, 1.0, 1.0, 0.0)
 
     load_story()
 end
 
 function Tick(dt)
-    if dialogue_transition.active then
-        dialogue_transition.elapsed = dialogue_transition.elapsed + (dt or 0.0)
-        local alpha = 1.0
-        if dialogue_transition.duration > 0.0 then
-            alpha = math.min(dialogue_transition.elapsed / dialogue_transition.duration, 1.0)
+    if story_finished then
+        return
+    end
+
+    if update_skip_hold(dt) then
+        return
+    end
+
+    if update_prologue(dt) then
+        if input_cooldown > 0.0 then
+            input_cooldown = math.max(0.0, input_cooldown - (dt or 0.0))
         end
 
-        if dialogue_transition.mode == "enter" then
-            set_overlay_alpha(dialogue_transition.one_key, alpha)
-        else
-            set_overlay_alpha(dialogue_transition.one_key, 1.0 - alpha)
+        if prologue_state.mode == "line_reveal" then
+            if GetKeyDown("SPACE") then
+                try_advance_page()
+                return
+            end
+
+            if ui["NextPageButton"] and ui["NextPageButton"]:WasClicked() then
+                try_advance_page()
+            end
+        end
+        return
+    end
+
+    if typing_state.active then
+        typing_state.elapsed = typing_state.elapsed + (dt or 0.0)
+
+        while typing_state.active
+            and typing_state.visible_count < #typing_state.chars
+            and typing_state.elapsed >= typing_state.interval do
+            typing_state.elapsed = typing_state.elapsed - typing_state.interval
+            typing_state.visible_count = typing_state.visible_count + 1
+
+            local revealed_char = typing_state.chars[typing_state.visible_count]
+            if (typing_state.visible_count % 3) == 0 and is_typing_sound_character(revealed_char) then
+                play_story_sfx(TYPEWRITER_SOUND_PATH)
+            end
         end
 
-        if alpha >= 1.0 then
-            complete_dialogue_transition()
+        update_typewriter_text()
+
+        if typing_state.visible_count >= #typing_state.chars then
+            typing_state.active = false
         end
     end
 
@@ -682,6 +1151,22 @@ function Tick(dt)
         if auto_advance_timer <= 0.0 then
             auto_advance_timer = nil
             advance_page()
+            return
+        end
+    end
+
+    if scene_change_timer then
+        scene_change_timer = scene_change_timer - (dt or 0.0)
+        local progress = 1.0
+        if scene_change_duration > 0.0 then
+            progress = 1.0 - math.max(scene_change_timer, 0.0) / scene_change_duration
+        end
+        local alpha = ease_in_power(progress, 1.8)
+        set_visible("WhiteFlash", true)
+        set_tint("WhiteFlash", 1.0, 1.0, 1.0, alpha)
+        if scene_change_timer <= 0.0 then
+            scene_change_timer = nil
+            finish_story("PlayerDev.Scene")
             return
         end
     end
