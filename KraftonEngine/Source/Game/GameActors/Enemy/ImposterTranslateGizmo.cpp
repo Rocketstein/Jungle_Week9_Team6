@@ -26,11 +26,13 @@ namespace {
 	float RandomOffset()
 	{
 		std::uniform_int_distribution<int> Distribution(0, 2);
-		return Distribution(RandomEngine());
+		return static_cast<float>(Distribution(RandomEngine()));
 	}
 }
 
 void AImposterTranslateGizmo::Capture(AActor* InTarget) {
+	if (!InTarget) return;
+	if (!InTarget->IsA<AObstacleActorBase>()) return;
 	AImposterGizmoActorBase::Capture(InTarget);
 	if (!Target || !PreviewGizmo) return;
 	PreviewGizmo->SetTranslateMode();

@@ -23,6 +23,7 @@ namespace {
 }
 
 void AImposterRotationGizmo::Capture(AActor* InTarget) {
+	if (!InTarget || !InTarget->IsA<AObstacleActorBase>()) return;
 	AImposterGizmoActorBase::Capture(InTarget);
 	if (!Target || !PreviewGizmo) return;
 	PreviewGizmo->SetRotateMode();

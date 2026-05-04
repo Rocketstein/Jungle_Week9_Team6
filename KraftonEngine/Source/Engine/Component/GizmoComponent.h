@@ -87,7 +87,7 @@ public:
 	void SetTarget(AActor* NewTargetActor);
 
 	// For Imposter Gizmo
-	void SetSelectedAxis(int32 InAxis) { SelectedAxis = InAxis; }
+	void SetSelectedAxis(int32 InAxis) { SelectedAxis = (InAxis >= 0 && InAxis <= 3) ? InAxis : -1; }
 
 private:
 	bool IntersectRayAxis(const FRay& Ray, FVector AxisEnd, float AxisScale, float& OutRayT);

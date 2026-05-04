@@ -1,5 +1,5 @@
 ﻿#include "ImposterGizmoActorBase.h"
-#include "Game/GameActors/Obstacle/ObstacleActorBase.h"
+#include "GameFramework/World.h"
 
 #include <algorithm>
 #include <random>
@@ -23,12 +23,15 @@ void AImposterGizmoActorBase::Tick(float DeltaTime) {
 
 void AImposterGizmoActorBase::Capture(AActor* InActor) {
 	if (!InActor) return;
-	if (!InActor->IsA<AObstacleActorBase>()) return;
 	Target = InActor;
+	ElapsedDelay = 0.0f;
 	Elapsed = 0.0f;
 	bTransforming = false;
 
-	PreviewGizmo = AddComponent<UGizmoComponent>();
+	if (!PreviewGizmo)
+	{
+		PreviewGizmo = AddComponent<UGizmoComponent>();
+	}
 }
 
 uint8 AImposterGizmoActorBase::SetOffsetAxis() {
@@ -44,9 +47,14 @@ FLuaActorProxy AImposterGizmoActorBase::GetCapturedActorProxy() const {
 }
 
 void AImposterGizmoActorBase::Release() {
-	PreviewGizmo->SetSelectedAxis(-1);
-	PreviewGizmo->Deactivate();
+	if (PreviewGizmo)
+	{
+		PreviewGizmo->SetSelectedAxis(-1);
+		PreviewGizmo->Deactivate();
+	}
 	Target = nullptr;
-	EndPlay();
-	UObjectManager::Get().DestroyObject(this);
+	if (UWorld* World = GetWorld())
+	{
+		World->DestroyActor(this);
+	}
 }

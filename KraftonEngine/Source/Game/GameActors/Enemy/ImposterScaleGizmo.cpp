@@ -23,8 +23,9 @@ namespace {
 }
 
 void AImposterScaleGizmo::Capture(AActor* InTarget) {
+	if (!InTarget || !InTarget->IsA<AObstacleActorBase>()) return;
 	AImposterGizmoActorBase::Capture(InTarget);
-	if (!InTarget || !PreviewGizmo) return;
+	if (!Target || !PreviewGizmo) return;
 	PreviewGizmo->SetScaleMode();
 	PreviewGizmo->SetTarget(Target);
 	PreviewGizmo->SetSelectedAxis(SetOffsetAxis());
