@@ -16,6 +16,7 @@
   },
   "assets": {
     "images": {
+      "control_room_on": "Asset/Content/Texture/Story/control_room_screen_on.png",
       "control_room_baek_0": "Asset/Content/Texture/Story/control_room_screen_on_baek_0.png",
       "control_room_baek_1": "Asset/Content/Texture/Story/control_room_screen_on_baek_1.png",
       "control_room_lim_0": "Asset/Content/Texture/Story/control_room_screen_on_lim_0.png",
