@@ -38,7 +38,7 @@ private:
 	bool bEnabled = true;
 
 	int32 StraightRunLength = 0;
-	int32 MinStraightsBetweenTurns = 2;
+	int32 MinStraightsBetweenTurns = 5;
 	int32 TargetChunkCount = 7;
 	float ChunkBuggedRate	 = 0.1f;
 	float ObstacleSpawnRate  = 0.55f;

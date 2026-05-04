@@ -7,8 +7,8 @@
 enum class EChunkType {
 	Start,
 	Straight,
-	//TurnLeft,
-	//TurnRight,
+	TurnLeft,
+	TurnRight,
 	//TwoWay,
 	StraightWithHole,
 	StraightOneLaneL,
