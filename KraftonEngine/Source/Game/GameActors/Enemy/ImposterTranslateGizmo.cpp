@@ -24,7 +24,7 @@ namespace {
 
 	float RandomOffset()
 	{
-		std::uniform_int_distribution<int> Distribution(1, 3);
+		std::uniform_int_distribution<int> Distribution(2, 5);
 		return static_cast<float>(Distribution(RandomEngine()));
 	}
 }
