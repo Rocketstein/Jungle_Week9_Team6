@@ -36,14 +36,6 @@ namespace {
 	}
 }
 
-void AImposterTranslateGizmo::Capture(AActor* InActor) {
-	if (!InActor) return;
-	if (!InActor->IsA<AObstacleActorBase>()) return;
-	Target = InActor;
-	Elapsed = 0.0f;
-	bTransforming = false;
-}
-
 void AImposterTranslateGizmo::Transform(float DeltaTime) {
 	if (!Target) return;
 

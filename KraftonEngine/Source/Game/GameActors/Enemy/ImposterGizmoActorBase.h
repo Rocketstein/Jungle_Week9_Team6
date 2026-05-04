@@ -11,7 +11,7 @@ public:
 	DECLARE_CLASS(AImposterGizmoActorBase, AEnemyActorBase)
 	
 	virtual void Tick(float DeltaTime) override;
-	virtual void Capture(AActor* InTarget)	= 0;
+	virtual void Capture(AActor* InTarget);
 	virtual void Transform(float DeltaTime) = 0;
 	void Release() { Target = nullptr; }
 
@@ -26,5 +26,6 @@ protected:
 	AActor* Target			= nullptr;
 	float	ActivationDelay = 1.5f;
 	float   ElapsedDelay	= 0.f;
-	bool	bIsTransforming = false;
+	float	Elapsed			= 0.f;
+	bool	bTransforming   = false;
 };

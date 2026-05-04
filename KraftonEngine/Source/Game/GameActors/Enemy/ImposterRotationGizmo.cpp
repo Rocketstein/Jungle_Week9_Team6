@@ -1,4 +1,4 @@
-#include "ImposterRotationGizmo.h"
+﻿#include "ImposterRotationGizmo.h"
 #include "Game/GameActors/Obstacle/ObstacleActorBase.h"
 
 #include <algorithm>
@@ -26,15 +26,6 @@ namespace {
 		std::uniform_int_distribution<int> Distribution(0, 2);
 		return Distribution(RandomEngine());
 	}
-}
-
-void AImposterRotationGizmo::Capture(AActor* InActor) {
-	if (!InActor) return;
-	if (!InActor->IsA<AObstacleActorBase>()) return;
-	
-	Target = InActor;
-	Elapsed = 0.0f;
-	bTransforming = false;
 }
 
 void AImposterRotationGizmo::Transform(float DeltaTime) {
