@@ -20,6 +20,7 @@
       "control_room_baek_1": "Asset/Content/Texture/Story/control_room_screen_on_baek_1.png",
       "control_room_lim_0": "Asset/Content/Texture/Story/control_room_screen_on_lim_0.png",
       "control_room_lim_1": "Asset/Content/Texture/Story/control_room_screen_on_lim_1.png",
+      "control_room_pod": "Asset/Content/Texture/Story/control_room_screen_pod.png",
       "control_room_baek_lim_0": "Asset/Content/Texture/Story/control_room_screen_on_baek_lim_0.png",
       "control_room_baek_lim_1": "Asset/Content/Texture/Story/control_room_screen_on_baek_lim_1.png"
     }
@@ -52,6 +53,12 @@
       "speaker": "BAEK_COMMANDER",
       "background": "control_room_baek_1",
       "message": "따라서 지금부터 교육생을 디버그 포드에 탑승시켜 엔진 내부로 직접 투입한다."
+    },
+    {
+      "id": "intro_016_pod_01",
+      "type": "image",
+      "background": "control_room_pod",
+      "duration": 2.5
     },
     {
       "id": "intro_017_im_01",

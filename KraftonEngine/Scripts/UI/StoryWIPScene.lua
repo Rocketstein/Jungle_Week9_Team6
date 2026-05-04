@@ -11,6 +11,7 @@ local scenario = nil
 local pages = {}
 local current_index = 1
 local input_cooldown = 0.0
+local auto_advance_timer = nil
 
 local MAX_LINE_WIDTH_UNITS = 28
 local SPEAKER_NAME_COLOR = { 134.0 / 255.0, 251.0 / 255.0, 255.0 / 255.0, 233.0 / 255.0 }
@@ -278,25 +279,48 @@ local function resolve_page_background(page)
     return nil
 end
 
+local function is_auto_page(page)
+    return type(page) == "table"
+        and (page.type == "image" or page.type == "splash")
+        and type(page.duration) == "number"
+        and page.duration > 0.0
+end
+
 local function apply_page(page)
     if type(page) ~= "table" then
         return
     end
 
-    local speaker_name = ScenarioLoader.resolve_speaker_name(scenario, page.speaker)
-    local message = format_terminal_message(tostring(page.message or ""))
     local background = resolve_page_background(page)
+    local auto_page = is_auto_page(page)
 
     if background then
         set_texture("StoryBackground", background)
     end
 
+    if auto_page then
+        auto_advance_timer = page.duration
+        set_text("SpeakerName", "")
+        set_text("DialogueText", "")
+        set_text("PageHint", "")
+        set_visible("SpeakerName", false)
+        set_visible("DialogueText", false)
+        set_visible("PageHint", false)
+        return
+    end
+
+    auto_advance_timer = nil
+
+    local speaker_name = ScenarioLoader.resolve_speaker_name(scenario, page.speaker)
+    local message = format_terminal_message(tostring(page.message or ""))
+
+    set_visible("SpeakerName", true)
+    set_visible("DialogueText", true)
+    set_visible("PageHint", true)
     set_text("SpeakerName", speaker_name)
     set_tint("SpeakerName", SPEAKER_NAME_COLOR[1], SPEAKER_NAME_COLOR[2], SPEAKER_NAME_COLOR[3], SPEAKER_NAME_COLOR[4])
-
     set_text("DialogueText", message)
     set_tint("DialogueText", DIALOGUE_TEXT_COLOR[1], DIALOGUE_TEXT_COLOR[2], DIALOGUE_TEXT_COLOR[3], DIALOGUE_TEXT_COLOR[4])
-
     set_text("PageHint", "[SPACE / CLICK] NEXT  " .. tostring(current_index) .. "/" .. tostring(#pages))
 end
 
@@ -362,6 +386,15 @@ function BeginPlay()
 end
 
 function Tick(dt)
+    if auto_advance_timer then
+        auto_advance_timer = auto_advance_timer - (dt or 0.0)
+        if auto_advance_timer <= 0.0 then
+            auto_advance_timer = nil
+            advance_page()
+            return
+        end
+    end
+
     if input_cooldown > 0.0 then
         input_cooldown = math.max(0.0, input_cooldown - (dt or 0.0))
     end
