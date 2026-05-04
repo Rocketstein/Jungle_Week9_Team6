@@ -8,7 +8,7 @@ public:
 	void Transform(float DeltaTime) override;
 	
 private:
-	FRotator GetRotationOffset() const;
+	FRotator GetRotationOffset();
 
 private:
 	FRotator StartRotation = FRotator::ZeroRotator;

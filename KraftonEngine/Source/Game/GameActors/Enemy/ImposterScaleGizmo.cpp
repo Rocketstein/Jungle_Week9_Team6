@@ -17,7 +17,7 @@ namespace {
 
 	float RandomScaleFactor()
 	{
-		std::uniform_real_distribution<float> Distribution(1.05f, 2.0f);
+		std::uniform_real_distribution<float> Distribution(1.2f, 2.0f);
 		return Distribution(RandomEngine());
 	}
 }
@@ -48,8 +48,23 @@ void AImposterScaleGizmo::Transform(float DeltaTime) {
 	}
 }
 
-// Return a scale within the range [1.05, 2]
-FVector AImposterScaleGizmo::GetScaleOffset() const {
-	const float ScaleFactor = RandomScaleFactor();
-	return FVector(ScaleFactor, ScaleFactor, ScaleFactor);
+// Return a scale within the range [1.2, 2]
+FVector AImposterScaleGizmo::GetScaleOffset() {
+
+	switch(SetPreviewAxis()) {
+	case (0) :
+	{
+		return FVector(RandomScaleFactor(), 1, 1);
+		break;
+	}
+	case (1):
+		return FVector(1, RandomScaleFactor(), 1);
+		break;
+	default:
+		return FVector(1, 1, RandomScaleFactor());
+		break;
+	}
+
+	//const float ScaleFactor = RandomScaleFactor();
+	//return FVector(ScaleFactor, ScaleFactor, ScaleFactor);
 }

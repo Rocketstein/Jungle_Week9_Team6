@@ -23,12 +23,6 @@ namespace {
 		return Distribution(RandomEngine()) == 0 ? -1 : 1;
 	}
 
-	int RandomAxis()
-	{
-		std::uniform_int_distribution<int> Distribution(0, 2);
-		return Distribution(RandomEngine());
-	}
-
 	float RandomOffset()
 	{
 		std::uniform_int_distribution<int> Distribution(0, 2);
@@ -58,8 +52,8 @@ void AImposterTranslateGizmo::Transform(float DeltaTime) {
 	}
 }
 
-FVector AImposterTranslateGizmo::GetTranslateOffset() const {
-	switch (RandomAxis())
+FVector AImposterTranslateGizmo::GetTranslateOffset() {
+	switch (SetPreviewAxis())
 	{
 	case 0:
 		return FVector(RandomOffset() * RandomSign(), 0.0f, 0.0f);

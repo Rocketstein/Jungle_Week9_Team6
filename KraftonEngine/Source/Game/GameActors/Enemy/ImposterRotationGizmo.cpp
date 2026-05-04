@@ -20,12 +20,6 @@ namespace {
 		std::uniform_int_distribution<int> Distribution(0, 3);
 		return static_cast<float>(Distribution(RandomEngine()) + 1) * 45.0f;
 	}
-
-	int RandomAxis()
-	{
-		std::uniform_int_distribution<int> Distribution(0, 2);
-		return Distribution(RandomEngine());
-	}
 }
 
 void AImposterRotationGizmo::Transform(float DeltaTime) {
@@ -54,9 +48,9 @@ void AImposterRotationGizmo::Transform(float DeltaTime) {
 	}
 }
 
-FRotator AImposterRotationGizmo::GetRotationOffset() const {
+FRotator AImposterRotationGizmo::GetRotationOffset() {
 	const float Angle = RandomAngle();
-	switch (RandomAxis())
+	switch (SetPreviewAxis())
 	{
 	case 0:
 		return FRotator(Angle, 0.0f, 0.0f);

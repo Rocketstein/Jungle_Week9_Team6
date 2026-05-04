@@ -7,7 +7,7 @@ public:
 	void Transform(float DeltaTime) override;
 
 private:
-	FVector GetTranslateOffset() const;
+	FVector GetTranslateOffset();
 
 private:
 	FVector StartLocation  = FVector::ZeroVector;

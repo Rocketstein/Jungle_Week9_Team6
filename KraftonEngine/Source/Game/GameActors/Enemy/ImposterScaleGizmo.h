@@ -7,7 +7,7 @@ public:
 	void Transform(float DeltaTime) override;
 
 private:
-	FVector GetScaleOffset() const;
+	FVector GetScaleOffset();
 
 private:
 	FVector StartScale = FVector::OneVector;
