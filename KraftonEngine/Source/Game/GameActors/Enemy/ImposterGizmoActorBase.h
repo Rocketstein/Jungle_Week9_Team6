@@ -15,7 +15,7 @@ public:
 	virtual void Transform(float DeltaTime) = 0;
 
 	uint8 SetOffsetAxis();
-	void Release() { Target = nullptr; }
+	void Release();
 
 	AActor* GetCapturedActor() const { if (Target) return Target; return nullptr; }
 	FLuaActorProxy GetCapturedActorProxy() const;

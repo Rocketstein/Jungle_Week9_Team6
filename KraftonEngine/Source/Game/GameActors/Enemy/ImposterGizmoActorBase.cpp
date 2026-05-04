@@ -42,3 +42,11 @@ FLuaActorProxy AImposterGizmoActorBase::GetCapturedActorProxy() const {
 	Proxy.Actor = Target;
 	return Proxy;
 }
+
+void AImposterGizmoActorBase::Release() {
+	PreviewGizmo->SetSelectedAxis(-1);
+	PreviewGizmo->Deactivate();
+	Target = nullptr;
+	EndPlay();
+	UObjectManager::Get().DestroyObject(this);
+}
