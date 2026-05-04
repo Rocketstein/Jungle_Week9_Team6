@@ -976,7 +976,31 @@ bool FLuaComponentProxy::StartCameraShake(float Intensity, float Duration)
 	if (TargetComp && TargetComp->IsA<UCameraComponent>())
 	{
 		UCameraComponent* Camera = static_cast<UCameraComponent*>(TargetComp);
+		// Back-compat: 기본 SinWave 셰이크에 Intensity/Duration 직접 set
 		Camera->StartCameraShake(Intensity, Duration);
+		return true;
+	}
+	return false;
+}
+
+bool FLuaComponentProxy::StartCameraShakeByClass(const FString& ShakeClassName, float Scale)
+{
+	UActorComponent* TargetComp = this->GetComponent();
+	if (TargetComp && TargetComp->IsA<UCameraComponent>())
+	{
+		UCameraComponent* Camera = static_cast<UCameraComponent*>(TargetComp);
+		return Camera->StartCameraShakeByName(ShakeClassName.c_str(), Scale) != nullptr;
+	}
+	return false;
+}
+
+bool FLuaComponentProxy::StopAllCameraShakes(bool bImmediate)
+{
+	UActorComponent* TargetComp = this->GetComponent();
+	if (TargetComp && TargetComp->IsA<UCameraComponent>())
+	{
+		UCameraComponent* Camera = static_cast<UCameraComponent*>(TargetComp);
+		Camera->StopAllCameraShakes(bImmediate);
 		return true;
 	}
 	return false;

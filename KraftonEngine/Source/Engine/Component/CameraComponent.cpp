@@ -1,6 +1,11 @@
-﻿#include "Component/CameraComponent.h"
+#include "Component/CameraComponent.h"
 #include "Object/ObjectFactory.h"
+#include "Object/UClass.h"
 #include "Camera/CameraShake.h"
+#include "Camera/CameraTypes.h"
+#include "Camera/CameraModifier.h"
+#include "Camera/CameraModifier_CameraShake.h"
+#include "Camera/CameraModifier_HitEffect.h"
 #include <cmath>
 
 IMPLEMENT_CLASS(UCameraComponent, USceneComponent)
@@ -10,12 +15,12 @@ FMatrix UCameraComponent::GetViewMatrix() const
 {
 	UpdateWorldMatrix();
 
-	// Apply additive shake offsets only for view matrix calculation
-	FVector FinalLoc = GetWorldLocation() + AdditiveLocationOffset;
+	// 카메라 자체 modifier(셰이크/effects)와 PCM modifier(글로벌 fade 등) 두 layer를 합산해 view 산출
+	FVector FinalLoc = GetWorldLocation() + SelfAdditiveLocationOffset + ExternalAdditiveLocationOffset;
 	FRotator FinalRot(GetWorldRotation());
-	FinalRot.Yaw += AdditiveRotationOffset.Yaw;
-	FinalRot.Pitch += AdditiveRotationOffset.Pitch;
-	FinalRot.Roll += AdditiveRotationOffset.Roll;
+	FinalRot.Pitch += SelfAdditiveRotationOffset.Pitch + ExternalAdditiveRotationOffset.Pitch;
+	FinalRot.Yaw   += SelfAdditiveRotationOffset.Yaw   + ExternalAdditiveRotationOffset.Yaw;
+	FinalRot.Roll  += SelfAdditiveRotationOffset.Roll  + ExternalAdditiveRotationOffset.Roll;
 
 	return FMatrix::MakeViewMatrix(FinalRot.GetRightVector(), FinalRot.GetUpVector(), FinalRot.GetForwardVector(), FinalLoc);
 }
@@ -112,59 +117,150 @@ FRay UCameraComponent::DeprojectScreenToWorld(float MouseX, float MouseY, float 
 void UCameraComponent::BeginPlay()
 {
 	USceneComponent::BeginPlay();
-	// 카메라 쉐이크/히트 이펙트는 엔진 내부 갱신 로직이라 사용자 bTickEnable과 무관하게 항상 tick
+	// 카메라 modifier 갱신은 엔진 내부 로직이라 사용자 bTickEnable과 무관하게 항상 tick.
 	SetComponentTickEnabled(true);
 }
 
-void UCameraComponent::StartCameraShake(float Intensity, float duration)
+void UCameraComponent::EndPlay()
 {
-	USinWaveCameraShake* NewShake = UObjectManager::Get().CreateObject<USinWaveCameraShake>(this);
-	NewShake->Intensity = Intensity;
-	NewShake->Duration = duration;
-	ActiveShakes.push_back(NewShake);
+	for (UCameraModifier* Mod : CameraModifiers)
+	{
+		if (Mod)
+		{
+			Mod->OnRemoved();
+			UObjectManager::Get().DestroyObject(Mod);
+		}
+	}
+	CameraModifiers.clear();
+	CachedShakeModifier = nullptr;
+	CachedHitEffectModifier = nullptr;
+
+	USceneComponent::EndPlay();
+}
+
+UCameraModifier* UCameraComponent::AddCameraModifier(UClass* ModifierClass)
+{
+	if (!ModifierClass) return nullptr;
+	if (!ModifierClass->IsA(UCameraModifier::StaticClass())) return nullptr;
+	return AddCameraModifierByName(ModifierClass->GetName());
+}
+
+UCameraModifier* UCameraComponent::AddCameraModifierByName(const char* ModifierClassName)
+{
+	if (!ModifierClassName) return nullptr;
+	UObject* NewObj = FObjectFactory::Get().Create(ModifierClassName, this);
+	UCameraModifier* NewMod = NewObj ? Cast<UCameraModifier>(NewObj) : nullptr;
+	if (!NewMod)
+	{
+		if (NewObj) UObjectManager::Get().DestroyObject(NewObj);
+		return nullptr;
+	}
+
+	CameraModifiers.push_back(NewMod);
+	NewMod->OnAdded();
+	return NewMod;
+}
+
+void UCameraComponent::RemoveCameraModifier(UCameraModifier* Modifier)
+{
+	if (!Modifier) return;
+	auto It = std::find(CameraModifiers.begin(), CameraModifiers.end(), Modifier);
+	if (It == CameraModifiers.end()) return;
+
+	Modifier->OnRemoved();
+	if (CachedShakeModifier == Modifier) CachedShakeModifier = nullptr;
+	if (CachedHitEffectModifier == Modifier) CachedHitEffectModifier = nullptr;
+
+	CameraModifiers.erase(It);
+	UObjectManager::Get().DestroyObject(Modifier);
+}
+
+UCameraModifier_CameraShake* UCameraComponent::GetOrCreateCameraShakeModifier()
+{
+	if (CachedShakeModifier) return CachedShakeModifier;
+	CachedShakeModifier = Cast<UCameraModifier_CameraShake>(AddCameraModifier(UCameraModifier_CameraShake::StaticClass()));
+	return CachedShakeModifier;
+}
+
+UCameraModifier_HitEffect* UCameraComponent::GetOrCreateHitEffectModifier()
+{
+	if (CachedHitEffectModifier) return CachedHitEffectModifier;
+	CachedHitEffectModifier = Cast<UCameraModifier_HitEffect>(AddCameraModifier(UCameraModifier_HitEffect::StaticClass()));
+	return CachedHitEffectModifier;
+}
+
+void UCameraComponent::ApplyCameraModifiers(float DeltaTime, FMinimalViewInfo& InOutView)
+{
+	for (UCameraModifier* Mod : CameraModifiers)
+	{
+		if (!Mod || Mod->bDisabled) continue;
+		if (Mod->ModifyCamera(DeltaTime, InOutView)) break; // true 반환 시 체인 중단
+	}
+}
+
+UCameraShakeBase* UCameraComponent::StartCameraShake(UClass* ShakeClass, float Scale)
+{
+	UCameraModifier_CameraShake* ShakeMod = GetOrCreateCameraShakeModifier();
+	return ShakeMod ? ShakeMod->AddCameraShake(ShakeClass, Scale) : nullptr;
+}
+
+UCameraShakeBase* UCameraComponent::StartCameraShakeByName(const char* ShakeClassName, float Scale)
+{
+	UCameraModifier_CameraShake* ShakeMod = GetOrCreateCameraShakeModifier();
+	return ShakeMod ? ShakeMod->AddCameraShakeByName(ShakeClassName, Scale) : nullptr;
+}
+
+void UCameraComponent::StopCameraShake(UCameraShakeBase* Instance, bool bImmediate)
+{
+	if (CachedShakeModifier) CachedShakeModifier->RemoveCameraShake(Instance, bImmediate);
+}
+
+void UCameraComponent::StopAllCameraShakes(bool bImmediate)
+{
+	if (CachedShakeModifier) CachedShakeModifier->RemoveAllCameraShakes(bImmediate);
 }
 
 void UCameraComponent::AddHitEffect(float Intensity, float Duration)
 {
-	HitEffectIntensity = Intensity;
-	HitEffectDuration = (Duration > 0.0f) ? Duration : 1.0f;
+	UCameraModifier_HitEffect* HitMod = GetOrCreateHitEffectModifier();
+	if (HitMod) HitMod->AddHitEffect(Intensity, Duration);
+}
+
+UCameraShakeBase* UCameraComponent::StartCameraShake(float Intensity, float Duration)
+{
+	// Back-compat: 기존 시그니처는 SinWaveCameraShake에 Intensity/Duration을 직접 set.
+	UCameraShakeBase* Shake = StartCameraShakeByName("USinWaveCameraShake", 1.0f);
+	if (Shake)
+	{
+		Shake->Intensity = Intensity;
+		Shake->Duration = Duration;
+	}
+	return Shake;
+}
+
+void UCameraComponent::SetExternalAdditiveOffsets(const FVector& InLocOffset, const FRotator& InRotOffset, float InAdditionalHitEffect)
+{
+	ExternalAdditiveLocationOffset = InLocOffset;
+	ExternalAdditiveRotationOffset = InRotOffset;
+	ExternalHitEffectIntensity = InAdditionalHitEffect;
 }
 
 void UCameraComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction& ThisTickFunction)
 {
 	USceneComponent::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// Hit Effect Fade out
-	if (HitEffectIntensity > 0.0f)
-	{
-		HitEffectIntensity -= (1.0f / HitEffectDuration) * DeltaTime;
-		if (HitEffectIntensity < 0.0f) HitEffectIntensity = 0.0f;
-	}
+	// 카메라 자체 modifier 체인을 평가해 Self layer offset/HitEffect 캐시.
+	// PCM이 없는 경우(예: Playground의 TestPlayer.lua)에도 이 경로만으로 쉐이크/히트 이펙트 동작.
+	FMinimalViewInfo View;
+	View.Location = FVector::ZeroVector;
+	View.Rotation = FRotator::ZeroRotator;
+	View.HitEffectIntensity = 0.0f;
 
-	AdditiveLocationOffset = FVector::ZeroVector;
-	AdditiveRotationOffset = FRotator::ZeroRotator;
+	ApplyCameraModifiers(DeltaTime, View);
 
-	for (int32 i = static_cast<int32>(ActiveShakes.size()) - 1; i >= 0; --i)
-	{
-		UCameraShakeBase* Shake = ActiveShakes[i];
-		if (!Shake) continue;
-
-		FVector LocOffset = FVector::ZeroVector;
-		FRotator RotOffset = FRotator::ZeroRotator;
-
-		Shake->UpdateShake(DeltaTime, LocOffset, RotOffset);
-
-		AdditiveLocationOffset += LocOffset;
-		AdditiveRotationOffset.Pitch += RotOffset.Pitch;
-		AdditiveRotationOffset.Yaw += RotOffset.Yaw;
-		AdditiveRotationOffset.Roll += RotOffset.Roll;
-
-		if (Shake->IsFinished())
-		{
-			UObjectManager::Get().DestroyObject(Shake);
-			ActiveShakes.erase(ActiveShakes.begin() + i);
-		}
-	}
+	SelfAdditiveLocationOffset = View.Location;
+	SelfAdditiveRotationOffset = View.Rotation;
+	SelfHitEffectIntensity = View.HitEffectIntensity;
 }
 
 void UCameraComponent::GetEditableProperties(TArray<FPropertyDescriptor>& OutProps)

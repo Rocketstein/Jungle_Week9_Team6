@@ -103,6 +103,8 @@ struct FLuaComponentProxy
 	bool IsMoveDone() const;
 
 	bool StartCameraShake(float Intensity, float Duration);
+	bool StartCameraShakeByClass(const FString& ShakeClassName, float Scale);
+	bool StopAllCameraShakes(bool bImmediate);
 	bool AddHitEffect(float Intensity, float Duration);
 
 	bool SetBoxExtent(const FVector& Extent);
