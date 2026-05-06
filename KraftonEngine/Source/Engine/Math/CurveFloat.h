@@ -8,5 +8,5 @@ public:
 	TArray<FVector2> Curve;
 
 public:
-	FVector2 Evaluate(float NormalizedT) const;
+	float Evaluate(float NormalizedT) const;
 };
