@@ -1,11 +1,11 @@
-﻿#include "PlayerController.h"
+#include "PlayerController.h"
 
-#include "GameFramework/PawnActor.h"
-#include "Input/InputManager.h"
 #include "Component/CameraComponent.h"
-#include "GameFramework/World.h"
-#include "Engine/Runtime/Engine.h"
 #include "Engine/Camera/PlayerCameraManager.h"
+#include "Engine/Runtime/Engine.h"
+#include "GameFramework/PawnActor.h"
+#include "GameFramework/World.h"
+#include "Input/InputManager.h"
 #include "Viewport/GameViewportClient.h"
 
 IMPLEMENT_CLASS(APlayerController, AActor)
@@ -33,6 +33,11 @@ void APlayerController::Possess(APawnActor* InPawn)
 	if (PossessedPawn == InPawn) return;
 	UnPossess();
 	PossessedPawn = InPawn;
+
+	if (PlayerCameraManager)
+	{
+		PlayerCameraManager->SetOwner(this);
+	}
 
 	if (PossessedPawn)
 	{
@@ -69,8 +74,19 @@ void APlayerController::UnPossess()
 	PossessedPawn = nullptr;
 }
 
-void APlayerController::AcquirePlayerCameraManager(APlayerCameraManager* InCameraManager) {
-	if (!InCameraManager) return;
-	CameraManager = InCameraManager;
-	CameraManager->SetOwner(this);
+void APlayerController::AcquirePlayerCameraManager(APlayerCameraManager* InCameraManager)
+{
+	PlayerCameraManager = InCameraManager;
+	if (PlayerCameraManager)
+	{
+		PlayerCameraManager->SetOwner(this);
+	}
+}
+
+void APlayerController::PlayCameraModifier(const FString& ScriptPath, const TMap<FString, float>& Params)
+{
+	if (PlayerCameraManager)
+	{
+		PlayerCameraManager->PlayCameraModifier(ScriptPath, Params);
+	}
 }

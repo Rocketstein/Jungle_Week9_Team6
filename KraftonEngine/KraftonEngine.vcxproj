@@ -314,8 +314,11 @@
     <ClCompile Include="Source\Engine\Asset\AssetFileSerializer.cpp" />
     <ClCompile Include="Source\Engine\Audio\AudioManager.cpp" />
     <ClCompile Include="Source\Engine\Camera\CameraModifier.cpp" />
+    <ClCompile Include="Source\Engine\Camera\CameraModifier_CameraShake.cpp" />
     <ClCompile Include="Source\Engine\Camera\CameraShake.cpp" />
     <ClCompile Include="Source\Engine\Camera\CameraShakePattern.cpp" />
+    <ClCompile Include="Source\Engine\Camera\LuaCameraModifier.cpp" />
+    <ClCompile Include="Source\Engine\Camera\MinimalViewInfo.cpp" />
     <ClCompile Include="Source\Engine\Camera\PlayerCameraManager.cpp" />
     <ClCompile Include="Source\Engine\Collision\CollisionDispatcher.cpp" />
     <ClCompile Include="Source\Engine\Collision\ConvexVolume.cpp" />
@@ -339,6 +342,7 @@
     <ClCompile Include="Source\Engine\Component\SceneComponent.cpp" />
     <ClCompile Include="Source\Engine\Component\ScriptComponent.cpp" />
     <ClCompile Include="Source\Engine\Component\SoundComponent.cpp" />
+    <ClCompile Include="Source\Engine\Component\SpringArmComponent.cpp" />
     <ClCompile Include="Source\Engine\Component\StaticMeshComponent.cpp" />
     <ClCompile Include="Source\Engine\Component\SubUVComponent.cpp" />
     <ClCompile Include="Source\Engine\Component\TextRenderComponent.cpp" />
@@ -480,6 +484,7 @@
     <ClCompile Include="Source\Engine\Runtime\WindowsApplication.cpp" />
     <ClCompile Include="Source\Engine\Runtime\WindowsWindow.cpp" />
     <ClCompile Include="Source\Engine\Scripting\LuaActorProxy.cpp" />
+    <ClCompile Include="Source\Engine\Scripting\LuaCoroutineScheduler.cpp" />
     <ClCompile Include="Source\Engine\Scripting\LuaComponentProxy.cpp" />
     <ClCompile Include="Source\Engine\Scripting\LuaScriptInstance.cpp" />
     <ClCompile Include="Source\Engine\Scripting\LuaScriptRuntime.cpp" />
@@ -572,8 +577,11 @@
     <ClInclude Include="Source\Engine\Audio\AudioManager.h" />
     <ClInclude Include="Source\Engine\Audio\AudioTypes.h" />
     <ClInclude Include="Source\Engine\Camera\CameraModifier.h" />
+    <ClInclude Include="Source\Engine\Camera\CameraModifier_CameraShake.h" />
     <ClInclude Include="Source\Engine\Camera\CameraShake.h" />
     <ClInclude Include="Source\Engine\Camera\CameraShakePattern.h" />
+    <ClInclude Include="Source\Engine\Camera\LuaCameraModifier.h" />
+    <ClInclude Include="Source\Engine\Camera\MinimalViewInfo.h" />
     <ClInclude Include="Source\Engine\Camera\PlayerCameraManager.h" />
     <ClInclude Include="Source\Engine\Collision\CollisionDispatcher.h" />
     <ClInclude Include="Source\Engine\Collision\ConvexVolume.h" />
@@ -598,6 +606,7 @@
     <ClInclude Include="Source\Engine\Component\SceneComponent.h" />
     <ClInclude Include="Source\Engine\Component\ScriptComponent.h" />
     <ClInclude Include="Source\Engine\Component\SoundComponent.h" />
+    <ClInclude Include="Source\Engine\Component\SpringArmComponent.h" />
     <ClInclude Include="Source\Engine\Component\StaticMeshComponent.h" />
     <ClInclude Include="Source\Engine\Component\SubUVComponent.h" />
     <ClInclude Include="Source\Engine\Component\TextRenderComponent.h" />
@@ -779,9 +788,11 @@
     <ClInclude Include="Source\Engine\Runtime\WindowsWindow.h" />
     <ClInclude Include="Source\Engine\Runtime\resource.h" />
     <ClInclude Include="Source\Engine\Scripting\LuaActorProxy.h" />
+    <ClInclude Include="Source\Engine\Scripting\LuaCoroutineScheduler.h" />
     <ClInclude Include="Source\Engine\Scripting\LuaComponentProxy.h" />
     <ClInclude Include="Source\Engine\Scripting\LuaScriptInstance.h" />
     <ClInclude Include="Source\Engine\Scripting\LuaScriptRuntime.h" />
+    <ClInclude Include="Source\Engine\Scripting\SolInclude.h" />
     <ClInclude Include="Source\Engine\Serialization\Archive.h" />
     <ClInclude Include="Source\Engine\Serialization\MemoryArchive.h" />
     <ClInclude Include="Source\Engine\Serialization\SceneSaveManager.h" />
@@ -1197,6 +1208,9 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="KraftonEngine.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Source\Engine\GameFramework\CameraActor.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -18,6 +18,10 @@ FDefaultRenderPipeline::~FDefaultRenderPipeline()
 {
 }
 
+// Function : Execute default render pipeline for current frame
+// input : DeltaTime, Renderer
+// DeltaTime : frame delta time
+// Renderer : renderer that consumes final frame context and scene draw commands
 void FDefaultRenderPipeline::Execute(float DeltaTime, FRenderer& Renderer)
 {
 	Renderer.BeginFrame();
@@ -29,8 +33,6 @@ void FDefaultRenderPipeline::Execute(float DeltaTime, FRenderer& Renderer)
 	UWorld* World = Engine->GetWorld();
 	UCameraComponent* Camera = World ? World->GetActiveCamera() : nullptr;
 
-	// Game/Shipping에서 화면에 그리려면 FViewport(오프스크린 RT)가 필요.
-	// UGameEngine::Init이 GameViewportClient에 FViewport를 세팅해뒀음.
 	FViewport* VP = nullptr;
 	if (UGameViewportClient* GVC = Engine->GetGameViewportClient())
 	{
@@ -61,32 +63,23 @@ void FDefaultRenderPipeline::Execute(float DeltaTime, FRenderer& Renderer)
 		Camera->OnResize(static_cast<int32>(VP->GetWidth()), static_cast<int32>(VP->GetHeight()));
 		const FMinimalViewInfo* ActivePOV = nullptr;
 
-		// 1) 오프스크린 RT 클리어 + 바인딩
 		const float ClearColor[4] = { 0.10f, 0.10f, 0.12f, 1.0f };
 		VP->BeginRender(Ctx, ClearColor);
 
-		if (AGameModeBase* GameMode = World->GetAuthGameMode())
+		Frame.SetViewportInfo(VP);
+
+		// PlayerCameraManager owns the final runtime camera POV.
+		// The active camera component is only a fallback when the manager has not produced a cache yet.
+		AGameModeBase* GameMode = World->GetAuthGameMode();
+		APlayerCameraManager* CameraManager = GameMode ? GameMode->GetPlayerCameraManager() : nullptr;
+		if (CameraManager && CameraManager->HasValidCameraCachePOV())
 		{
-			if (APlayerCameraManager* CameraManager = GameMode->GetPlayerCameraManager();
-				CameraManager && CameraManager->HasValidCameraCachePOV())
-			{
-				ActivePOV = &CameraManager->GetCameraCachePOV();
-				Frame.SetCameraInfo(*ActivePOV);
-			}
-			else
-			{
-				Frame.SetCameraInfo(Camera);
-			}
+			Frame.SetCameraInfo(CameraManager->GetCameraCachePOV());
 		}
 		else
 		{
 			Frame.SetCameraInfo(Camera);
 		}
-		Frame.SetViewportInfo(VP);
-		const FMinimalViewInfo& CameraState = ActivePOV ? *ActivePOV : Camera->GetCameraState();
-		float AR = CameraState.bConstrainAspectRatio ? CameraState.LetterBoxingAspectW / CameraState.LetterBoxingAspectH
-			: CameraState.AspectRatio;
-		Frame.ApplyConstrainedAR(AR);
 
 		FViewportRenderOptions Opts;
 		Opts.ViewMode = EViewMode::Lit_Phong;
@@ -113,8 +106,6 @@ void FDefaultRenderPipeline::Execute(float DeltaTime, FRenderer& Renderer)
 		Renderer.Render(Frame, *Scene);
 	}
 
-	// 오프스크린 RT 내용을 스왑체인 백버퍼로 복사 — ImGui 합성 없이도 화면에 출력되게 함.
-	// BeginFrame이 백버퍼를 클리어한 뒤이므로 여기서 덮어써도 안전.
 	if (VP && VP->GetRTTexture())
 	{
 		Renderer.GetFD3DDevice().CopyToBackbuffer(VP->GetRTTexture());

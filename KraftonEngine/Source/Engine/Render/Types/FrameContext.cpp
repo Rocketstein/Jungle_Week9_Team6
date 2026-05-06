@@ -2,31 +2,28 @@
 #include "Component/CameraComponent.h"
 #include "Viewport/Viewport.h"
 
+// Function : Populate frame camera data from active camera component
+// input : Camera
+// Camera : camera component used when PlayerCameraManager cache is not available
 void FFrameContext::SetCameraInfo(const UCameraComponent* Camera)
 {
-	View            = Camera->GetViewMatrix();
-	Proj            = Camera->GetProjectionMatrix();
-	CameraPosition  = Camera->GetWorldLocation();
-	CameraForward   = Camera->GetForwardVector();
-	CameraRight     = Camera->GetRightVector();
-	CameraUp        = Camera->GetUpVector();
-	bIsOrtho        = Camera->IsOrthogonal();
-	OrthoWidth      = Camera->GetOrthoWidth();
-	NearClip        = Camera->GetCameraState().NearZ;
-	FarClip         = Camera->GetCameraState().FarZ;
+	if (!Camera)
+	{
+		return;
+	}
 
-	// Per-viewport frustum — used by RenderCollector for inline frustum culling
-	FrustumVolume.UpdateFromMatrix(View * Proj);
+	SetCameraInfo(Camera->GetCameraState());
 }
 
+// Function : Populate frame camera data from final PlayerCameraManager POV
+// input : POV
+// POV : final camera view after CalcCamera and camera modifiers
 void FFrameContext::SetCameraInfo(const FMinimalViewInfo& POV)
 {
-	const FRotator Rotation = POV.Rotation;
-
 	View = FMatrix::MakeViewMatrix(
-		Rotation.GetRightVector(),
-		Rotation.GetUpVector(),
-		Rotation.GetForwardVector(),
+		POV.Rotation.GetRightVector(),
+		POV.Rotation.GetUpVector(),
+		POV.Rotation.GetForwardVector(),
 		POV.Location);
 
 	// Override aspect ratio if letterboxing is active
@@ -47,13 +44,14 @@ void FFrameContext::SetCameraInfo(const FMinimalViewInfo& POV)
 	}
 
 	CameraPosition = POV.Location;
-	CameraForward = Rotation.GetForwardVector();
-	CameraRight = Rotation.GetRightVector();
-	CameraUp = Rotation.GetUpVector();
+	CameraForward = POV.Rotation.GetForwardVector();
+	CameraRight = POV.Rotation.GetRightVector();
+	CameraUp = POV.Rotation.GetUpVector();
 	bIsOrtho = POV.bIsOrthogonal;
 	OrthoWidth = POV.OrthoWidth;
 	NearClip = POV.NearZ;
 	FarClip = POV.FarZ;
+	PostProcessSettings = POV.PostPorcessSettings;
 
 	FrustumVolume.UpdateFromMatrix(View * Proj);
 }

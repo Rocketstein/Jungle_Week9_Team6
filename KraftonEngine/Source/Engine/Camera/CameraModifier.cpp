@@ -1,20 +1,20 @@
-﻿#include "CameraModifier.h"
+#include "CameraModifier.h"
 #include "Object/ObjectFactory.h"
 
 IMPLEMENT_CLASS(UCameraModifier, UObject)
 
 UCameraModifier::UCameraModifier() {}
-UCameraModifier::~UCameraModifier() 
-{
-	if (ShakePattern) {
-		UObjectManager::Get().DestroyObject(ShakePattern);
-		ShakePattern = nullptr;
-	}	
-}
+
+UCameraModifier::~UCameraModifier() {}
 
 void UCameraModifier::AddedToCamera(APlayerCameraManager* InCameraManager)
 {
 	CameraOwner = InCameraManager;
+}
+
+bool UCameraModifier::IsFinished() const
+{
+	return !bPendingDisable && bDisabled;
 }
 
 void UCameraModifier::EnableModifier()
@@ -54,17 +54,6 @@ void UCameraModifier::DisableModifier(bool bImmediate)
 
 bool UCameraModifier::ModifyCamera(float DeltaTime, FMinimalViewInfo& InOutPOV)
 {
-	if (!ShakePattern) return false;
-
-	float TOffsetX = ShakePattern->EvalTransitionX(Alpha);
-	float TOffsetY = ShakePattern->EvalTransitionY(Alpha);
-	float TOffsetZ = ShakePattern->EvalTransitionZ(Alpha);
-	InOutPOV.Location += FVector(TOffsetX, TOffsetY, TOffsetZ) * TransitionIntensity;
-	
-	float ROffsetX = ShakePattern->EvalRotationX(Alpha);
-	float ROffsetY = ShakePattern->EvalRotationY(Alpha);
-	float ROffsetZ = ShakePattern->EvalRotationZ(Alpha);
-	InOutPOV.Rotation += FRotator(ROffsetX, ROffsetY, ROffsetZ) * RotationIntensity;
 	return false;
 }
 
@@ -104,6 +93,6 @@ void UCameraModifier::UpdateAlpha(float DeltaTime)
 	Alpha += DeltaTime / AlphaInTime;
 	if (Alpha > 1.0f)
 	{
-		Alpha = 0.0f;
+		Alpha = 1.0f;
 	}
 }
