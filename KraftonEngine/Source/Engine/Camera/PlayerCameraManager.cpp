@@ -90,7 +90,6 @@ void APlayerCameraManager::Tick(float DeltaTime)
 {
 	AActor::Tick(DeltaTime);
 	UpdateCamera(DeltaTime);
-	StartLetterBoxing(10.f, 10.f);
 }
 
 void APlayerCameraManager::UpdateCamera(float DeltaTime) {
