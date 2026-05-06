@@ -8,5 +8,10 @@ public:
 	TArray<FVector2> Curve;
 
 public:
+	UCurveFloat();
+
 	float Evaluate(float NormalizedT) const;
+	void AddKey(float Time, float Value);
+	void SortKeys();
+	void ResetLinear();
 };

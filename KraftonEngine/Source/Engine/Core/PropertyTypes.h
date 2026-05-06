@@ -23,6 +23,7 @@ enum class EPropertyType : uint8_t
 	TextureSlot,   // FTextureSlot — 텍스처 경로
 	Enum,
 	Vec3Array,
+	CurveFloat,
 };
 
 // 머티리얼 슬롯: 경로를 하나의 단위로 관리

@@ -2,6 +2,7 @@
 
 #include "Editor/EditorEngine.h"
 #include "Editor/Settings/EditorSettings.h"
+#include "Editor/UI/CurveEditor.h"
 #include "Editor/UI/EditorAccentColor.h"
 #include "Editor/UI/EditorPanelTitleUtils.h"
 
@@ -30,6 +31,7 @@
 #include "Core/PropertyTypes.h"
 #include "Engine/Runtime/Engine.h"
 #include "Engine/Runtime/WindowsWindow.h"
+#include "Math/CurveFloat.h"
 #include "GameFramework/World.h"
 #include "ImGui/imgui.h"
 #include "Materials/Material.h"
@@ -2974,6 +2976,9 @@ void FEditorPropertyWidget::PropagatePropertyChange(const FString &PropName, con
                 case EPropertyType::Vec3Array:
                     *static_cast<TArray<FVector> *>(DstProp.ValuePtr) = *static_cast<TArray<FVector> *>(SrcProp->ValuePtr);
                     break;
+                case EPropertyType::CurveFloat:
+                    static_cast<UCurveFloat *>(DstProp.ValuePtr)->Curve = static_cast<UCurveFloat *>(SrcProp->ValuePtr)->Curve;
+                    break;
                 }
                 if (Size > 0)
                     memcpy(DstProp.ValuePtr, SrcProp->ValuePtr, Size);
@@ -3745,6 +3750,12 @@ bool FEditorPropertyWidget::RenderPropertyWidget(TArray<FPropertyDescriptor> &Pr
             Arr->push_back(FVector(0.0f, 0.0f, 0.0f));
             bChanged = true;
         }
+        break;
+    }
+    case EPropertyType::CurveFloat:
+    {
+        UCurveFloat *Curve = static_cast<UCurveFloat *>(Prop.ValuePtr);
+        bChanged = CurveEditor::DrawCurveFloat(Label, Curve);
         break;
     }
     }

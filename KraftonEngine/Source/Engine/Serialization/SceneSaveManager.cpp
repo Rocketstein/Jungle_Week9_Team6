@@ -25,6 +25,7 @@
 #include "Object/Object.h"
 #include "Object/ObjectFactory.h"
 #include "Core/PropertyTypes.h"
+#include "Math/CurveFloat.h"
 #include "Object/FName.h"
 #include "Profiling/PlatformTime.h"
 #include "Engine/Serialization/WindowsArchive.h"
@@ -732,6 +733,21 @@ json::JSON FSceneSaveManager::SerializePropertyValue(const FPropertyDescriptor& 
 			outer.append(inner);
 		}
 		return outer;
+	}
+	case EPropertyType::CurveFloat: {
+		const UCurveFloat* Curve = static_cast<const UCurveFloat*>(Prop.ValuePtr);
+		JSON obj = json::Object();
+		JSON keys = json::Array();
+		if (Curve) {
+			for (const FVector2& Key : Curve->Curve) {
+				JSON key = json::Object();
+				key["Time"] = JSON(static_cast<double>(Key.X));
+				key["Value"] = JSON(static_cast<double>(Key.Y));
+				keys.append(key);
+			}
+		}
+		obj["Keys"] = keys;
+		return obj;
 	}
 
 	default:
@@ -1515,6 +1531,47 @@ void FSceneSaveManager::DeserializePropertyValue(FPropertyDescriptor& Prop, json
 				++i;
 			}
 			Arr->push_back(v);
+		}
+		break;
+	}
+	case EPropertyType::CurveFloat: {
+		UCurveFloat* Curve = static_cast<UCurveFloat*>(Prop.ValuePtr);
+		if (!Curve)
+		{
+			break;
+		}
+
+		Curve->Curve.clear();
+		json::JSON* KeysValue = &Value;
+		if (Value.hasKey("Keys"))
+		{
+			KeysValue = &Value["Keys"];
+		}
+
+		for (auto& elem : KeysValue->ArrayRange()) {
+			if (elem.hasKey("Time") && elem.hasKey("Value")) {
+				Curve->Curve.push_back(FVector2(
+					static_cast<float>(elem["Time"].ToFloat()),
+					static_cast<float>(elem["Value"].ToFloat())));
+			}
+			else {
+				int i = 0;
+				FVector2 Key(0.0f, 0.0f);
+				for (auto& c : elem.ArrayRange()) {
+					if (i == 0) Key.X = static_cast<float>(c.ToFloat());
+					else if (i == 1) Key.Y = static_cast<float>(c.ToFloat());
+					++i;
+				}
+				Curve->Curve.push_back(Key);
+			}
+		}
+		if (Curve->Curve.empty())
+		{
+			Curve->ResetLinear();
+		}
+		else
+		{
+			Curve->SortKeys();
 		}
 		break;
 	}
