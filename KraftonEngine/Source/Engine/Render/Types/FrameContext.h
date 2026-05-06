@@ -37,10 +37,10 @@ struct FFrameContext
 	float OrthoWidth = 10.0f;
 
 	// Viewport
-	float ViewRectX;
-	float ViewRectY;
-	float ViewRectWidth;
-	float ViewRectHeight;
+	float ViewRectX = 0.0f;
+	float ViewRectY = 0.0f;
+	float ViewRectWidth = 0.0f;
+	float ViewRectHeight = 0.0f;
 	float ViewportWidth  = 0.0f;
 	float ViewportHeight = 0.0f;
 

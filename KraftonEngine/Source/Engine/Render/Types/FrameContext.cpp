@@ -64,6 +64,11 @@ void FFrameContext::ApplyConstrainedAR(float TargetAspect) {
 	ViewRectWidth	= ViewportWidth;
 	ViewRectHeight	= ViewportHeight;
 
+	if (ViewportWidth <= 0.0f || ViewportHeight <= 0.0f || TargetAspect <= 0.0f)
+	{
+		return;
+	}
+
 	const float CurrentAspect = ViewportWidth / ViewportHeight;
 
 	if (CurrentAspect > TargetAspect)
@@ -82,6 +87,10 @@ void FFrameContext::SetViewportInfo(const FViewport* VP)
 {
 	ViewportWidth    = static_cast<float>(VP->GetWidth());
 	ViewportHeight   = static_cast<float>(VP->GetHeight());
+	ViewRectX        = 0.0f;
+	ViewRectY        = 0.0f;
+	ViewRectWidth    = ViewportWidth;
+	ViewRectHeight   = ViewportHeight;
 	ViewportRTV             = VP->GetRTV();
 	ViewportDSV             = VP->GetDSV();
 	SceneColorCopySRV       = VP->GetSceneColorCopySRV();

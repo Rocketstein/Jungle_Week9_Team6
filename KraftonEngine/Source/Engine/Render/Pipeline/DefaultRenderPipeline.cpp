@@ -59,6 +59,7 @@ void FDefaultRenderPipeline::Execute(float DeltaTime, FRenderer& Renderer)
 	if (Camera && VP)
 	{
 		Camera->OnResize(static_cast<int32>(VP->GetWidth()), static_cast<int32>(VP->GetHeight()));
+		const FMinimalViewInfo* ActivePOV = nullptr;
 
 		// 1) 오프스크린 RT 클리어 + 바인딩
 		const float ClearColor[4] = { 0.10f, 0.10f, 0.12f, 1.0f };
@@ -69,7 +70,8 @@ void FDefaultRenderPipeline::Execute(float DeltaTime, FRenderer& Renderer)
 			if (APlayerCameraManager* CameraManager = GameMode->GetPlayerCameraManager();
 				CameraManager && CameraManager->HasValidCameraCachePOV())
 			{
-				Frame.SetCameraInfo(CameraManager->GetCameraCachePOV());
+				ActivePOV = &CameraManager->GetCameraCachePOV();
+				Frame.SetCameraInfo(*ActivePOV);
 			}
 			else
 			{
@@ -81,20 +83,10 @@ void FDefaultRenderPipeline::Execute(float DeltaTime, FRenderer& Renderer)
 			Frame.SetCameraInfo(Camera);
 		}
 		Frame.SetViewportInfo(VP);
-		const auto& CameraState = Camera->GetCameraState();
+		const FMinimalViewInfo& CameraState = ActivePOV ? *ActivePOV : Camera->GetCameraState();
 		float AR = CameraState.bConstrainAspectRatio ? CameraState.LetterBoxingAspectW / CameraState.LetterBoxingAspectH
 			: CameraState.AspectRatio;
 		Frame.ApplyConstrainedAR(AR);
-		D3D11_VIEWPORT SceneVP{};
-		SceneVP.TopLeftX = Frame.ViewRectX;
-		SceneVP.TopLeftY = Frame.ViewRectY;
-		SceneVP.Width = Frame.ViewRectWidth;
-		SceneVP.Height = Frame.ViewRectHeight;
-		SceneVP.MinDepth = 0.0f;
-		SceneVP.MaxDepth = 1.0f;
-
-		Ctx->RSSetViewports(1, &SceneVP);
-
 
 		FViewportRenderOptions Opts;
 		Opts.ViewMode = EViewMode::Lit_Phong;
