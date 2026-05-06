@@ -110,7 +110,6 @@ void FViewTarget::CheckViewTarget(APlayerController* OwningController)
 void APlayerCameraManager::BeginPlay()
 {
 	AActor::BeginPlay();
-	StartCameraFade(0, 1, 5, FLinearColor(0, 0, 0, 1));
 }
 
 // Function : Destroy owned camera modifiers when manager leaves play

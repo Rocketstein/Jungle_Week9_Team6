@@ -649,7 +649,7 @@ void FDrawCommandBuilder::BuildPostProcessCommands(const FFrameContext& Frame, c
 		if (HitVignetteShader)
 		{
 			FPostProcessConstants ppConstants = {};
-			ppConstants.HitEffectIntensity = CameraFadeAmount;
+			ppConstants.HitEffectIntensity = 0.0f;
 			ppConstants.FadeColor = Frame.PostProcessSettings.FadeColor.ToVector4();
 			ppConstants.FadeAmount = CameraFadeAmount;
 			PostProcessCB.Update(Ctx, &ppConstants, sizeof(FPostProcessConstants));
