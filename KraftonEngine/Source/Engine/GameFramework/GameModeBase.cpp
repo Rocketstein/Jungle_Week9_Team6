@@ -51,4 +51,7 @@ void AGameModeBase::StartPlay()
 			UObjectManager::Get().DestroyObject(Obj);
 		}
 	}
+
+	// TODO PlayerCameraManager 스폰 후 PlayerController에 연결
+
 }

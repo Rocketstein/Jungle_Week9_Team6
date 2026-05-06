@@ -21,6 +21,6 @@ public:
 	APlayerController* GetSpawnedController() const { return SpawnedController; }
 
 protected:
-	APawnActor* SpawnedPawn = nullptr;
-	APlayerController* SpawnedController = nullptr;
+	APawnActor*				SpawnedPawn				= nullptr;
+	APlayerController*		SpawnedController		= nullptr;
 };
