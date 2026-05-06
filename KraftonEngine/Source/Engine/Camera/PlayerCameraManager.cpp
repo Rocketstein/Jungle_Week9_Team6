@@ -247,8 +247,8 @@ void APlayerCameraManager::EndCameraFade() {
 
 void APlayerCameraManager::StartLetterBoxing(float LBAspectW, float LBAspectH) {
 	ViewTarget.POV.bConstrainAspectRatio = true;
-	ViewTarget.POV.LetterBoxingAspectH = LBAspectW;
-	ViewTarget.POV.LetterBoxingAspectW = LBAspectH;
+	ViewTarget.POV.LetterBoxingAspectW = LBAspectW;
+	ViewTarget.POV.LetterBoxingAspectH = LBAspectH;
 }
 
 void APlayerCameraManager::EndLetterBoxing() {

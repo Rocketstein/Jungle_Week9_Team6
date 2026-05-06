@@ -31,10 +31,6 @@ void FFrameContext::SetCameraInfo(const FMinimalViewInfo& POV)
 
 	if (!POV.bIsOrthogonal)
 	{
-		Proj = FMatrix::PerspectiveFovLH(POV.FOV, POV.AspectRatio, POV.NearZ, POV.FarZ);
-	}
-	else
-	{
 		// Override aspect ratio if letterboxing is active
 		if (POV.bConstrainAspectRatio) {
 			float LWAspectW = POV.LetterBoxingAspectW;
@@ -43,16 +39,17 @@ void FFrameContext::SetCameraInfo(const FMinimalViewInfo& POV)
 			bool Pivot = LWAspectW > LWAspectH;
 			if (Pivot) LWAspectH = (LWAspectW) / POV.AspectRatio;
 			else LWAspectW = LWAspectH / POV.AspectRatio;
-			
-			const float HalfW = POV.OrthoWidth * 0.5f;
-			const float HalfH = HalfW / (LWAspectW / LWAspectH);
-			Proj = FMatrix::OrthoLH(HalfW * 2.0f, HalfH * 2.0f, POV.NearZ, POV.FarZ);
-
+			Proj = FMatrix::PerspectiveFovLH(POV.FOV, LWAspectW / LWAspectH, POV.NearZ, POV.FarZ);
 		} else {
-			const float HalfW = POV.OrthoWidth * 0.5f;
-			const float HalfH = HalfW / POV.AspectRatio;
-			Proj = FMatrix::OrthoLH(HalfW * 2.0f, HalfH * 2.0f, POV.NearZ, POV.FarZ);
+			Proj = FMatrix::PerspectiveFovLH(POV.FOV, POV.AspectRatio, POV.NearZ, POV.FarZ);
 		}
+	}
+	else
+	{
+		// Override aspect ratio if letterboxing is active
+		const float HalfW = POV.OrthoWidth * 0.5f;
+		const float HalfH = HalfW / POV.AspectRatio;
+		Proj = FMatrix::OrthoLH(HalfW * 2.0f, HalfH * 2.0f, POV.NearZ, POV.FarZ);
 	}
 
 	CameraPosition = POV.Location;
