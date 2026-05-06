@@ -1,4 +1,4 @@
-#include "PlayerCameraManager.h"
+﻿#include "PlayerCameraManager.h"
 #include "Engine/Asset/AssetData.h"
 #include "Engine/Asset/AssetCurveUtils.h"
 #include "Engine/Asset/AssetFileSerializer.h"
@@ -90,6 +90,7 @@ void APlayerCameraManager::Tick(float DeltaTime)
 {
 	AActor::Tick(DeltaTime);
 	UpdateCamera(DeltaTime);
+	StartLetterBoxing(10.f, 10.f);
 }
 
 void APlayerCameraManager::UpdateCamera(float DeltaTime) {
@@ -242,4 +243,14 @@ void APlayerCameraManager::EndCameraFade() {
 	bEnableFading	  = false;
 	FadeAmount		  = 0.0f;
 	FadeTimeRemaining = 0.0f;
+}
+
+void APlayerCameraManager::StartLetterBoxing(float LBAspectW, float LBAspectH) {
+	ViewTarget.POV.bConstrainAspectRatio = true;
+	ViewTarget.POV.LetterBoxingAspectH = LBAspectW;
+	ViewTarget.POV.LetterBoxingAspectW = LBAspectH;
+}
+
+void APlayerCameraManager::EndLetterBoxing() {
+	ViewTarget.POV.bConstrainAspectRatio = false;
 }

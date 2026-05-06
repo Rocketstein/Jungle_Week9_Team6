@@ -35,9 +35,24 @@ void FFrameContext::SetCameraInfo(const FMinimalViewInfo& POV)
 	}
 	else
 	{
-		const float HalfW = POV.OrthoWidth * 0.5f;
-		const float HalfH = HalfW / POV.AspectRatio;
-		Proj = FMatrix::OrthoLH(HalfW * 2.0f, HalfH * 2.0f, POV.NearZ, POV.FarZ);
+		// Override aspect ratio if letterboxing is active
+		if (POV.bConstrainAspectRatio) {
+			float LWAspectW = POV.LetterBoxingAspectW;
+			float LWAspectH = POV.LetterBoxingAspectH;
+
+			bool Pivot = LWAspectW > LWAspectH;
+			if (Pivot) LWAspectH = (LWAspectW) / POV.AspectRatio;
+			else LWAspectW = LWAspectH / POV.AspectRatio;
+			
+			const float HalfW = POV.OrthoWidth * 0.5f;
+			const float HalfH = HalfW / (LWAspectW / LWAspectH);
+			Proj = FMatrix::OrthoLH(HalfW * 2.0f, HalfH * 2.0f, POV.NearZ, POV.FarZ);
+
+		} else {
+			const float HalfW = POV.OrthoWidth * 0.5f;
+			const float HalfH = HalfW / POV.AspectRatio;
+			Proj = FMatrix::OrthoLH(HalfW * 2.0f, HalfH * 2.0f, POV.NearZ, POV.FarZ);
+		}
 	}
 
 	CameraPosition = POV.Location;

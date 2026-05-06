@@ -56,7 +56,8 @@ public:
 	const FMinimalViewInfo& GetCameraCachePOV() const { return ViewTarget.POV; }
 	bool HasValidCameraCachePOV() const { return bHasValidCameraCachePOV; }
 
-
+	void StartLetterBoxing(float LBAspectW, float LBAspectH);
+	void EndLetterBoxing();
 
 public:
 	FViewTarget		ViewTarget;
