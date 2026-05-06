@@ -37,6 +37,10 @@ struct FFrameContext
 	float OrthoWidth = 10.0f;
 
 	// Viewport
+	float ViewRectX;
+	float ViewRectY;
+	float ViewRectWidth;
+	float ViewRectHeight;
 	float ViewportWidth  = 0.0f;
 	float ViewportHeight = 0.0f;
 
@@ -91,6 +95,7 @@ struct FFrameContext
 	void SetCameraInfo(const UCameraComponent* Camera);
 	void SetCameraInfo(const FMinimalViewInfo& POV);
 	void SetViewportInfo(const FViewport* VP);
+	void ApplyConstrainedAR(float TargetAspect);
 
 	void SetViewportSize(float InWidth, float InHeight)
 	{

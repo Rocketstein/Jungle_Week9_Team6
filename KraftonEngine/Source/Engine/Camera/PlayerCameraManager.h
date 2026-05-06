@@ -75,5 +75,6 @@ public:
 private:
 	APlayerController* Owner = nullptr;
 	TArray<UCameraModifier*> ModifierList;
+
 	bool bHasValidCameraCachePOV = false;
 };

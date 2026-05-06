@@ -29,26 +29,20 @@ void FFrameContext::SetCameraInfo(const FMinimalViewInfo& POV)
 		Rotation.GetForwardVector(),
 		POV.Location);
 
+	// Override aspect ratio if letterboxing is active
+	const float ProjectionAspect = POV.bConstrainAspectRatio
+		? POV.LetterBoxingAspectW / POV.LetterBoxingAspectH
+		: POV.AspectRatio;
+
 	if (!POV.bIsOrthogonal)
 	{
-		// Override aspect ratio if letterboxing is active
-		if (POV.bConstrainAspectRatio) {
-			float LWAspectW = POV.LetterBoxingAspectW;
-			float LWAspectH = POV.LetterBoxingAspectH;
-
-			bool Pivot = LWAspectW > LWAspectH;
-			if (Pivot) LWAspectH = (LWAspectW) / POV.AspectRatio;
-			else LWAspectW = LWAspectH / POV.AspectRatio;
-			Proj = FMatrix::PerspectiveFovLH(POV.FOV, LWAspectW / LWAspectH, POV.NearZ, POV.FarZ);
-		} else {
-			Proj = FMatrix::PerspectiveFovLH(POV.FOV, POV.AspectRatio, POV.NearZ, POV.FarZ);
-		}
+		Proj = FMatrix::PerspectiveFovLH(POV.FOV, ProjectionAspect, POV.NearZ, POV.FarZ);
 	}
 	else
 	{
 		// Override aspect ratio if letterboxing is active
 		const float HalfW = POV.OrthoWidth * 0.5f;
-		const float HalfH = HalfW / POV.AspectRatio;
+		const float HalfH = HalfW / ProjectionAspect;
 		Proj = FMatrix::OrthoLH(HalfW * 2.0f, HalfH * 2.0f, POV.NearZ, POV.FarZ);
 	}
 
@@ -62,6 +56,26 @@ void FFrameContext::SetCameraInfo(const FMinimalViewInfo& POV)
 	FarClip = POV.FarZ;
 
 	FrustumVolume.UpdateFromMatrix(View * Proj);
+}
+
+void FFrameContext::ApplyConstrainedAR(float TargetAspect) {
+	ViewRectX		= 0.0f;
+	ViewRectY		= 0.0f;
+	ViewRectWidth	= ViewportWidth;
+	ViewRectHeight	= ViewportHeight;
+
+	const float CurrentAspect = ViewportWidth / ViewportHeight;
+
+	if (CurrentAspect > TargetAspect)
+	{
+		ViewRectWidth = ViewportHeight * TargetAspect;
+		ViewRectX = (ViewportWidth - ViewRectWidth) * 0.5f;
+	}
+	else
+	{
+		ViewRectHeight = ViewportWidth / TargetAspect;
+		ViewRectY = (ViewportHeight - ViewRectHeight) * 0.5f;
+	}
 }
 
 void FFrameContext::SetViewportInfo(const FViewport* VP)

@@ -81,6 +81,20 @@ void FDefaultRenderPipeline::Execute(float DeltaTime, FRenderer& Renderer)
 			Frame.SetCameraInfo(Camera);
 		}
 		Frame.SetViewportInfo(VP);
+		const auto& CameraState = Camera->GetCameraState();
+		float AR = CameraState.bConstrainAspectRatio ? CameraState.LetterBoxingAspectW / CameraState.LetterBoxingAspectH
+			: CameraState.AspectRatio;
+		Frame.ApplyConstrainedAR(AR);
+		D3D11_VIEWPORT SceneVP{};
+		SceneVP.TopLeftX = Frame.ViewRectX;
+		SceneVP.TopLeftY = Frame.ViewRectY;
+		SceneVP.Width = Frame.ViewRectWidth;
+		SceneVP.Height = Frame.ViewRectHeight;
+		SceneVP.MinDepth = 0.0f;
+		SceneVP.MaxDepth = 1.0f;
+
+		Ctx->RSSetViewports(1, &SceneVP);
+
 
 		FViewportRenderOptions Opts;
 		Opts.ViewMode = EViewMode::Lit_Phong;
