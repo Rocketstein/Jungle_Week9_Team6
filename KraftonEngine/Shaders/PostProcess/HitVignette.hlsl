@@ -24,9 +24,8 @@ PS_Input_UV VS(uint vertexID : SV_VertexID)
 float4 PS(PS_Input_UV input) : SV_TARGET
 {
     float4 color = SceneColor.Sample(Sampler, input.uv);
-    float intensity = saturate(max(HitEffectIntensity, FadeAmount));
     
-    if (intensity <= 0.0f)
+    if (FadeAmount <= 0.0f)
     {
         return color;
     }
@@ -36,14 +35,14 @@ float4 PS(PS_Input_UV input) : SV_TARGET
     float vignette = length(dist);
     
     // Apply exponential curve for sharp edges and multiply by intensity
-    float hitEffect = pow(saturate(vignette * 0.8f), 4.0) * intensity;
+    float hitEffect = pow(saturate(vignette * 0.8f), 4.0) * FadeAmount;
     
     // Blend with camera fade color. 
     float3 hitColor = FadeColor.a > 0.0f ? FadeColor.rgb : float3(0.8f, 0.0f, 0.0f);
     color.rgb = lerp(color.rgb, hitColor, hitEffect);
     
     // Subtle overall tint based on intensity
-    color.rgb += hitColor * intensity * 0.05f;
+    color.rgb += hitColor * FadeAmount * 0.05f;
     
     return color;
 }

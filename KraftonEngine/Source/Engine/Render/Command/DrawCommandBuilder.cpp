@@ -14,7 +14,6 @@
 #include "Materials/Material.h"
 #include "Materials/MaterialManager.h"
 #include "Texture/Texture2D.h"
-#include "Engine/Runtime/Engine.h"
 
 #include <algorithm>
 
@@ -643,16 +642,16 @@ void FDrawCommandBuilder::BuildPostProcessCommands(const FFrameContext& Frame, c
 		Cmd.SortKey = MakePostProcessSortKey(PostProcessMaterialSort++);
 	}
 
-	// Camera-manager fade vignette
-	UCameraComponent* Camera = GEngine->GetWorld()->GetActiveCamera();
-	const auto& PostProcessInfo = Camera->GetCameraState().PostProcessSettings;
-	if (PostProcessInfo.FadeAmount > 0.f) {
+	const float CameraFadeAmount = std::clamp(Frame.PostProcessSettings.FadeAmount, 0.0f, 1.0f);
+	if (CameraFadeAmount > 0.0f)
+	{
 		FShader* HitVignetteShader = FShaderManager::Get().GetOrCreate(EShaderPath::HitVignette);
-		if (HitVignetteShader) {
+		if (HitVignetteShader)
+		{
 			FPostProcessConstants ppConstants = {};
-			ppConstants.HitEffectIntensity = PostProcessInfo.FadeAmount;
-			ppConstants.FadeColor = PostProcessInfo.FadeColor.ToVector4();
-			ppConstants.FadeAmount = PostProcessInfo.FadeAmount;
+			ppConstants.HitEffectIntensity = CameraFadeAmount;
+			ppConstants.FadeColor = Frame.PostProcessSettings.FadeColor.ToVector4();
+			ppConstants.FadeAmount = CameraFadeAmount;
 			PostProcessCB.Update(Ctx, &ppConstants, sizeof(FPostProcessConstants));
 
 			FDrawCommand& Cmd = DrawCommandList.AddCommand();
@@ -661,8 +660,6 @@ void FDrawCommandBuilder::BuildPostProcessCommands(const FFrameContext& Frame, c
 			Cmd.SortKey = MakePostProcessSortKey(PostProcessMaterialSort++);
 		}
 	}
-
-	const float CameraFadeAmount = std::clamp(Frame.PostProcessSettings.FadeAmount, 0.0f, 1.0f);
 
 	// FXAA
 	if (Frame.RenderOptions.ShowFlags.bFXAA)
