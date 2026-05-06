@@ -74,12 +74,19 @@ void FDefaultRenderPipeline::Execute(float DeltaTime, FRenderer& Renderer)
 		APlayerCameraManager* CameraManager = GameMode ? GameMode->GetPlayerCameraManager() : nullptr;
 		if (CameraManager && CameraManager->HasValidCameraCachePOV())
 		{
-			Frame.SetCameraInfo(CameraManager->GetCameraCachePOV());
+			ActivePOV = &CameraManager->GetCameraCachePOV();
+			Frame.SetCameraInfo(*ActivePOV);
 		}
 		else
 		{
 			Frame.SetCameraInfo(Camera);
 		}
+
+		const FMinimalViewInfo& CameraState = ActivePOV ? *ActivePOV : Camera->GetCameraState();
+		const float AR = CameraState.bConstrainAspectRatio
+			? CameraState.LetterBoxingAspectW / CameraState.LetterBoxingAspectH
+			: CameraState.AspectRatio;
+		Frame.ApplyConstrainedAR(AR);
 
 		FViewportRenderOptions Opts;
 		Opts.ViewMode = EViewMode::Lit_Phong;
