@@ -66,7 +66,7 @@ void FDrawCommandBuilder::Create(ID3D11Device* InDevice, ID3D11DeviceContext* In
 	ScreenQuads.Create(InDevice);
 
 	FogCB.Create(InDevice, sizeof(FFogConstants));
-	PostProcessCB.Create(InDevice, sizeof(FPostProcessConstants));
+	FadeCB.Create(InDevice, sizeof(FFadeConstants));
 	OutlineCB.Create(InDevice, sizeof(FOutlinePostProcessConstants));
 	SceneDepthCB.Create(InDevice, sizeof(FSceneDepthPConstants));
 	FXAACB.Create(InDevice, sizeof(FFXAAConstants));
@@ -86,7 +86,7 @@ void FDrawCommandBuilder::Release()
 	PerObjectCBPool.clear();
 
 	FogCB.Release();
-	PostProcessCB.Release();
+	FadeCB.Release();
 	OutlineCB.Release();
 	SceneDepthCB.Release();
 	FXAACB.Release();
@@ -645,18 +645,17 @@ void FDrawCommandBuilder::BuildPostProcessCommands(const FFrameContext& Frame, c
 	const float CameraFadeAmount = std::clamp(Frame.PostProcessSettings.FadeAmount, 0.0f, 1.0f);
 	if (CameraFadeAmount > 0.0f)
 	{
-		FShader* HitVignetteShader = FShaderManager::Get().GetOrCreate(EShaderPath::HitVignette);
-		if (HitVignetteShader)
+		FShader* FadeShader = FShaderManager::Get().GetOrCreate(EShaderPath::Fade);
+		if (FadeShader)
 		{
-			FPostProcessConstants ppConstants = {};
-			ppConstants.HitEffectIntensity = 0.0f;
-			ppConstants.FadeColor = Frame.PostProcessSettings.FadeColor.ToVector4();
-			ppConstants.FadeAmount = CameraFadeAmount;
-			PostProcessCB.Update(Ctx, &ppConstants, sizeof(FPostProcessConstants));
+			FFadeConstants fadeConstants = {};
+			fadeConstants.FadeColor = Frame.PostProcessSettings.FadeColor.ToVector4();
+			fadeConstants.FadeAmount = CameraFadeAmount;
+			FadeCB.Update(Ctx, &fadeConstants, sizeof(FFadeConstants));
 
 			FDrawCommand& Cmd = DrawCommandList.AddCommand();
-			Cmd.InitFullscreenTriangle(HitVignetteShader, ERenderPass::PostProcess, PPRS);
-			Cmd.Bindings.PerShaderCB[0] = &PostProcessCB;
+			Cmd.InitFullscreenTriangle(FadeShader, ERenderPass::PostProcess, PPRS);
+			Cmd.Bindings.PerShaderCB[0] = &FadeCB;
 			Cmd.SortKey = MakePostProcessSortKey(PostProcessMaterialSort++);
 		}
 	}

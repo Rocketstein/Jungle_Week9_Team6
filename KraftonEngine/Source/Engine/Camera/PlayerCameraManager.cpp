@@ -328,6 +328,11 @@ void APlayerCameraManager::StartCameraFade(float FromAlpha, float ToAlpha, float
 
 	ViewTarget.POV.PostProcessSettings.FadeColor = FadeColor;
 	ViewTarget.POV.PostProcessSettings.FadeAmount = FadeAmount;
+	if (bHasValidCameraCachePOV)
+	{
+		CameraCache.POV.PostProcessSettings.FadeColor = FadeColor;
+		CameraCache.POV.PostProcessSettings.FadeAmount = FadeAmount;
+	}
 }
 
 void APlayerCameraManager::EndCameraFade()
@@ -338,6 +343,11 @@ void APlayerCameraManager::EndCameraFade()
 	FadeTimeRemaining = 0.0f;
 	ViewTarget.POV.PostProcessSettings.FadeColor = FadeColor;
 	ViewTarget.POV.PostProcessSettings.FadeAmount = FadeAmount;
+	if (bHasValidCameraCachePOV)
+	{
+		CameraCache.POV.PostProcessSettings.FadeColor = FadeColor;
+		CameraCache.POV.PostProcessSettings.FadeAmount = FadeAmount;
+	}
 }
 
 void APlayerCameraManager::LoadCameraModifierStackAsset(const std::filesystem::path& AssetPath)
