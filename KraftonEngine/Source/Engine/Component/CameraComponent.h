@@ -18,14 +18,15 @@ struct FPostProcessSettings
 // Frame snapshot of the current camera state
 struct FMinimalViewInfo
 {
-	FVector  Location = FVector(0, 0, 0);
-	FRotator Rotation = FRotator(0, 0, 0);
-	float	 FOV = 3.14159265358979f / 3.0f;
-	float	 AspectRatio = 16.0f / 9.0f;
-	float	 NearZ = 0.1f;
-	float	 FarZ = 1000.0f;
-	float	 OrthoWidth = 10.0f;
-	bool	 bIsOrthogonal = false;
+	FVector  Location				= FVector(0, 0, 0);
+	FRotator Rotation				= FRotator(0, 0, 0);
+	float	 FOV					= 3.14159265358979f / 3.0f;
+	float	 AspectRatio			= 16.0f / 9.0f;
+	float	 NearZ					= 0.1f;
+	float	 FarZ					= 1000.0f;
+	float	 OrthoWidth				= 10.0f;
+	bool	 bIsOrthogonal			= false;
+	bool	 bConstrainAspectRatio	= false;
 
 	FPostProcessSettings PostProcessSettings;
 };

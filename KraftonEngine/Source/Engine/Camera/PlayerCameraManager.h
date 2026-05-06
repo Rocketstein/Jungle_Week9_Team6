@@ -56,11 +56,7 @@ public:
 	const FMinimalViewInfo& GetCameraCachePOV() const { return ViewTarget.POV; }
 	bool HasValidCameraCachePOV() const { return bHasValidCameraCachePOV; }
 
-	//void StartCameraShake();
-	//void EndCameraShake();
 
-	//void StartCameraFade(float FromAlpha, float ToAlpha, float Duration, FLinearColor Color);
-	//void EndCameraFade();
 
 public:
 	FViewTarget		ViewTarget;
