@@ -10,7 +10,10 @@
 cbuffer PostProcessMaterialBuffer : register(b2)
 {
     float HitEffectIntensity;
-    float3 _Pad;
+    float3 _Pad0;
+    float4 FadeColor;
+    float FadeAmount;
+    float3 _Pad1;
 }
 
 PS_Input_UV VS(uint vertexID : SV_VertexID)
@@ -21,8 +24,9 @@ PS_Input_UV VS(uint vertexID : SV_VertexID)
 float4 PS(PS_Input_UV input) : SV_TARGET
 {
     float4 color = SceneColor.Sample(Sampler, input.uv);
+    float intensity = saturate(max(HitEffectIntensity, FadeAmount));
     
-    if (HitEffectIntensity <= 0.0f)
+    if (intensity <= 0.0f)
     {
         return color;
     }
@@ -32,14 +36,14 @@ float4 PS(PS_Input_UV input) : SV_TARGET
     float vignette = length(dist);
     
     // Apply exponential curve for sharp edges and multiply by intensity
-    float hitEffect = pow(saturate(vignette * 0.8f), 4.0) * HitEffectIntensity;
+    float hitEffect = pow(saturate(vignette * 0.8f), 4.0) * intensity;
     
-    // Blend with deep red
-    float3 redColor = float3(0.8f, 0.0f, 0.0f);
-    color.rgb = lerp(color.rgb, redColor, hitEffect);
+    // Blend with camera fade color. 
+    float3 hitColor = FadeColor.a > 0.0f ? FadeColor.rgb : float3(0.8f, 0.0f, 0.0f);
+    color.rgb = lerp(color.rgb, hitColor, hitEffect);
     
-    // Subtle overall red tint based on intensity
-    color.rgb += redColor * HitEffectIntensity * 0.05f;
+    // Subtle overall tint based on intensity
+    color.rgb += hitColor * intensity * 0.05f;
     
     return color;
 }

@@ -134,7 +134,7 @@ void APlayerCameraManager::Tick(float DeltaTime)
 {
 	AActor::Tick(DeltaTime);
 	UpdateCamera(DeltaTime);
-	StartLetterBoxing(10.f, 10.f);
+	StartCameraFade(0, 1, 5, FLinearColor(0, 0, 0, 1));
 }
 
 // Function : Bind camera manager to controller and initialize view target from pawn
@@ -249,8 +249,8 @@ void APlayerCameraManager::UpdateCamera(float DeltaTime)
 		FadeTimeRemaining -= DeltaTime;
 	}
 
-	NewPOV.PostPorcessSettings.FadeColor = FadeColor;
-	NewPOV.PostPorcessSettings.FadeAmount = FadeAmount;
+	NewPOV.PostProcessSettings.FadeColor = FadeColor;
+	NewPOV.PostProcessSettings.FadeAmount = FadeAmount;
 	NewPOV.bConstrainAspectRatio = bEnableLetterBoxing;
 	if (bEnableLetterBoxing)
 	{

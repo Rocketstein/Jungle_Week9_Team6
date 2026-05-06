@@ -237,6 +237,17 @@ struct FFogConstants
 	float _pad[2];              // 8B  — 16B boundary
 };
 
+// HitVignette post-process CB (b2) - HLSL PostProcessMaterialBuffer와 1:1 대응
+struct FPostProcessConstants
+{
+	float HitEffectIntensity = 0.0f;
+	float Padding0[3] = {};
+	FVector4 FadeColor = FVector4(0.0f, 0.0f, 0.0f, 1.0f);
+	float FadeAmount = 0.0f;
+	float Padding1[3] = {};
+};
+static_assert(sizeof(FPostProcessConstants) % 16 == 0, "FPostProcessConstants must be 16-byte aligned");
+
 struct FFXAAConstants
 {
 	float EdgeThreshold;

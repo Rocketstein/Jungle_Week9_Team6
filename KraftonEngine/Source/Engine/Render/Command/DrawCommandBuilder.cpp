@@ -67,6 +67,7 @@ void FDrawCommandBuilder::Create(ID3D11Device* InDevice, ID3D11DeviceContext* In
 	ScreenQuads.Create(InDevice);
 
 	FogCB.Create(InDevice, sizeof(FFogConstants));
+	PostProcessCB.Create(InDevice, sizeof(FPostProcessConstants));
 	OutlineCB.Create(InDevice, sizeof(FOutlinePostProcessConstants));
 	SceneDepthCB.Create(InDevice, sizeof(FSceneDepthPConstants));
 	FXAACB.Create(InDevice, sizeof(FFXAAConstants));
@@ -86,6 +87,7 @@ void FDrawCommandBuilder::Release()
 	PerObjectCBPool.clear();
 
 	FogCB.Release();
+	PostProcessCB.Release();
 	OutlineCB.Release();
 	SceneDepthCB.Release();
 	FXAACB.Release();
@@ -640,6 +642,27 @@ void FDrawCommandBuilder::BuildPostProcessCommands(const FFrameContext& Frame, c
 
 		Cmd.SortKey = MakePostProcessSortKey(PostProcessMaterialSort++);
 	}
+
+	// Camera-manager fade vignette
+	UCameraComponent* Camera = GEngine->GetWorld()->GetActiveCamera();
+	const auto& PostProcessInfo = Camera->GetCameraState().PostProcessSettings;
+	if (PostProcessInfo.FadeAmount > 0.f) {
+		FShader* HitVignetteShader = FShaderManager::Get().GetOrCreate(EShaderPath::HitVignette);
+		if (HitVignetteShader) {
+			FPostProcessConstants ppConstants = {};
+			ppConstants.HitEffectIntensity = PostProcessInfo.FadeAmount;
+			ppConstants.FadeColor = PostProcessInfo.FadeColor.ToVector4();
+			ppConstants.FadeAmount = PostProcessInfo.FadeAmount;
+			PostProcessCB.Update(Ctx, &ppConstants, sizeof(FPostProcessConstants));
+
+			FDrawCommand& Cmd = DrawCommandList.AddCommand();
+			Cmd.InitFullscreenTriangle(HitVignetteShader, ERenderPass::PostProcess, PPRS);
+			Cmd.Bindings.PerShaderCB[0] = &PostProcessCB;
+			Cmd.SortKey = MakePostProcessSortKey(PostProcessMaterialSort++);
+		}
+	}
+
+	const float CameraFadeAmount = std::clamp(Frame.PostProcessSettings.FadeAmount, 0.0f, 1.0f);
 
 	// FXAA
 	if (Frame.RenderOptions.ShowFlags.bFXAA)
